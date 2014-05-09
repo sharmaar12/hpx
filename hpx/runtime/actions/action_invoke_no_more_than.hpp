@@ -72,7 +72,7 @@ namespace hpx { namespace actions { namespace detail
         // a semaphore into the call graph.
         static threads::thread_state_enum thread_function(
             threads::thread_state_ex_enum state,
-            threads::thread_function_nonser_type f)
+            threads::thread_function_type f)
         {
             typedef typename construct_semaphore_type::semaphore_type
                 semaphore_type;
@@ -83,7 +83,7 @@ namespace hpx { namespace actions { namespace detail
         }
 
         template <typename F>
-        static threads::thread_function_nonser_type
+        static threads::thread_function_type
         call(naming::address::address_type lva, F && f, boost::mpl::false_)
         {
             typedef typename Action::component_type component_type;
@@ -99,14 +99,14 @@ namespace hpx { namespace actions { namespace detail
         // the traits::action_schedule_thread<> below).
         static threads::thread_state_enum thread_function_future(
             threads::thread_state_ex_enum state,
-            threads::thread_function_nonser_type f)
+            threads::thread_function_type f)
         {
             construct_semaphore_type::get_sem().wait();
             return f(state);
         }
 
         template <typename F>
-        static threads::thread_function_nonser_type
+        static threads::thread_function_type
         call(naming::address::address_type lva, F && f, boost::mpl::true_)
         {
             typedef typename Action::component_type component_type;
@@ -119,7 +119,7 @@ namespace hpx { namespace actions { namespace detail
 
         ///////////////////////////////////////////////////////////////////////
         template <typename F>
-        static threads::thread_function_nonser_type
+        static threads::thread_function_type
         call(naming::address::address_type lva, F&& f)
         {
             typedef typename Action::result_type result_type;

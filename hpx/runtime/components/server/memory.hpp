@@ -136,7 +136,7 @@ namespace hpx { namespace components { namespace server
         /// This is the default hook implementation for decorate_action which 
         /// does no hooking at all.
         template <typename F>
-        static threads::thread_function_nonser_type
+        static threads::thread_function_type
         decorate_action(naming::address::address_type, F && f)
         {
             return std::forward<F>(f);

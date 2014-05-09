@@ -38,7 +38,7 @@ namespace hpx { namespace components
         /// the component ensuring that only one action is executed at a time
         /// for this component instance.
         template <typename F>
-        static threads::thread_function_nonser_type
+        static threads::thread_function_type
         decorate_action(naming::address::address_type lva, F && f)
         {
             return util::bind(
@@ -65,7 +65,7 @@ namespace hpx { namespace components
         // safe action invocation.
         threads::thread_state_enum thread_function(
             threads::thread_state_ex_enum state,
-            threads::thread_function_nonser_type f)
+            threads::thread_function_type f)
         {
             threads::thread_state_enum result = threads::unknown;
 

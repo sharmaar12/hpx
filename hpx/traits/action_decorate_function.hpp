@@ -17,7 +17,7 @@ namespace hpx { namespace traits
     struct action_decorate_function
     {
         template <typename F>
-        static threads::thread_function_nonser_type
+        static threads::thread_function_type
         call(naming::address::address_type lva, F && f)
         {
             // by default we forward this to the component type
