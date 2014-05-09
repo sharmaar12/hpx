@@ -27,8 +27,7 @@ struct hello_world_server
 
     ///////////////////////////////////////////////////////////////////////////
     // wrap given function into a nullary function as expected by the executor
-    static void func(hpx::util::function_nonser<
-        hpx::threads::thread_function_type> const& f)
+    static void func(hpx::threads::thread_function_nonser_type f)
     {
         f(hpx::threads::wait_signaled);
     }
