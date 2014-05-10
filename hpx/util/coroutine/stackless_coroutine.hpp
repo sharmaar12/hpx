@@ -241,7 +241,7 @@ namespace hpx { namespace util { namespace coroutines
             return !exited();
         }
 
-        hpx::util::detail::unique_function<signature_type, void, void> f_;
+        hpx::util::detail::unique_function<signature_type> f_;
         context_state state_;
         thread_id_repr_type id_;
 

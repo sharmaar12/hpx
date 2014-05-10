@@ -56,23 +56,19 @@ namespace hpx { namespace util { namespace detail
 {
     template <
         typename Sig
-      , typename IArchive = portable_binary_iarchive
-      , typename OArchive = portable_binary_oarchive
+      , typename IArchive = void, typename OArchive = void
     >
     struct unique_function;
 
     ///////////////////////////////////////////////////////////////////////////
-    template <typename Sig
+    template <
+        typename Sig
       , typename IArchive = void, typename OArchive = void
     >
     struct unique_function_base;
 
     ///////////////////////////////////////////////////////////////////////////
-    template <
-        typename Sig
-        , typename IArchive
-        , typename OArchive
-    >
+    template <typename Sig, typename IArchive, typename OArchive>
     bool is_empty_function(unique_function<Sig, IArchive, OArchive> const& f) BOOST_NOEXCEPT
     {
         return f.empty();
