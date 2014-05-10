@@ -49,8 +49,6 @@ namespace hpx { namespace lcos
 
         virtual void set_value (RemoteResult && result) = 0;
 
-        virtual result_type const& get_value(error_code& ec = throws) = 0;
-
     public:
         // components must contain a typedef for wrapping_type defining the
         // managed_component type used to encapsulate instances of this
@@ -79,15 +77,6 @@ namespace hpx { namespace lcos
             set_value(std::move(result));
         }
 
-        /// The \a function get_result_nonvirt is called whenever a
-        /// \a get_result_action is applied on this LCO instance. This
-        /// function just forwards to the virtual function \a get_result, which
-        /// is overloaded by the derived concrete LCO.
-        Result get_value_nonvirt()
-        {
-            return util::void_guard<Result>(), get_value();
-        }
-
     public:
         /// The \a set_value_action may be used to trigger any LCO instances
         /// while carrying an additional parameter of any type.
@@ -108,18 +97,6 @@ namespace hpx { namespace lcos
 #else
         HPX_DEFINE_COMPONENT_DIRECT_ACTION_TPL(base_lco_with_value,
             set_value_nonvirt, set_value_action);
-#endif
-
-        /// The \a get_value_action may be used to query the value this LCO
-        /// instance exposes as its 'result' value.
-#if defined(HPX_GCC_VERSION) && (HPX_GCC_VERSION <= 40400)
-        typedef hpx::actions::direct_result_action0<
-            base_lco_with_value, Result,
-            &base_lco_with_value::get_value_nonvirt
-        > get_value_action;
-#else
-        HPX_DEFINE_COMPONENT_DIRECT_ACTION_TPL(base_lco_with_value,
-            get_value_nonvirt, get_value_action);
 #endif
     };
 
@@ -168,9 +145,6 @@ namespace hpx { namespace traits
     HPX_REGISTER_ACTION_DECLARATION(                                            \
         hpx::lcos::base_lco_with_value<Value>::set_value_action,                \
         BOOST_PP_CAT(set_value_action_, Name))                                  \
-    HPX_REGISTER_ACTION_DECLARATION(                                            \
-        hpx::lcos::base_lco_with_value<Value>::get_value_action,                \
-        BOOST_PP_CAT(get_value_action_, Name))                                  \
     HPX_REGISTER_TYPED_CONTINUATION_DECLARATION(                                \
         Value                                                                   \
       , BOOST_PP_CAT(typed_continuation_, Name))                                \
@@ -183,9 +157,6 @@ namespace hpx { namespace traits
     HPX_REGISTER_ACTION(                                                        \
         hpx::lcos::base_lco_with_value<Value>::set_value_action,                \
         BOOST_PP_CAT(set_value_action_, Name))                                  \
-    HPX_REGISTER_ACTION(                                                        \
-        hpx::lcos::base_lco_with_value<Value>::get_value_action,                \
-        BOOST_PP_CAT(get_value_action_, Name))                                  \
     HPX_REGISTER_TYPED_CONTINUATION(                                            \
         Value                                                                   \
       , BOOST_PP_CAT(typed_continuation_, Name))                                \
