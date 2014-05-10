@@ -51,12 +51,11 @@ namespace hpx { namespace threads { namespace executors
             // Return an estimate of the number of waiting tasks.
             std::size_t num_pending_closures(error_code& ec) const;
 
-            // helper function
+            // helper functions
             void add_no_count(closure_type && f);
+            void thread_wrapper(closure_type && f);
 
         private:
-            void thread_wrapper(closure_type f);
-
             util::io_service_pool* pool_;
             boost::atomic<std::size_t> task_count_;
             lcos::local::counting_semaphore shutdown_sem_;
