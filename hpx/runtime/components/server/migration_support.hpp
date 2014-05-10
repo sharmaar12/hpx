@@ -102,7 +102,7 @@ namespace hpx { namespace components
         // no migration will happen while an operation is in flight.
         threads::thread_state_enum thread_function(
             threads::thread_state_ex_enum state,
-            threads::thread_function_type const& f)
+            threads::thread_function_type f)
         {
             scoped_pinner sp(*this);
             return f(state);
