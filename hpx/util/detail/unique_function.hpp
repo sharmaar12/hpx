@@ -75,6 +75,22 @@ namespace hpx { namespace util { namespace detail
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    template <typename Function>
+    struct invalidate_function
+    {
+        explicit invalidate_function(Function& f)
+          : f_(f)
+        {}
+
+        ~invalidate_function()
+        {
+            f_.reset();
+        }
+
+        Function& f_;
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
     template <typename Sig, typename IArchive, typename OArchive>
     struct unique_function : unique_function_base<Sig, IArchive, OArchive>
     {
@@ -244,21 +260,6 @@ namespace hpx { namespace util { namespace detail
     {
         HPX_MOVABLE_BUT_NOT_COPYABLE(unique_function_base);
 
-    private:
-        struct invalidate
-        {
-            explicit invalidate(unique_function_base& f)
-              : f_(f)
-            {}
-
-            ~invalidate()
-            {
-                f_.reset();
-            }
-
-            unique_function_base& f_;
-        };
-
     public:
         typedef R result_type;
 
@@ -272,7 +273,7 @@ namespace hpx { namespace util { namespace detail
                 R(BOOST_PP_ENUM_PARAMS(N, A))
               , IArchive, OArchive
             > vtable_ptr_type;
-        
+
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -441,7 +442,7 @@ namespace hpx { namespace util { namespace detail
 
         BOOST_FORCEINLINE R operator()(BOOST_PP_ENUM_BINARY_PARAMS(N, A, a))
         {
-            invalidate on_exit(*this);
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 BOOST_PP_COMMA_IF(N) HPX_ENUM_FORWARD_ARGS(N, A, a));
         }

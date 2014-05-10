@@ -32,7 +32,6 @@ namespace hpx { namespace util { namespace detail
                 R()
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -181,8 +180,9 @@ namespace hpx { namespace util { namespace detail
                       , R()
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()() const
+        BOOST_FORCEINLINE R operator()()
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                  );
         }
@@ -215,7 +215,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -364,8 +363,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0) const
+        BOOST_FORCEINLINE R operator()(A0 a0)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ));
         }
@@ -398,7 +398,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -547,8 +546,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ));
         }
@@ -581,7 +581,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -730,8 +729,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ));
         }
@@ -764,7 +764,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -913,8 +912,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ));
         }
@@ -947,7 +947,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -1096,8 +1095,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ));
         }
@@ -1130,7 +1130,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -1279,8 +1278,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ));
         }
@@ -1313,7 +1313,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -1462,8 +1461,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ));
         }
@@ -1496,7 +1496,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -1645,8 +1644,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ));
         }
@@ -1679,7 +1679,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -1828,8 +1827,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ));
         }
@@ -1862,7 +1862,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -2011,8 +2010,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ));
         }
@@ -2045,7 +2045,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -2194,8 +2193,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ));
         }
@@ -2228,7 +2228,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -2377,8 +2376,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ));
         }
@@ -2411,7 +2411,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -2560,8 +2559,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ));
         }
@@ -2594,7 +2594,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -2743,8 +2742,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ));
         }
@@ -2777,7 +2777,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -2926,8 +2925,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ));
         }
@@ -2960,7 +2960,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -3109,8 +3108,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ));
         }
@@ -3143,7 +3143,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -3292,8 +3291,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ) , std::forward<A16>( a16 ));
         }
@@ -3326,7 +3326,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -3475,8 +3474,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ) , std::forward<A16>( a16 ) , std::forward<A17>( a17 ));
         }
@@ -3509,7 +3509,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -3658,8 +3657,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ) , std::forward<A16>( a16 ) , std::forward<A17>( a17 ) , std::forward<A18>( a18 ));
         }
@@ -3692,7 +3692,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -3841,8 +3840,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ) , std::forward<A16>( a16 ) , std::forward<A17>( a17 ) , std::forward<A18>( a18 ) , std::forward<A19>( a19 ));
         }
@@ -3875,7 +3875,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -4024,8 +4023,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19 , A20 a20) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19 , A20 a20)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ) , std::forward<A16>( a16 ) , std::forward<A17>( a17 ) , std::forward<A18>( a18 ) , std::forward<A19>( a19 ) , std::forward<A20>( a20 ));
         }
@@ -4058,7 +4058,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -4207,8 +4206,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19 , A20 a20 , A21 a21) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19 , A20 a20 , A21 a21)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ) , std::forward<A16>( a16 ) , std::forward<A17>( a17 ) , std::forward<A18>( a18 ) , std::forward<A19>( a19 ) , std::forward<A20>( a20 ) , std::forward<A21>( a21 ));
         }
@@ -4241,7 +4241,6 @@ namespace hpx { namespace util { namespace detail
                 R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22)
               , IArchive, OArchive
             > vtable_ptr_type;
-        
         unique_function_base() BOOST_NOEXCEPT
           : vptr(get_empty_table_ptr())
           , object(0)
@@ -4390,8 +4389,9 @@ namespace hpx { namespace util { namespace detail
                       , R(A0 , A1 , A2 , A3 , A4 , A5 , A6 , A7 , A8 , A9 , A10 , A11 , A12 , A13 , A14 , A15 , A16 , A17 , A18 , A19 , A20 , A21 , A22)
                     >::template get<true, IArchive, OArchive>();
         }
-        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19 , A20 a20 , A21 a21 , A22 a22) const
+        BOOST_FORCEINLINE R operator()(A0 a0 , A1 a1 , A2 a2 , A3 a3 , A4 a4 , A5 a5 , A6 a6 , A7 a7 , A8 a8 , A9 a9 , A10 a10 , A11 a11 , A12 a12 , A13 a13 , A14 a14 , A15 a15 , A16 a16 , A17 a17 , A18 a18 , A19 a19 , A20 a20 , A21 a21 , A22 a22)
         {
+            invalidate_function<unique_function_base> on_exit(*this);
             return vptr->invoke(&object
                 , std::forward<A0>( a0 ) , std::forward<A1>( a1 ) , std::forward<A2>( a2 ) , std::forward<A3>( a3 ) , std::forward<A4>( a4 ) , std::forward<A5>( a5 ) , std::forward<A6>( a6 ) , std::forward<A7>( a7 ) , std::forward<A8>( a8 ) , std::forward<A9>( a9 ) , std::forward<A10>( a10 ) , std::forward<A11>( a11 ) , std::forward<A12>( a12 ) , std::forward<A13>( a13 ) , std::forward<A14>( a14 ) , std::forward<A15>( a15 ) , std::forward<A16>( a16 ) , std::forward<A17>( a17 ) , std::forward<A18>( a18 ) , std::forward<A19>( a19 ) , std::forward<A20>( a20 ) , std::forward<A21>( a21 ) , std::forward<A22>( a22 ));
         }
