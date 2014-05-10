@@ -166,10 +166,6 @@ HPX_REGISTER_ACTION_DECLARATION(
     hpx::lcos::base_lco_with_value<nqueen::list_type>::set_value_action,
     set_value_action_vector_std_size_t);
 
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::lcos::base_lco_with_value<nqueen::list_type>::get_value_action,
-    get_value_action_vector_std_size_t);
-
 
 #endif // HPX_9FEC203D_0AAB_4213_BA36_456BE578ED3D
 
