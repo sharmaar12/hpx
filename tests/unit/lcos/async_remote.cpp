@@ -42,6 +42,33 @@ HPX_REGISTER_ACTION_DECLARATION(call_action);
 HPX_REGISTER_ACTION(call_action);
 
 ///////////////////////////////////////////////////////////////////////////////
+struct movable_only
+{
+    HPX_MOVABLE_BUT_NOT_COPYABLE(movable_only);
+
+public:
+    movable_only(boost::int32_t i = 0) : i(i) {}
+    movable_only(movable_only&& other) : i(other.i) { other.i = 0; }
+
+    template <typename Archive>
+    void serialize(Archive& ar, unsigned) { ar & i; }
+
+    boost::int32_t i;
+};
+
+boost::int32_t movable_only_increment(movable_only m)
+{
+    return m.i + 1;
+}
+HPX_PLAIN_ACTION(movable_only_increment);
+
+movable_only movable_only_decrement(boost::int32_t i)
+{
+    return i - 1;
+}
+HPX_PLAIN_ACTION(movable_only_decrement);
+
+///////////////////////////////////////////////////////////////////////////////
 void test_remote_async(hpx::id_type const& target)
 {
     {
@@ -54,7 +81,7 @@ void test_remote_async(hpx::id_type const& target)
             hpx::async(hpx::launch::all, inc, target, 42);
         HPX_TEST_EQ(f2.get(), 43);
     }
-    
+
     {
         increment_with_future_action inc;
         hpx::promise<boost::int32_t> p;
@@ -64,7 +91,7 @@ void test_remote_async(hpx::id_type const& target)
         hpx::future<boost::int32_t> f2 =
             hpx::async(hpx::launch::all, inc, target, f);
 
-        p.set_value(42);        
+        p.set_value(42);
         HPX_TEST_EQ(f1.get(), 43);
         HPX_TEST_EQ(f2.get(), 43);
     }
@@ -140,12 +167,84 @@ void test_remote_async(hpx::id_type const& target)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+void test_movable_only_arguments(hpx::id_type const& target)
+{
+    typedef movable_only_increment_action increment_action;
+
+    {
+        increment_action inc;
+
+        hpx::future<boost::int32_t> f1 = hpx::async(inc, target, movable_only(42));
+        HPX_TEST_EQ(f1.get(), 43);
+
+        hpx::future<boost::int32_t> f2 =
+            hpx::async(hpx::launch::all, inc, target, movable_only(42));
+        HPX_TEST_EQ(f2.get(), 43);
+    }
+
+    {
+        increment_action inc;
+
+        hpx::future<boost::int32_t> f1 =
+            hpx::async(hpx::util::bind(hpx::util::one_shot(inc), target, movable_only(42)));
+        HPX_TEST_EQ(f1.get(), 43);
+    }
+
+    {
+        hpx::future<boost::int32_t> f1 =
+            hpx::async<increment_action>(target, movable_only(42));
+        HPX_TEST_EQ(f1.get(), 43);
+
+        hpx::future<boost::int32_t> f2 =
+            hpx::async<increment_action>(hpx::launch::all, target, movable_only(42));
+        HPX_TEST_EQ(f2.get(), 43);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void test_movable_only_returns(hpx::id_type const& target)
+{
+    typedef movable_only_decrement_action decrement_action;
+
+    {
+        decrement_action inc;
+
+        hpx::future<movable_only> f1 = hpx::async(inc, target, 42);
+        HPX_TEST_EQ(f1.get().i, 41);
+
+        hpx::future<movable_only> f2 =
+            hpx::async(hpx::launch::all, inc, target, 42);
+        HPX_TEST_EQ(f2.get().i, 41);
+    }
+
+    {
+        decrement_action inc;
+
+        hpx::future<movable_only> f1 =
+            hpx::async(hpx::util::bind(hpx::util::one_shot(inc), target, 42));
+        HPX_TEST_EQ(f1.get().i, 41);
+    }
+
+    {
+        hpx::future<movable_only> f1 =
+            hpx::async<decrement_action>(target, 42);
+        HPX_TEST_EQ(f1.get().i, 41);
+
+        hpx::future<movable_only> f2 =
+            hpx::async<decrement_action>(hpx::launch::all, target, 42);
+        HPX_TEST_EQ(f2.get().i, 41);
+    }
+}
+
 int hpx_main()
 {
     std::vector<hpx::id_type> localities = hpx::find_all_localities();
     BOOST_FOREACH(hpx::id_type const& id, localities)
     {
         test_remote_async(id);
+        test_movable_only_arguments(id);
+        test_movable_only_returns(id);
     }
     return hpx::finalize();
 }
