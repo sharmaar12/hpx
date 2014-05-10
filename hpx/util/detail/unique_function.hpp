@@ -248,6 +248,21 @@ namespace hpx { namespace util { namespace detail
     {
         HPX_MOVABLE_BUT_NOT_COPYABLE(unique_function_base);
 
+    private:
+        struct invalidate
+        {
+            explicit invalidate(unique_function_base& f)
+              : f_(f)
+            {}
+
+            ~invalidate()
+            {
+                f_.reset();
+            }
+
+            unique_function_base& f_;
+        };
+
     public:
         typedef R result_type;
 
@@ -428,8 +443,9 @@ namespace hpx { namespace util { namespace detail
                     >::template get<true, IArchive, OArchive>();
         }
 
-        BOOST_FORCEINLINE R operator()(BOOST_PP_ENUM_BINARY_PARAMS(N, A, a)) const
+        BOOST_FORCEINLINE R operator()(BOOST_PP_ENUM_BINARY_PARAMS(N, A, a))
         {
+            invalidate on_exit(*this);
             return vptr->invoke(&object
                 BOOST_PP_COMMA_IF(N) HPX_ENUM_FORWARD_ARGS(N, A, a));
         }
