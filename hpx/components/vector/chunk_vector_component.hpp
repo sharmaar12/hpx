@@ -1,3 +1,8 @@
+//  Copyright (c) 2014 Anuj R. Sharma
+//
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
 /*! \file Chunk_vector.hpp */
 #ifndef CHUNK_VECTOR_COMPONENT_HPP
 #define CHUNK_VECTOR_COMPONENT_HPP
@@ -26,7 +31,6 @@
 
 
 namespace hpx{
-    namespace dthrust{
         namespace server{
 
           //  template <typename VALUE_TYPE>
@@ -69,20 +73,25 @@ namespace hpx{
                     }
                     void set_value(size_t pos, VALUE_TYPE const& val)
                     {
-                        // TODO in set value Add code th handle Exception
-//                        try{
+
+                        try{
                             chunk_vector_.at(pos) = val;
-//                        }
-//                        catch(const std::out_of_range& e)
-//                        {
-//                            hpx::cout << "Out of Range Error " << e.what();
-//                        }
+                        }
+                        catch(const std::out_of_range& e)
+                        {
+                            HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Out of range error");
+                        }
                     }
 
                     void set_value_rval(size_t pos, VALUE_TYPE const&& val)
                     {
-                        // TODO in set value Add code th handle Exception
+                         try{
                             chunk_vector_.at(pos) = std::move(val);
+                        }
+                        catch(const std::out_of_range& e)
+                        {
+                            HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value_rval", "Out of range error");
+                        }
                     }
 
                     bool empty() const{
@@ -140,12 +149,12 @@ namespace hpx{
 
                 static hpx::lcos::future<size_t> size_async(hpx::naming::id_type const& gid)
                 {
-                    return hpx::async<hpx::dthrust::server::chunk_vector::size_action>(gid);
+                    return hpx::async<hpx::server::chunk_vector::size_action>(gid);
                 }
 
                 static size_t size_sync(hpx::naming::id_type const& gid)
                 {
-                    return hpx::async<hpx::dthrust::server::chunk_vector::size_action>(gid).get();
+                    return hpx::async<hpx::server::chunk_vector::size_action>(gid).get();
                 }
 
                 //
@@ -153,12 +162,12 @@ namespace hpx{
                 //
                 static void push_back_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
                 {
-                    hpx::apply<hpx::dthrust::server::chunk_vector::push_back_action>(gid, val);
+                    hpx::apply<hpx::server::chunk_vector::push_back_action>(gid, val);
                 }
 
                 static void push_back_sync(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
                 {
-                    hpx::async<hpx::dthrust::server::chunk_vector::push_back_action>(gid, val).get();
+                    hpx::async<hpx::server::chunk_vector::push_back_action>(gid, val).get();
                 }
 
                 //
@@ -166,12 +175,12 @@ namespace hpx{
                 //
                 static void push_back_rval_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
                 {
-                    hpx::apply<hpx::dthrust::server::chunk_vector::push_back_rval_action>(gid, std::move(val));
+                    hpx::apply<hpx::server::chunk_vector::push_back_rval_action>(gid, std::move(val));
                 }
 
                 static void push_back_rval_sync(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
                 {
-                    hpx::async<hpx::dthrust::server::chunk_vector::push_back_rval_action>(gid, std::move(val)).get();
+                    hpx::async<hpx::server::chunk_vector::push_back_rval_action>(gid, std::move(val)).get();
                 }
 
                 //
@@ -180,12 +189,12 @@ namespace hpx{
 
                 static hpx::lcos::future<VALUE_TYPE> at_async(hpx::naming::id_type const& gid, size_t pos)
                 {
-                    return hpx::async<hpx::dthrust::server::chunk_vector::at_action>(gid, pos);
+                    return hpx::async<hpx::server::chunk_vector::at_action>(gid, pos);
                 }
 
                 static VALUE_TYPE at_sync(hpx::naming::id_type const& gid, size_t pos)
                 {
-                    return hpx::async<hpx::dthrust::server::chunk_vector::at_action>(gid, pos).get();
+                    return hpx::async<hpx::server::chunk_vector::at_action>(gid, pos).get();
                 }
 
                 //
@@ -193,12 +202,12 @@ namespace hpx{
                 //
                 static void set_value_non_blocking(hpx::naming::id_type const& gid, size_t pos, VALUE_TYPE const& val)
                 {
-                    hpx::apply<hpx::dthrust::server::chunk_vector::set_value_action>(gid, pos, val);
+                    hpx::apply<hpx::server::chunk_vector::set_value_action>(gid, pos, val);
                 }
 
                 static void set_value_sync(hpx::naming::id_type const& gid, size_t pos, VALUE_TYPE const& val)
                 {
-                    hpx::async<hpx::dthrust::server::chunk_vector::set_value_action>(gid, pos, val).get();
+                    hpx::async<hpx::server::chunk_vector::set_value_action>(gid, pos, val).get();
                 }
 
                 //
@@ -206,12 +215,12 @@ namespace hpx{
                 //
                 static void set_value_rval_non_blocking(hpx::naming::id_type const& gid, size_t pos,  VALUE_TYPE const&& val)
                 {
-                    hpx::apply<hpx::dthrust::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val));
+                    hpx::apply<hpx::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val));
                 }
 
                 static void set_value_rval_sync(hpx::naming::id_type const& gid, size_t pos, VALUE_TYPE const&& val)
                 {
-                    hpx::async<hpx::dthrust::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val)).get();
+                    hpx::async<hpx::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val)).get();
                 }
 
                 //
@@ -220,12 +229,12 @@ namespace hpx{
 
                 static hpx::lcos::future<bool> empty_async(hpx::naming::id_type const& gid)
                 {
-                    return hpx::async<hpx::dthrust::server::chunk_vector::empty_action>(gid);
+                    return hpx::async<hpx::server::chunk_vector::empty_action>(gid);
                 }
 
                 static bool empty_sync(hpx::naming::id_type const& gid)
                 {
-                    return hpx::async<hpx::dthrust::server::chunk_vector::empty_action>(gid).get();
+                    return hpx::async<hpx::server::chunk_vector::empty_action>(gid).get();
                 }
 
                 //
@@ -251,10 +260,9 @@ namespace hpx{
                  typedef hpx::components::client_base<chunk_vector, stubs::chunk_vector> base_type;
             public:
 
-                //TODO empty constructor
-                //chunk_vector(){}
 
-
+                //TODO flag the error of invalid gid for default constructor
+                chunk_vector(){}
                 chunk_vector(hpx::naming::id_type const& gid): base_type(gid){}
                 chunk_vector(hpx::shared_future<hpx::naming::id_type> const& gid): base_type(gid){}
                 //
@@ -266,7 +274,7 @@ namespace hpx{
                     this->base_type::display_non_blocking(this->get_gid());
                 }
 
-                void display_sync() const
+                void display() const
                 {
                     HPX_ASSERT(this->get_gid());
                     this->base_type::display_sync(this->get_gid());
@@ -282,7 +290,7 @@ namespace hpx{
                     return this->base_type::size_async(this->get_gid());
                 }
 
-                size_t size_sync() const
+                size_t size() const
                 {
                     HPX_ASSERT(this->get_gid());
                     return this->base_type::size_sync(this->get_gid());
@@ -298,7 +306,7 @@ namespace hpx{
                     this->base_type::push_back_non_blocking(this->get_gid(), val);
                 }
 
-                void push_back_sync(VALUE_TYPE const& val)
+                void push_back(VALUE_TYPE const& val)
                 {
                     HPX_ASSERT(this->get_gid());
                     this->base_type::push_back_sync(this->get_gid(), val);
@@ -313,7 +321,7 @@ namespace hpx{
                     this->base_type::push_back_rval_non_blocking(this->get_gid(), std::move(val));
                 }
 
-                void push_back_sync(VALUE_TYPE const&& val)
+                void push_back(VALUE_TYPE const&& val)
                 {
                     HPX_ASSERT(this->get_gid());
                     this->base_type::push_back_rval_sync(this->get_gid(), std::move(val));
@@ -323,13 +331,13 @@ namespace hpx{
                 // at API's in client class
                 //
 
-                hpx::lcos::future<VALUE_TYPE> at_async(size_t pos) const
+                hpx::lcos::future<VALUE_TYPE> get_value_async(size_t pos) const
                 {
                     HPX_ASSERT(this->get_gid());
                     return this->base_type::at_async(this->get_gid(), pos);
                 }
 
-                VALUE_TYPE at_sync(size_t pos) const
+                VALUE_TYPE get_value(size_t pos) const
                 {
                     HPX_ASSERT(this->get_gid());
                     return this->base_type::at_sync(this->get_gid(), pos);
@@ -344,7 +352,7 @@ namespace hpx{
                     this->base_type::set_value_non_blocking(this->get_gid(), pos, val);
                 }
 
-                void set_value_sync(size_t pos, VALUE_TYPE const& val)
+                void set_value(size_t pos, VALUE_TYPE const& val)
                 {
                     HPX_ASSERT(this->get_gid());
                     this->base_type::set_value_sync(this->get_gid(), pos, val);
@@ -360,7 +368,7 @@ namespace hpx{
                     this->base_type::set_value_rval_non_blocking(this->get_gid(), pos, std::move(val));
                 }
 
-                void set_value_sync(size_t pos, VALUE_TYPE const&& val)
+                void set_value(size_t pos, VALUE_TYPE const&& val)
                 {
                     HPX_ASSERT(this->get_gid());
                     this->base_type::set_value_rval_sync(this->get_gid(), pos, std::move(val));
@@ -376,7 +384,7 @@ namespace hpx{
                     return this->base_type::empty_async(this->get_gid());
                 }
 
-                bool empty_sync() const
+                bool empty() const
                 {
                     HPX_ASSERT(this->get_gid());
                     return this->base_type::empty_sync(this->get_gid());
@@ -391,43 +399,42 @@ namespace hpx{
                     this->base_type::clear_non_blocking(this->get_gid());
                 }
 
-                void clear_sync()
+                void clear()
                 {
                     HPX_ASSERT(this->get_gid());
                     this->base_type::clear_sync(this->get_gid());
                 }
 
             };
-    }//end of dthrust namespace
 }//end of hpx namespace
 
 //Registering the component action to AGAS
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::display_action,
+    hpx::server::chunk_vector::display_action,
     chunk_vector_display_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::size_action,
+    hpx::server::chunk_vector::size_action,
     chunk_vector_size_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::push_back_action,
+    hpx::server::chunk_vector::push_back_action,
     chunk_vector_push_back_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::push_back_rval_action,
+    hpx::server::chunk_vector::push_back_rval_action,
     chunk_vector_push_back_rval_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::at_action,
+    hpx::server::chunk_vector::at_action,
     chunk_vector_at_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::set_value_action,
+    hpx::server::chunk_vector::set_value_action,
     chunk_vector_set_value_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::set_value_rval_action,
+    hpx::server::chunk_vector::set_value_rval_action,
     chunk_vector_set_value_rval_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::empty_action,
+    hpx::server::chunk_vector::empty_action,
     chunk_vector_empty_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::dthrust::server::chunk_vector::clear_action,
+    hpx::server::chunk_vector::clear_action,
     chunk_vector_clear_action);
 
 #endif // CHUNK_VECTOR_COMPONENT_H

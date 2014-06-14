@@ -77,7 +77,8 @@ namespace hpx
         security_error = 50,                        ///< An error occurred in the security component
         filesystem_error = 51,                      ///< The specified file does not exist or other filesystem related error
         bad_function_call = 52,                     ///< equivalent of std::bad_function_call
-
+	out_of_range = 53,			    ///< Equivalent to std::out_of_range
+        
         /// \cond NOINTERNAL
         last_error,
         error_upper_bound = 0x7fffL   // force this enum type to be at least 16 bits.
@@ -140,6 +141,7 @@ namespace hpx
         /* 50 */ "security_error",
         /* 51 */ "filesystem_error",
         /* 52 */ "bad_function_call",
+	/* 53 */ "out_of_range",
 
         /*    */ ""
     };
