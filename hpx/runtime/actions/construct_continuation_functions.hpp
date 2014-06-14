@@ -16,6 +16,12 @@
 #include <boost/preprocessor/iterate.hpp>
 #include <boost/preprocessor/enum_params.hpp>
 
+#if defined(HPX_GCC_VERSION)
+#define HPX_MAYBE_FORCEINLINE inline
+#else
+#define HPX_MAYBE_FORCEINLINE BOOST_FORCEINLINE
+#endif
+
 #if !defined(HPX_USE_PREPROCESSOR_LIMIT_EXPANSION)
 #  include <hpx/runtime/actions/preprocessed/construct_continuation_functions.hpp>
 #else
@@ -44,6 +50,8 @@
 
 #endif // !defined(HPX_USE_PREPROCESSOR_LIMIT_EXPANSION)
 
+#undef HPX_MAYBE_FORCEINLINE
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,7 +70,7 @@
         template <typename Object
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename Arg)
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename FArg)>
-        BOOST_FORCEINLINE result_type operator()(continuation_type cont,
+        HPX_MAYBE_FORCEINLINE result_type operator()(continuation_type cont,
             void (Object::* func)(BOOST_PP_ENUM_BINARY_PARAMS(N, FArg, arg)),
             Object* obj
           BOOST_PP_COMMA_IF(N) HPX_ENUM_FWD_ARGS(N, Arg, arg)) const
@@ -85,7 +93,7 @@
         template <typename Object
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename Arg)
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename FArg)>
-        BOOST_FORCEINLINE result_type operator()(continuation_type cont,
+        HPX_MAYBE_FORCEINLINE result_type operator()(continuation_type cont,
             void (Object::* const func)(
                 BOOST_PP_ENUM_BINARY_PARAMS(N, FArg, arg)) const,
             Component* obj
@@ -145,7 +153,7 @@
         template <typename Object
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename Arg)
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename FArg)>
-        BOOST_FORCEINLINE result_type operator()(continuation_type cont,
+        HPX_MAYBE_FORCEINLINE result_type operator()(continuation_type cont,
             Result (Object::* func)(BOOST_PP_ENUM_BINARY_PARAMS(N, FArg, arg)),
             Component* obj
           BOOST_PP_COMMA_IF(N) HPX_ENUM_FWD_ARGS(N, Arg, arg)) const
@@ -169,7 +177,7 @@
         template <typename Object
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename Arg)
             BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, typename FArg)>
-        BOOST_FORCEINLINE result_type operator()(continuation_type cont,
+        HPX_MAYBE_FORCEINLINE result_type operator()(continuation_type cont,
             Result (Object::* const func)(
                 BOOST_PP_ENUM_BINARY_PARAMS(N, FArg, arg)) const,
             Component* obj

@@ -519,7 +519,7 @@ namespace hpx { namespace threads
             return used_processing_units_;
         }
 
-        // Return the executor associated with th egiven thread
+        // Return the executor associated with the given thread
         executor get_executor(thread_id_type const& id, error_code& ec) const;
 
     private:
@@ -528,8 +528,10 @@ namespace hpx { namespace threads
             performance_counters::counter_info const& info, error_code& ec);
         naming::gid_type thread_counts_counter_creator(
             performance_counters::counter_info const& info, error_code& ec);
+#if HPX_THREAD_MAINTAIN_IDLE_RATES
         naming::gid_type idle_rate_counter_creator(
             performance_counters::counter_info const& info, error_code& ec);
+#endif
 #if HPX_THREAD_MAINTAIN_QUEUE_WAITTIME
         naming::gid_type thread_wait_time_counter_creator(
             performance_counters::counter_info const& info, error_code& ec);
