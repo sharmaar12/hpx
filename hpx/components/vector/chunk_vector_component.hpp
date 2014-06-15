@@ -68,8 +68,14 @@ namespace hpx{
                     void push_back_rval(VALUE_TYPE&& val){
                         chunk_vector_.push_back(std::move(val));
                     }
-                    VALUE_TYPE at(std::size_t pos){
-                        return chunk_vector_.at(pos);
+                    VALUE_TYPE get_value(std::size_t pos){
+                        try{
+                            return chunk_vector_.at(pos);
+                        }
+                        catch(const std::out_of_range& e)
+                        {
+                            HPX_THROW_EXCEPTION(hpx::out_of_range, "get_value", "Value of 'pos' is out of range");
+                        }
                     }
                     void set_value(std::size_t pos, VALUE_TYPE const& val)
                     {
@@ -113,7 +119,7 @@ namespace hpx{
                 HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, size);
                 HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back);
                 HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back_rval);
-                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, at);
+                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, get_value);
                 HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value);
                 HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value_rval);
                 HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, empty);
@@ -184,17 +190,17 @@ namespace hpx{
                 }
 
                 //
-                // at API's in stub class
+                // get_value API's in stub class
                 //
 
-                static hpx::lcos::future<VALUE_TYPE> at_async(hpx::naming::id_type const& gid, std::size_t pos)
+                static hpx::lcos::future<VALUE_TYPE> get_value_async(hpx::naming::id_type const& gid, std::size_t pos)
                 {
-                    return hpx::async<hpx::server::chunk_vector::at_action>(gid, pos);
+                    return hpx::async<hpx::server::chunk_vector::get_value_action>(gid, pos);
                 }
 
-                static VALUE_TYPE at_sync(hpx::naming::id_type const& gid, std::size_t pos)
+                static VALUE_TYPE get_value_sync(hpx::naming::id_type const& gid, std::size_t pos)
                 {
-                    return hpx::async<hpx::server::chunk_vector::at_action>(gid, pos).get();
+                    return hpx::async<hpx::server::chunk_vector::get_value_action>(gid, pos).get();
                 }
 
                 //
@@ -252,7 +258,7 @@ namespace hpx{
 
 
             };//end of chunk_vector(stubs)
-        }//end of stub namespace
+        }//end of the namespace stubs
 
 
             class chunk_vector : public hpx::components::client_base<chunk_vector, stubs::chunk_vector>
@@ -328,19 +334,19 @@ namespace hpx{
                 }
 
                 //
-                // at API's in client class
+                // get_value API's in client class
                 //
 
                 hpx::lcos::future<VALUE_TYPE> get_value_async(std::size_t pos) const
                 {
                     HPX_ASSERT(this->get_gid());
-                    return this->base_type::at_async(this->get_gid(), pos);
+                    return this->base_type::get_value_async(this->get_gid(), pos);
                 }
 
                 VALUE_TYPE get_value(std::size_t pos) const
                 {
                     HPX_ASSERT(this->get_gid());
-                    return this->base_type::at_sync(this->get_gid(), pos);
+                    return this->base_type::get_value_sync(this->get_gid(), pos);
                 }
 
                 //
@@ -422,8 +428,8 @@ HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::push_back_rval_action,
     chunk_vector_push_back_rval_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::server::chunk_vector::at_action,
-    chunk_vector_at_action);
+    hpx::server::chunk_vector::get_value_action,
+    chunk_vector_get_value_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::set_value_action,
     chunk_vector_set_value_action);

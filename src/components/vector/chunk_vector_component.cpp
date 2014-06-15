@@ -23,8 +23,8 @@ HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::push_back_rval_action,
     chunk_vector_push_back_rval_action);
 HPX_REGISTER_ACTION(
-    hpx::server::chunk_vector::at_action,
-    chunk_vector_at_action);
+    hpx::server::chunk_vector::get_value_action,
+    chunk_vector_get_value_action);
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::set_value_action,
     chunk_vector_set_value_action);
