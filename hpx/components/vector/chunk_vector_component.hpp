@@ -47,17 +47,6 @@ namespace hpx{
                     explicit chunk_vector(std::size_t chunk_size, VALUE_TYPE val)
                     : chunk_size_(chunk_size), val_(val), chunk_vector_(chunk_size, val) {}
 
-                    void display() const
-                    {
-                        if(chunk_vector_.empty())
-                            hpx::cout << "Chunk Vector is empty \n" << hpx::flush;
-                        else{
-                             std::vector<VALUE_TYPE>::const_iterator it = chunk_vector_.begin();
-                            for(;it != chunk_vector_.end(); it++ )
-                                hpx::cout << *it << "\n" << hpx::flush;
-                        }
-                    } //end of display
-
                     std::size_t size() const{
                         return chunk_vector_.size();
                     }//end of size
@@ -74,7 +63,7 @@ namespace hpx{
                         }
                         catch(const std::out_of_range& e)
                         {
-                            HPX_THROW_EXCEPTION(hpx::out_of_range, "get_value", "Value of 'pos' is out of range");
+                            HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Value of 'pos' is out of range");
                         }
                     }
                     void set_value(std::size_t pos, VALUE_TYPE const& val)
@@ -108,13 +97,13 @@ namespace hpx{
                         chunk_vector_.clear();
                     }
 
-                    ~chunk_vector(){
+
+                    virtual ~chunk_vector(){
 
                         }
                 //
                 //Define the component action here
                 //
-                HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, display);
                 HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, size);
                 HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back);
                 HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back_rval);
@@ -134,20 +123,6 @@ namespace hpx{
 
         namespace stubs{
             struct chunk_vector : hpx::components::stub_base <server::chunk_vector>{
-                //
-                //  Display API's in stub class
-                //
-
-                static void display_non_blocking(hpx::naming::id_type const& gid)
-                {
-                    hpx::apply<server::chunk_vector::display_action>(gid);
-                }
-
-                static void display_sync(hpx::naming::id_type const& gid)
-                {
-                    hpx::async<server::chunk_vector::display_action>(gid).get();
-                }
-
                 //
                 //  Size API's in stub class
                 //
@@ -270,20 +245,6 @@ namespace hpx{
                 chunk_vector(){}
                 chunk_vector(hpx::naming::id_type const& gid): base_type(gid){}
                 chunk_vector(hpx::shared_future<hpx::naming::id_type> const& gid): base_type(gid){}
-                //
-                // Display API's in client class
-                //
-                void display_non_blocking() const
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::display_non_blocking(this->get_gid());
-                }
-
-                void display() const
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::display_sync(this->get_gid());
-                }
 
                 //
                 //  Size API's in client class
@@ -410,13 +371,11 @@ namespace hpx{
                     this->base_type::clear_sync(this->get_gid());
                 }
 
-            };
+            };//end of chunk_vector (client)
+
 }//end of hpx namespace
 
 //Registering the component action to AGAS
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::server::chunk_vector::display_action,
-    chunk_vector_display_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::size_action,
     chunk_vector_size_action);
@@ -441,5 +400,6 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::clear_action,
     chunk_vector_clear_action);
+
 
 #endif // CHUNK_VECTOR_COMPONENT_HPP
