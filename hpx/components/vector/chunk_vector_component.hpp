@@ -108,8 +108,7 @@ namespace hpx{
                         chunk_vector_.clear();
                     }
 
-
-                    virtual ~chunk_vector(){
+                    ~chunk_vector(){
 
                         }
                 //
