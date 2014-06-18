@@ -78,7 +78,8 @@ namespace hpx
         filesystem_error = 51,                      ///< The specified file does not exist or other filesystem related error
         bad_function_call = 52,                     ///< equivalent of std::bad_function_call
 	out_of_range = 53,			    ///< Equivalent to std::out_of_range
-        
+	length_error = 54,			    ///< Equivalent to std::length_error
+	
         /// \cond NOINTERNAL
         last_error,
         error_upper_bound = 0x7fffL   // force this enum type to be at least 16 bits.
@@ -142,6 +143,7 @@ namespace hpx
         /* 51 */ "filesystem_error",
         /* 52 */ "bad_function_call",
 	/* 53 */ "out_of_range",
+	/* 54 */ "length_error",
 
         /*    */ ""
     };

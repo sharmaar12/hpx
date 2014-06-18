@@ -30,355 +30,689 @@
  */
 
 
-namespace hpx{
-        namespace server{
+namespace hpx
+{
+    namespace server
+    {
 
-          //  template <typename VALUE_TYPE>
-            class HPX_COMPONENT_EXPORT chunk_vector : public hpx::components::locking_hook<
-                hpx::components::managed_component_base<chunk_vector> >
+        //  template <typename VALUE_TYPE>
+        class HPX_COMPONENT_EXPORT chunk_vector : public hpx::components::locking_hook<
+            hpx::components::managed_component_base<chunk_vector> >
+        {
+        public:
+            //
+            //Constructors
+            //
+            explicit chunk_vector(): chunk_vector_(0,0) {}
+
+            explicit chunk_vector(std::size_t chunk_size)
+                : chunk_vector_(chunk_size,0) {}
+
+            explicit chunk_vector(std::size_t chunk_size, VALUE_TYPE val)
+                : chunk_vector_(chunk_size, val) {}
+
+            //
+            //Destructor (Non Virtual)
+            //
+            ~chunk_vector()
             {
-                typedef VALUE_TYPE chunk_value_type;
-                public:
-                    explicit chunk_vector(): chunk_size_(0), val_(0), chunk_vector_(0,0) {}
+            }
 
-                    explicit chunk_vector(std::size_t chunk_size)
-                    : chunk_size_(chunk_size), val_(0), chunk_vector_(chunk_size,0) {}
-
-                    explicit chunk_vector(std::size_t chunk_size, VALUE_TYPE val)
-                    : chunk_size_(chunk_size), val_(val), chunk_vector_(chunk_size, val) {}
-
-                    std::size_t size() const{
-                        return chunk_vector_.size();
-                    }//end of size
-
-                    void push_back(VALUE_TYPE const& val){
-                        chunk_vector_.push_back(val);
-                    }
-                    void push_back_rval(VALUE_TYPE&& val){
-                        chunk_vector_.push_back(std::move(val));
-                    }
-                    VALUE_TYPE get_value(std::size_t pos){
-                        try{
-                            return chunk_vector_.at(pos);
-                        }
-                        catch(const std::out_of_range& e)
-                        {
-                            HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Value of 'pos' is out of range");
-                        }
-                    }
-                    void set_value(std::size_t pos, VALUE_TYPE const& val)
-                    {
-
-                        try{
-                            chunk_vector_.at(pos) = val;
-                        }
-                        catch(const std::out_of_range& e)
-                        {
-                            HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Value of 'pos' is out of range");
-                        }
-                    }
-
-                    void set_value_rval(std::size_t pos, VALUE_TYPE const&& val)
-                    {
-                         try{
-                            chunk_vector_.at(pos) = std::move(val);
-                        }
-                        catch(const std::out_of_range& e)
-                        {
-                            HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value_rval", "Value of 'pos' is out of range");
-                        }
-                    }
-
-                    bool empty() const{
-                        return chunk_vector_.empty();
-                    }
-
-                    void clear(){
-                        chunk_vector_.clear();
-                    }
-
-
-                    virtual ~chunk_vector(){
-
-                        }
-                //
-                //Define the component action here
-                //
-                HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, size);
-                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back);
-                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back_rval);
-                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, get_value);
-                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value);
-                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value_rval);
-                HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, empty);
-                HPX_DEFINE_COMPONENT_ACTION(chunk_vector, clear);
-
-                private:
-                    std::size_t chunk_size_;
-                    VALUE_TYPE val_;
-                    std::vector<VALUE_TYPE> chunk_vector_;
-            };//end of class chunk_vector
-
-        }//end of server namespace
-
-        namespace stubs{
-            struct chunk_vector : hpx::components::stub_base <server::chunk_vector>{
-                //
-                //  Size API's in stub class
-                //
-
-                static hpx::lcos::future<std::size_t> size_async(hpx::naming::id_type const& gid)
-                {
-                    return hpx::async<hpx::server::chunk_vector::size_action>(gid);
-                }
-
-                static std::size_t size_sync(hpx::naming::id_type const& gid)
-                {
-                    return hpx::async<hpx::server::chunk_vector::size_action>(gid).get();
-                }
-
-                //
-                //Push_back API's in stub class
-                //
-                static void push_back_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
-                {
-                    hpx::apply<hpx::server::chunk_vector::push_back_action>(gid, val);
-                }
-
-                static void push_back_sync(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
-                {
-                    hpx::async<hpx::server::chunk_vector::push_back_action>(gid, val).get();
-                }
-
-                //
-                //  Push_back_rval API's in stub class
-                //
-                static void push_back_rval_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
-                {
-                    hpx::apply<hpx::server::chunk_vector::push_back_rval_action>(gid, std::move(val));
-                }
-
-                static void push_back_rval_sync(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
-                {
-                    hpx::async<hpx::server::chunk_vector::push_back_rval_action>(gid, std::move(val)).get();
-                }
-
-                //
-                // get_value API's in stub class
-                //
-
-                static hpx::lcos::future<VALUE_TYPE> get_value_async(hpx::naming::id_type const& gid, std::size_t pos)
-                {
-                    return hpx::async<hpx::server::chunk_vector::get_value_action>(gid, pos);
-                }
-
-                static VALUE_TYPE get_value_sync(hpx::naming::id_type const& gid, std::size_t pos)
-                {
-                    return hpx::async<hpx::server::chunk_vector::get_value_action>(gid, pos).get();
-                }
-
-                //
-                //  set_value API's in stub class
-                //
-                static void set_value_non_blocking(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const& val)
-                {
-                    hpx::apply<hpx::server::chunk_vector::set_value_action>(gid, pos, val);
-                }
-
-                static void set_value_sync(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const& val)
-                {
-                    hpx::async<hpx::server::chunk_vector::set_value_action>(gid, pos, val).get();
-                }
-
-                //
-                //  set_value_rval API's in stub class
-                //
-                static void set_value_rval_non_blocking(hpx::naming::id_type const& gid, std::size_t pos,  VALUE_TYPE const&& val)
-                {
-                    hpx::apply<hpx::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val));
-                }
-
-                static void set_value_rval_sync(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const&& val)
-                {
-                    hpx::async<hpx::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val)).get();
-                }
-
-                //
-                //  empty API's in stub class
-                //
-
-                static hpx::lcos::future<bool> empty_async(hpx::naming::id_type const& gid)
-                {
-                    return hpx::async<hpx::server::chunk_vector::empty_action>(gid);
-                }
-
-                static bool empty_sync(hpx::naming::id_type const& gid)
-                {
-                    return hpx::async<hpx::server::chunk_vector::empty_action>(gid).get();
-                }
-
-                //
-                //  clear API's in client class
-                //
-                static void clear_non_blocking(hpx::naming::id_type const& gid)
-                {
-                    hpx::apply<server::chunk_vector::clear_action>(gid);
-                }
-
-                static void clear_sync(hpx::naming::id_type const& gid)
-                {
-                    hpx::async<server::chunk_vector::clear_action>(gid).get();
-                }
-
-
-            };//end of chunk_vector(stubs)
-        }//end of the namespace stubs
-
-
-            class chunk_vector : public hpx::components::client_base<chunk_vector, stubs::chunk_vector>
+            //
+            //Capacity Related API's in the server class
+            //
+            std::size_t size() const
             {
-                 typedef hpx::components::client_base<chunk_vector, stubs::chunk_vector> base_type;
-            public:
-
-
-                //TODO flag the error of invalid gid for default constructor
-                chunk_vector(){}
-                chunk_vector(hpx::naming::id_type const& gid): base_type(gid){}
-                chunk_vector(hpx::shared_future<hpx::naming::id_type> const& gid): base_type(gid){}
-
-                //
-                //  Size API's in client class
-                //
-
-                hpx::lcos::future<std::size_t> size_async() const
+                return chunk_vector_.size();
+            }//end of size
+            std::size_t max_size() const
+            {
+                return chunk_vector_.max_size();
+            }
+            void resize_only (std::size_t n)
+            {
+                chunk_vector_.resize(n);
+            }
+            void resize_with_val (std::size_t n, VALUE_TYPE const& val)
+            {
+                chunk_vector_.resize(n, val);
+            }
+            std::size_t capacity() const
+            {
+                return chunk_vector_.capacity();
+            }
+            bool empty() const
+            {
+                return chunk_vector_.empty();
+            }
+            void reserve(std::size_t n)
+            {
+                try
                 {
-                    HPX_ASSERT(this->get_gid());
-                    return this->base_type::size_async(this->get_gid());
+                    chunk_vector_.reserve(n);
                 }
-
-                std::size_t size() const
+                catch(std::length_error const& le)
                 {
-                    HPX_ASSERT(this->get_gid());
-                    return this->base_type::size_sync(this->get_gid());
+                    HPX_THROW_EXCEPTION(hpx::length_error, "reserve" , "Can not reserve the space for vector of given size");
                 }
+            }
 
-                //
-                //  Push_back API's in Client class
-                //
-
-                void push_back_non_blocking(VALUE_TYPE const& val)
+            //
+            // Element access API's
+            //
+            VALUE_TYPE get_value(std::size_t pos) const
+            {
+                try
                 {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::push_back_non_blocking(this->get_gid(), val);
+                    return chunk_vector_.at(pos);
                 }
-
-                void push_back(VALUE_TYPE const& val)
+                catch(const std::out_of_range& e)
                 {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::push_back_sync(this->get_gid(), val);
+                    HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Value of 'pos' is out of range");
                 }
+            }
 
-                //
-                //  Push_back_rval API's in Client class [NOTE it is overloading of push_back]
-                //
-                void push_back_non_blocking(VALUE_TYPE const&& val)
+            VALUE_TYPE front() const
+            {
+                return chunk_vector_.front();
+            }
+
+            VALUE_TYPE back() const
+            {
+                return chunk_vector_.back();
+            }
+
+            //
+            // Modifiers API's in server class
+            //
+            void assign(std::size_t n, VALUE_TYPE const& val)
+            {
+                chunk_vector_.assign(n, val);
+            }
+
+            void push_back(VALUE_TYPE const& val)
+            {
+                chunk_vector_.push_back(val);
+            }
+            void push_back_rval(VALUE_TYPE&& val)
+            {
+                chunk_vector_.push_back(std::move(val));
+            }
+            void pop_back()
+            {
+                chunk_vector_.pop_back();
+            }
+
+            //this API is required as we do not returning the reference to the element in Any API.
+            void set_value(std::size_t pos, VALUE_TYPE const& val)
+            {
+
+                try
                 {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::push_back_rval_non_blocking(this->get_gid(), std::move(val));
+                    chunk_vector_.at(pos) = val;
                 }
-
-                void push_back(VALUE_TYPE const&& val)
+                catch(const std::out_of_range& e)
                 {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::push_back_rval_sync(this->get_gid(), std::move(val));
+                    HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Value of 'pos' is out of range");
                 }
+            }
 
-                //
-                // get_value API's in client class
-                //
-
-                hpx::lcos::future<VALUE_TYPE> get_value_async(std::size_t pos) const
+            void set_value_rval(std::size_t pos, VALUE_TYPE const&& val)
+            {
+                try
                 {
-                    HPX_ASSERT(this->get_gid());
-                    return this->base_type::get_value_async(this->get_gid(), pos);
+                    chunk_vector_.at(pos) = std::move(val);
                 }
-
-                VALUE_TYPE get_value(std::size_t pos) const
+                catch(const std::out_of_range& e)
                 {
-                    HPX_ASSERT(this->get_gid());
-                    return this->base_type::get_value_sync(this->get_gid(), pos);
+                    HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value_rval", "Value of 'pos' is out of range");
                 }
+            }
 
-                //
-                //  set_value API's in client class
-                //
-                void set_value_non_blocking(std::size_t pos, VALUE_TYPE const& val)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::set_value_non_blocking(this->get_gid(), pos, val);
-                }
+//            void swap(hpx::server::chunk_vector x){
+//                this->chunk_vector_.swap(x.chunk_vector_);
+//            }
 
-                void set_value(std::size_t pos, VALUE_TYPE const& val)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::set_value_sync(this->get_gid(), pos, val);
-                }
+            void clear()
+            {
+                chunk_vector_.clear();
+            }
 
 
-                //
-                //  set_value_rval API's in client class [NOTE it is overloading if the set_value function]
-                //
-                void set_value_non_blocking(std::size_t pos, VALUE_TYPE const&& val)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::set_value_rval_non_blocking(this->get_gid(), pos, std::move(val));
-                }
 
-                void set_value(std::size_t pos, VALUE_TYPE const&& val)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::set_value_rval_sync(this->get_gid(), pos, std::move(val));
-                }
+            //
+            //Define the component action here
+            //
 
-                //
-                // empty API's in client class
-                //
+            //capacity related component action
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, size);
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, max_size);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, resize_only);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, resize_with_val);
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, capacity);
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, empty);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, reserve);
 
-                hpx::lcos::future<bool> empty_async() const
-                {
-                    HPX_ASSERT(this->get_gid());
-                    return this->base_type::empty_async(this->get_gid());
-                }
+            //Element access component action
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, get_value);
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, front);
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, back);
 
-                bool empty() const
-                {
-                    HPX_ASSERT(this->get_gid());
-                    return this->base_type::empty_sync(this->get_gid());
-                }
+            //Modifiers component action
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, assign);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back_rval);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, pop_back);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value_rval);
+//            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, swap);
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, clear);
 
-                //
-                //  clear API's in client class
-                //
-                void clear_non_blocking()
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::clear_non_blocking(this->get_gid());
-                }
+        private:
+            std::vector<VALUE_TYPE> chunk_vector_;
+        };//end of class chunk_vector
 
-                void clear()
-                {
-                    HPX_ASSERT(this->get_gid());
-                    this->base_type::clear_sync(this->get_gid());
-                }
+    }//end of server namespace
 
-            };//end of chunk_vector (client)
+    namespace stubs
+    {
+        struct chunk_vector : hpx::components::stub_base <server::chunk_vector>
+        {
+
+            //
+            //  Capacity related API's in stubs class
+            //
+
+            //SIZE
+            static hpx::lcos::future<std::size_t> size_async(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::size_action>(gid);
+            }
+
+            static std::size_t size_sync(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::size_action>(gid).get();
+            }
+
+            //MAX_SIZE
+            static hpx::lcos::future<std::size_t> max_size_async(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::max_size_action>(gid);
+            }
+
+            static std::size_t max_size_sync(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::max_size_action>(gid).get();
+            }
+
+            //RESIZE_ONLY
+            static void resize_only_non_blocking(hpx::naming::id_type const& gid, std::size_t n)
+            {
+                hpx::apply<hpx::server::chunk_vector::resize_only_action>(gid, n);
+            }
+
+            static void resize_only_sync(hpx::naming::id_type const& gid, std::size_t n)
+            {
+                hpx::async<hpx::server::chunk_vector::resize_only_action>(gid, n).get();
+            }
+
+            //RESIZE_WITH_VAL
+            static void resize_with_val_non_blocking(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val)
+            {
+                hpx::apply<hpx::server::chunk_vector::resize_with_val_action>(gid, n, val);
+            }
+
+            static void resize_with_val_sync(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val)
+            {
+                hpx::async<hpx::server::chunk_vector::resize_with_val_action>(gid, n, val).get();
+            }
+
+            //CAPACITY
+            static hpx::lcos::future<std::size_t> capacity_async(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::capacity_action>(gid);
+            }
+
+            static std::size_t capacity_sync(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::capacity_action>(gid).get();
+            }
+
+            //EMPTY
+            static hpx::lcos::future<bool> empty_async(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::empty_action>(gid);
+            }
+
+            static bool empty_sync(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::empty_action>(gid).get();
+            }
+
+            //RESERVE
+            static void reserve_non_blocking(hpx::naming::id_type const& gid, std::size_t n)
+            {
+                hpx::apply<hpx::server::chunk_vector::reserve_action>(gid, n);
+            }
+
+            static void reserve_sync(hpx::naming::id_type const& gid, std::size_t n)
+            {
+                hpx::async<hpx::server::chunk_vector::reserve_action>(gid, n).get();
+            }
+
+            //
+            //  Element Access API's in stubs class
+            //
+
+            //GET_VALUE
+            static hpx::lcos::future<VALUE_TYPE> get_value_async(hpx::naming::id_type const& gid, std::size_t pos)
+            {
+                return hpx::async<hpx::server::chunk_vector::get_value_action>(gid, pos);
+            }
+
+            static VALUE_TYPE get_value_sync(hpx::naming::id_type const& gid, std::size_t pos)
+            {
+                return hpx::async<hpx::server::chunk_vector::get_value_action>(gid, pos).get();
+            }
+
+            //FRONT
+            static hpx::lcos::future<VALUE_TYPE> front_async(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::front_action>(gid);
+            }
+
+            static VALUE_TYPE front_sync(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::front_action>(gid).get();
+            }
+
+            //BACK
+            static hpx::lcos::future<VALUE_TYPE> back_async(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::back_action>(gid);
+            }
+
+            static VALUE_TYPE back_sync(hpx::naming::id_type const& gid)
+            {
+                return hpx::async<hpx::server::chunk_vector::back_action>(gid).get();
+            }
+
+            //
+            //  Modifiers API's in stubs class
+            //
+
+            //ASSIGN
+            static void assign_non_blocking(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val)
+            {
+                hpx::apply<hpx::server::chunk_vector::assign_action>(gid, n, val);
+            }
+            static void assign_sync(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val)
+            {
+                hpx::async<hpx::server::chunk_vector::assign_action>(gid, n, val).get();
+            }
+
+            //PUSH_BACK
+            static void push_back_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
+            {
+                hpx::apply<hpx::server::chunk_vector::push_back_action>(gid, val);
+            }
+
+            static void push_back_sync(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
+            {
+                hpx::async<hpx::server::chunk_vector::push_back_action>(gid, val).get();
+            }
+
+            //PUSH_BACK_RVAL
+            static void push_back_rval_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
+            {
+                hpx::apply<hpx::server::chunk_vector::push_back_rval_action>(gid, std::move(val));
+            }
+
+            static void push_back_rval_sync(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
+            {
+                hpx::async<hpx::server::chunk_vector::push_back_rval_action>(gid, std::move(val)).get();
+            }
+
+            //POP_BACK
+            static void pop_back_non_blocking(hpx::naming::id_type const& gid)
+            {
+                hpx::apply<hpx::server::chunk_vector::pop_back_action>(gid);
+            }
+
+            static void pop_back_sync(hpx::naming::id_type const& gid)
+            {
+                hpx::async<hpx::server::chunk_vector::pop_back_action>(gid).get();
+            }
+
+            //SET_VALUE
+            static void set_value_non_blocking(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const& val)
+            {
+                hpx::apply<hpx::server::chunk_vector::set_value_action>(gid, pos, val);
+            }
+
+            static void set_value_sync(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const& val)
+            {
+                hpx::async<hpx::server::chunk_vector::set_value_action>(gid, pos, val).get();
+            }
+
+            //SET_VALUE_RVAL
+            static void set_value_rval_non_blocking(hpx::naming::id_type const& gid, std::size_t pos,  VALUE_TYPE const&& val)
+            {
+                hpx::apply<hpx::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val));
+            }
+
+            static void set_value_rval_sync(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const&& val)
+            {
+                hpx::async<hpx::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val)).get();
+            }
+
+            //CLEAR
+            static void clear_non_blocking(hpx::naming::id_type const& gid)
+            {
+                hpx::apply<server::chunk_vector::clear_action>(gid);
+            }
+
+            static void clear_sync(hpx::naming::id_type const& gid)
+            {
+                hpx::async<server::chunk_vector::clear_action>(gid).get();
+            }
+
+
+        };//end of chunk_vector(stubs)
+    }//end of the namespace stubs
+
+
+    class chunk_vector : public hpx::components::client_base<chunk_vector, stubs::chunk_vector>
+    {
+        typedef hpx::components::client_base<chunk_vector, stubs::chunk_vector> base_type;
+    public:
+
+
+        //TODO flag the error of invalid gid for default constructor
+        chunk_vector() {}
+        chunk_vector(hpx::naming::id_type const& gid): base_type(gid) {}
+        chunk_vector(hpx::shared_future<hpx::naming::id_type> const& gid): base_type(gid) {}
+
+        //Destructor
+        ~chunk_vector()
+        {
+        }
+
+        //
+        //  Capacity related API's in chunk_vector client class
+        //
+
+        //SIZE
+        hpx::lcos::future<std::size_t> size_async() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::size_async(this->get_gid());
+        }
+
+        std::size_t size() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::size_sync(this->get_gid());
+        }
+
+        //MAX_SIZE
+        hpx::lcos::future<std::size_t> max_size_async() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::max_size_async(this->get_gid());
+        }
+
+        std::size_t max_size() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::max_size_sync(this->get_gid());
+        }
+
+        //RESIZE (for resize_only)
+        void resize_non_blocking(std::size_t n)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::resize_only_non_blocking(this->get_gid(), n);
+        }
+
+        void resize(std::size_t n)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::resize_only_sync(this->get_gid(), n);
+        }
+
+        //RESIZE (fro resize_with_val)
+        void resize_non_blocking(std::size_t n, VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::resize_with_val_non_blocking(this->get_gid(), n, val);
+        }
+
+        void resize(std::size_t n, VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::resize_with_val_sync(this->get_gid(), n, val);
+        }
+
+        //CAPACITY
+        hpx::lcos::future<std::size_t> capacity_async() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::capacity_async(this->get_gid());
+        }
+
+        std::size_t capacity() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::capacity_sync(this->get_gid());
+        }
+
+        //EMPTY
+        hpx::lcos::future<bool> empty_async() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::empty_async(this->get_gid());
+        }
+
+        bool empty() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::empty_sync(this->get_gid());
+        }
+
+        //RESERVE
+        void reserve_non_blocking(std::size_t n)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::reserve_non_blocking(this->get_gid(), n);
+        }
+
+        void reserve(std::size_t n)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::reserve_sync(this->get_gid(), n);
+        }
+
+        //
+        //  Element Access API's in Client class
+        //
+
+        //GET_VALUE
+        hpx::lcos::future<VALUE_TYPE> get_value_async(std::size_t pos) const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::get_value_async(this->get_gid(), pos);
+        }
+
+        VALUE_TYPE get_value(std::size_t pos) const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::get_value_sync(this->get_gid(), pos);
+        }
+
+        //FRONT
+        hpx::lcos::future<VALUE_TYPE> front_async() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::front_async(this->get_gid());
+        }
+
+        VALUE_TYPE front() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::front_sync(this->get_gid());
+        }
+
+        //BACK
+        hpx::lcos::future<VALUE_TYPE> back_async() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::back_async(this->get_gid());
+        }
+
+        VALUE_TYPE back() const
+        {
+            HPX_ASSERT(this->get_gid());
+            return this->base_type::back_sync(this->get_gid());
+        }
+
+        //
+        //  Modifiers API's in client class
+        //
+        void assign_non_blocking(std::size_t n, VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::assign_non_blocking(this->get_gid(), n, val);
+        }
+
+        void assign(std::size_t n, VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::assign_sync(this->get_gid(), n, val);
+        }
+
+        //PUSH_BACK
+        void push_back_non_blocking(VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::push_back_non_blocking(this->get_gid(), val);
+        }
+
+        void push_back(VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::push_back_sync(this->get_gid(), val);
+        }
+
+        //PUSH_BACK (for push_back_rval)
+        void push_back_non_blocking(VALUE_TYPE const&& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::push_back_rval_non_blocking(this->get_gid(), std::move(val));
+        }
+
+        void push_back(VALUE_TYPE const&& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::push_back_rval_sync(this->get_gid(), std::move(val));
+        }
+
+        //POP_BACK
+        void pop_back_non_blocking()
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::pop_back_non_blocking(this->get_gid());
+        }
+
+        void pop_back()
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::pop_back_sync(this->get_gid());
+        }
+
+        //SET_VALUE
+        void set_value_non_blocking(std::size_t pos, VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::set_value_non_blocking(this->get_gid(), pos, val);
+        }
+
+        void set_value(std::size_t pos, VALUE_TYPE const& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::set_value_sync(this->get_gid(), pos, val);
+        }
+
+        //SET_VALUE (for set_value rval)
+        void set_value_non_blocking(std::size_t pos, VALUE_TYPE const&& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::set_value_rval_non_blocking(this->get_gid(), pos, std::move(val));
+        }
+
+        void set_value(std::size_t pos, VALUE_TYPE const&& val)
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::set_value_rval_sync(this->get_gid(), pos, std::move(val));
+        }
+
+        //CLEAR
+        void clear_non_blocking()
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::clear_non_blocking(this->get_gid());
+        }
+
+        void clear()
+        {
+            HPX_ASSERT(this->get_gid());
+            this->base_type::clear_sync(this->get_gid());
+        }
+
+    };//end of chunk_vector (client)
 
 }//end of hpx namespace
 
 //Registering the component action to AGAS
+
+//Capacity related action declaration
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::size_action,
     chunk_vector_size_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::max_size_action,
+    chunk_vector_max_size_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::resize_only_action,
+    chunk_vector_resize_only_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::resize_with_val_action,
+    chunk_vector_resize_with_val_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::capacity_action,
+    chunk_vector_capacity_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::empty_action,
+    chunk_vector_empty_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::reserve_action,
+    chunk_vector_reserve_action);
+
+//Element access component action declaration
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::get_value_action,
+    chunk_vector_get_value_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::front_action,
+    chunk_vector_front_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::back_action,
+    chunk_vector_back_action);
+
+//Modifiers component action declaration
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::assign_action,
+    chunk_vector_assign_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::push_back_action,
     chunk_vector_push_back_action);
@@ -386,20 +720,21 @@ HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::push_back_rval_action,
     chunk_vector_push_back_rval_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::server::chunk_vector::get_value_action,
-    chunk_vector_get_value_action);
+    hpx::server::chunk_vector::pop_back_action,
+    chunk_vector_pop_back_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::set_value_action,
     chunk_vector_set_value_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::set_value_rval_action,
     chunk_vector_set_value_rval_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::server::chunk_vector::empty_action,
-    chunk_vector_empty_action);
+//HPX_REGISTER_ACTION_DECLARATION(
+//    hpx::server::chunk_vector::swap_action,
+//    chunk_vector_swap_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::clear_action,
     chunk_vector_clear_action);
+
 
 
 #endif // CHUNK_VECTOR_COMPONENT_HPP
