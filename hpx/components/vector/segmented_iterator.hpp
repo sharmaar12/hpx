@@ -43,6 +43,8 @@ namespace hpx
         typedef segmented_vector_iterator self_type;
         typedef std::pair<std::size_t, hpx::lcos::shared_future<hpx::naming::id_type>> bfg_pair;
         typedef std::vector< bfg_pair > vector_type;
+        
+        typedef std::pair<hpx::lcos::shared_future<hpx::naming::id_type>, std::size_t> local_return_type;
 
 
     private:
@@ -368,17 +370,17 @@ namespace hpx
             return seg_iter.curr_bfg_pair_;
         }
 
-        static std::pair<hpx::lcos::shared_future<hpx::naming::id_type>, std::size_t> local(self_type const& seg_iter)
+        static local_return_type local(self_type const& seg_iter)
         {
             return std::make_pair((seg_iter.curr_bfg_pair_)->second, seg_iter.local_index_);
         }
 
-        static std::pair<hpx::lcos::shared_future<hpx::naming::id_type>, std::size_t> begin(bfg_pair const& chunk_bfg_pair)
+        static local_return_type begin(bfg_pair const& chunk_bfg_pair)
         {
             return std::make_pair(chunk_bfg_pair.second, 0);
         }
 
-        static std::pair<hpx::lcos::shared_future<hpx::naming::id_type>, std::size_t> end(bfg_pair const& chunk_bfg_pair)
+        static local_return_type end(bfg_pair const& chunk_bfg_pair)
         {
             return std::make_pair(chunk_bfg_pair.second,
                                   hpx::stubs::chunk_vector::size_async((chunk_bfg_pair.second).get()).get() - 1
