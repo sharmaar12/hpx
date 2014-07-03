@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <boost/integer.hpp>
 
-#include <vector.hpp>
+#include <hpx/components/vector/vector.hpp>
 #include <hpx/components/vector/chunk_vector_component.hpp>
 
 #define VALUE_TYPE double

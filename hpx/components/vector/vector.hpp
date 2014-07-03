@@ -16,8 +16,7 @@
 #include <cstdint>
 #include <boost/integer.hpp>
 
-#include <segmented_iterator.hpp>
-
+#include <hpx/components/vector/segmented_iterator.hpp>
 #include <hpx/components/vector/chunk_vector_component.hpp>
 
 #include <boost/foreach.hpp>
