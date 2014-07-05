@@ -70,3 +70,7 @@ HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::clear_action,
     chunk_vector_clear_action);
 
+//Algorithm API's component action registration
+HPX_REGISTER_ACTION(
+    hpx::server::chunk_vector::chunk_for_each_action,
+    chunk_vector_chunk_for_each_action);

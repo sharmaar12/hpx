@@ -6,12 +6,12 @@
 #ifndef SEGMENTED_ITERATOR_HPP
 #define SEGMENTED_ITERATOR_HPP
 
+#include <hpx/include/util.hpp>
+#include <hpx/components/vector/chunk_vector_component.hpp>
+
 // headers for checking the ranges of the Datatypes
 #include <cstdint>
 #include <boost/integer.hpp>
-
-#include <hpx/components/vector/vector.hpp>
-#include <hpx/components/vector/chunk_vector_component.hpp>
 
 #define VALUE_TYPE double
 
@@ -43,9 +43,8 @@ namespace hpx
         typedef segmented_vector_iterator self_type;
         typedef std::pair<std::size_t, hpx::lcos::shared_future<hpx::naming::id_type>> bfg_pair;
         typedef std::vector< bfg_pair > vector_type;
-        
-        typedef std::pair<hpx::lcos::shared_future<hpx::naming::id_type>, std::size_t> local_return_type;
 
+        typedef std::pair<hpx::lcos::shared_future<hpx::naming::id_type>, std::size_t> local_return_type;
 
     private:
         std::size_t diff_helper(vector_type::const_iterator src, vector_type::const_iterator dest) const
@@ -375,15 +374,15 @@ namespace hpx
             return std::make_pair((seg_iter.curr_bfg_pair_)->second, seg_iter.local_index_);
         }
 
-        static local_return_type begin(bfg_pair const& chunk_bfg_pair)
+        static local_return_type begin(vector_type::const_iterator chunk_bfg_pair)
         {
-            return std::make_pair(chunk_bfg_pair.second, 0);
+            return std::make_pair(chunk_bfg_pair->second, 0);
         }
 
-        static local_return_type end(bfg_pair const& chunk_bfg_pair)
+        static local_return_type end(vector_type::const_iterator chunk_bfg_pair)
         {
-            return std::make_pair(chunk_bfg_pair.second,
-                                  hpx::stubs::chunk_vector::size_async((chunk_bfg_pair.second).get()).get() - 1
+            return std::make_pair(chunk_bfg_pair->second,
+                                  hpx::stubs::chunk_vector::size_async((chunk_bfg_pair->second).get()).get()
                                     );
         }
 
@@ -395,10 +394,6 @@ namespace hpx
             {
                 //DEFAULT destructor
             }
-
     };//end of segmented vector iterator
-
 }//end of hpx namespace
-
 #endif
-

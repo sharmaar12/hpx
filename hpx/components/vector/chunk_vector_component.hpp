@@ -12,7 +12,6 @@
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/include/lcos.hpp>
-#include <hpx/include/util.hpp>
 #include <hpx/include/iostreams.hpp>
 
 #include <vector>
@@ -40,6 +39,12 @@ namespace hpx
         class HPX_COMPONENT_EXPORT chunk_vector : public hpx::components::locking_hook<
             hpx::components::managed_component_base<chunk_vector> >
         {
+            typedef std::vector<VALUE_TYPE>::const_iterator const_iterator_type;
+            typedef std::vector<VALUE_TYPE>::iterator iterator_type;
+
+        private:
+            std::vector<VALUE_TYPE> chunk_vector_;
+
         public:
             //
             //Constructors
@@ -183,6 +188,17 @@ namespace hpx
                 chunk_vector_.clear();
             }
 
+
+            //
+            // Algorithm API's
+            //
+            void chunk_for_each(std::size_t first, std::size_t last, hpx::util::function<void(VALUE_TYPE &)> fn)
+            {
+                std::for_each( chunk_vector_.begin() + first,
+                              chunk_vector_.begin() + last,
+                              fn);
+            }
+
             //
             //Define the component action here
             //
@@ -211,8 +227,9 @@ namespace hpx
 //            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, swap);
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, clear);
 
-        private:
-            std::vector<VALUE_TYPE> chunk_vector_;
+            //Algorithm API action
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, chunk_for_each);
+
         };//end of class chunk_vector
 
     }//end of server namespace
@@ -406,13 +423,24 @@ namespace hpx
             //CLEAR
             static hpx::lcos::future<void> clear_async(hpx::naming::id_type const& gid)
             {
-                return hpx::async<server::chunk_vector::clear_action>(gid);
+                return hpx::async<hpx::server::chunk_vector::clear_action>(gid);
             }
 //            static void clear_non_blocking(hpx::naming::id_type const& gid)
 //            {
 //                hpx::apply<server::chunk_vector::clear_action>(gid);
 //            }
 
+        //
+        // Algorithm API's in Stubs class
+        //
+        static hpx::lcos::future<void> chunk_for_each_async(hpx::naming::id_type const& gid,
+                                                            std::size_t first,
+                                                            std::size_t last,
+                                                            hpx::util::function<void(VALUE_TYPE &)> fn)
+        {
+            return hpx::async<hpx::server::chunk_vector::chunk_for_each_action>(gid, first, last, fn);
+
+        }//end of chunk_vector_for_each_async
 
 
         };//end of chunk_vector(stubs)
@@ -477,7 +505,7 @@ namespace hpx
 //            this->base_type::resize_only_non_blocking(this->get_gid(), n);
 //        }
 
-        //RESIZE (fro resize_with_val)
+        //RESIZE (fro resize_with_val)Protected member function
         void resize(std::size_t n, VALUE_TYPE const& val)
         {
             HPX_ASSERT(this->get_gid());
@@ -722,5 +750,10 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::clear_action,
     chunk_vector_clear_action);
+
+//Algorithm API's component action declaration
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::chunk_for_each_action,
+    chunk_vector_chunk_for_each_action);
 
 #endif // CHUNK_VECTOR_COMPONENT_HPP

@@ -6,23 +6,17 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
-#include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/include/util.hpp>
-#include <hpx/include/iostreams.hpp>
+#include <hpx/components/vector/segmented_iterator.hpp>
+#include <hpx/components/vector/chunk_vector_component.hpp>
 
 // headers for checking the ranges of the Datatypes
 #include <cstdint>
 #include <boost/integer.hpp>
-
-#include <hpx/components/vector/segmented_iterator.hpp>
-#include <hpx/components/vector/chunk_vector_component.hpp>
-
 #include <boost/foreach.hpp>
 
 //TODO Remove all unnecessary comments from file
-//#include "chunk_vector_component.h"
 
 #define VALUE_TYPE double
 
@@ -35,14 +29,13 @@ namespace hpx{
         /**< This is the pair representing the (base_index, shared_future of gid)*/
         typedef std::pair<std::size_t, hpx::lcos::shared_future<hpx::naming::id_type>> bfg_pair;
         typedef std::vector< bfg_pair > vector_type;
-
-        private:
+    private:
             //It is the vector representing the base_index and corresponding gid's
             //Taken as future of hpx_id's as it delay the .get() as far as possible
             // shared future is mandatory as .get() can be called any number of time
             vector_type base_sf_of_gid_pair_;/**< Represent the Global ID's of each chunk */
 
-        protected:
+    protected:
             void create(std::size_t num_chunks, std::size_t chunk_size, VALUE_TYPE val)
             {
                 for (std::size_t chunk_index = 0; chunk_index < num_chunks; ++chunk_index)
@@ -146,7 +139,7 @@ namespace hpx{
             }//end of capacity_helper
 
         public:
-            typedef segmented_vector_iterator iterator;
+            typedef hpx::segmented_vector_iterator iterator;
 
             //
             // Constructors
@@ -524,8 +517,8 @@ namespace hpx{
             hpx::vector::iterator end()
             {
                 return iterator((base_sf_of_gid_pair_.end() - 2),
-                                hpx::stubs::chunk_vector::size_async( ((base_sf_of_gid_pair_.end() - 2)->second).get() ).get(),
-                                hpx::iter_state::valid);
+                                hpx::stubs::chunk_vector::size_async( ((base_sf_of_gid_pair_.end() - 2)->second).get() ).get(),\
+                                valid);
             }//end of begin
 
             //
