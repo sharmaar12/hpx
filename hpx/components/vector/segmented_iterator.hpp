@@ -224,43 +224,54 @@ namespace hpx
             return segmented_vector_iterator(temp_curr_bfg_pair, temp_local_index_, temp_state_);
         }//End of a + n
 
-//        self_type operator - (std::size_t n) const
-//        {
-//            vector_type::const_iterator temp_curr_bfg_pair = this->curr_bfg_pair_;
-//            std::size_t temp_local_index_ = this->local_index_;
-//            hpx::iter_state temp_state = this->state_;
-//            bool same_chunk = true;
-//            //this calculate remaining elements in current chunk
-//            std::size_t size = temp_local_index_ + 1;
-//
-//            while (n >= size)
-//            {
-//                same_chunk = false;
-//                n = n - size;
-//                //If the local index is zero we can not decrement it there as decrement gives valid operation on size_t
-//                if(temp_curr_bfg_pair->first != 0)
-//                {
-//                    --temp_curr_bfg_pair;
-//                    size = hpx::stubs::chunk_vector::size_async((temp_curr_bfg_pair->second).get()).get();
-//                }
-//                else if(temp_curr_bfg_pair->first == 0)
-//                {
-//                    --temp_curr_bfg_pair;
-//                    return segmented_vector_iterator(temp_curr_bfg_pair, 0, temp_state);
-//                }
-//
-//            }
-//            if(same_chunk)
-//            {
-//                temp_local_index_ -= n;
-//            }
-//            else
-//            {
-//                temp_local_index_ = size - (n + 1);
-//            }
-//
-//            return segmented_vector_iterator(temp_curr_bfg_pair, temp_local_index_, temp_state);
-//        }//end of a - n
+
+        self_type operator - (std::size_t n) const
+        {
+            //copying the current states of the iterator
+            vector_type::const_iterator temp_curr_bfg_pair = this->curr_bfg_pair_;
+            std::size_t temp_local_index = this->local_index_;
+            hpx::iter_state temp_state = this->state_;
+
+            //Temp variables
+            bool same_chunk = true;
+            std::size_t size = 0;
+            if(temp_state == hpx::iter_state::invalid)
+            {
+                return hpx::segmented_vector_iterator(temp_curr_bfg_pair,
+                                                      (temp_local_index - n),
+                                                      temp_state );
+            }
+            else
+            {
+                //this calculate remaining elements in current chunk
+                size = temp_local_index + 1; //This size tells how many need to go out side of current gid
+                while (n >= size)
+                {
+                    //NOTE This if condition is only met when iterator is going invalid
+                    if(temp_curr_bfg_pair->first == 0)
+                    {
+                        temp_state = hpx::iter_state::invalid;
+                        break;
+                    }
+                    same_chunk = false;
+                    n = n - size;
+                    --temp_curr_bfg_pair;
+                    size = hpx::stubs::chunk_vector::size_async((temp_curr_bfg_pair->second).get()).get();
+                }//end of while
+            }//end of
+
+            if(same_chunk)
+            {
+                temp_local_index -= n;
+            }
+            else
+            {
+                temp_local_index = size - (n + 1);
+            }
+
+            return segmented_vector_iterator(temp_curr_bfg_pair, temp_local_index, temp_state);
+        }//end of a - n
+
 
 //        //TODO this returning int64_t which has half range with size_t
 //        boost::int64_t operator - (self_type const& other) const
@@ -346,24 +357,26 @@ namespace hpx
         }// End of >=
 
         //COMPOUND ASSIGNMENT
-        void operator +=(std::size_t n)
+        self_type operator +=(std::size_t n) //return self_type to make (a = (b += n)) work
         {
             *this = *this + n;
+            return *this;
         }//End of +=
-//
-//        void operator -=(std::size_t n)
-//        {
-//            *this = *this - n;
-//        }//End of +=
-//
-//        //OFFSET DEREFERENCE
-//        VALUE_TYPE operator[](std::size_t n)
-//        {
-//            self_type temp = *this;
-//            temp = temp + n;
-//            return *temp;
-//        }
-//
+
+        self_type operator -=(std::size_t n) //return self_type to make (a = (b -= n)) work
+        {
+            *this = *this - n;
+            return *this;
+        }//End of +=
+
+        //OFFSET DEREFERENCE
+        VALUE_TYPE operator[](std::size_t n)
+        {
+            self_type temp = *this;
+            temp = temp + n;
+            return *temp;
+        }
+
         // API related to Segmented Iterators
         static vector_type::const_iterator segment(self_type const& seg_iter)
         {
