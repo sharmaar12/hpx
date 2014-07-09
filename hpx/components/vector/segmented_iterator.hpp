@@ -169,60 +169,61 @@ namespace hpx
             return temp;
         }
 
-//        //ARITHMATIC OPERATOR
-//        self_type operator + (std::size_t n) const
-//        {
-//            vector_type::const_iterator temp_curr_bfg_pair = this->curr_bfg_pair_;
-//            std::size_t temp_local_index_ = this->local_index_;
-//            hpx::iter_state temp_state_ = this->state_;
-//            hpx::naming::id_type invalid_id;
-//            bool same_chunk = true;
-//            std::size_t size = 0;
-//
-//            //Calculating the size of the first chunk
-//            if(temp_state_ == hpx::iter_state::invalid)
-//            {
-//                std::size_t invalid_diff = (std::numeric_limits<std::size_t>::max() - this->local_index_ + 1);
-//                if(n >= invalid_diff)
-//                {
-//                    temp_state_ = hpx::iter_state::valid;
-//                    std::size_t curr_chunk_size = (hpx::stubs::chunk_vector::size_async((curr_bfg_pair_->second).get())).get();
-//                    size = curr_chunk_size + invalid_diff;
-//                }
-//                else
-//                {
-//                    return segmented_vector_iterator(temp_curr_bfg_pair, temp_local_index_ + n, temp_state_);
-//                }
-//
-//            }
-//            else
-//            {
-//                std::size_t curr_chunk_size = (hpx::stubs::chunk_vector::size_async((curr_bfg_pair_->second).get())).get();
-//                size = curr_chunk_size - (temp_local_index_ + 1);
-//            }
-//
-//
-//            while( n > size)
-//            {
-//                if(((temp_curr_bfg_pair + 1)->second).get() == invalid_id ) //Break this loop if this is previous to LAST gid
-//                    break;
-//
-//                same_chunk = false;
-//                n = n - size;
-//                ++temp_curr_bfg_pair;
-//                size = hpx::stubs::chunk_vector::size_async((temp_curr_bfg_pair->second).get()).get();
-//            }
-//            if(same_chunk)
-//            {
-//                temp_local_index_ += n;
-//            }
-//            else
-//            {
-//                temp_local_index_ = n - 1;
-//            }
-//            return segmented_vector_iterator(temp_curr_bfg_pair, temp_local_index_, temp_state_);
-//        }//End of a + n
-//
+        //ARITHMATIC OPERATOR
+        self_type operator + (std::size_t n) const
+        {
+            //copying the current states of the iterator
+            vector_type::const_iterator temp_curr_bfg_pair = this->curr_bfg_pair_;
+            std::size_t temp_local_index_ = this->local_index_;
+            hpx::iter_state temp_state_ = this->state_;
+
+            //temp variables
+            hpx::naming::id_type invalid_id;
+            bool same_chunk = true;
+            std::size_t size = 0;
+
+            if(temp_state_ == hpx::iter_state::invalid)
+            {
+                std::size_t diff = (std::numeric_limits<std::size_t>::max() - temp_local_index_ + 1);
+                //calculate the interval through which it is invalid
+                if(n < diff )
+                {
+                    return hpx::segmented_vector_iterator(temp_curr_bfg_pair,
+                                                          (temp_local_index_ + n),
+                                                          temp_state_);
+                }
+                else
+                {
+                    n = n - diff;
+                    temp_local_index_ = 0;
+                    temp_state_ = hpx::iter_state::valid;
+                }
+            }
+
+            //Calculating the size of the first chunk
+            size = hpx::stubs::chunk_vector::size_async((temp_curr_bfg_pair->second).get()).get() - temp_local_index_;
+
+            while( n >= size)
+            {
+                if(((temp_curr_bfg_pair + 1)->second).get() == invalid_id ) //Break this loop if this is previous to LAST gid
+                    break;
+
+                same_chunk = false;
+                n = n - size;
+                ++temp_curr_bfg_pair;
+                size = hpx::stubs::chunk_vector::size_async((temp_curr_bfg_pair->second).get()).get();
+            }
+            if(same_chunk)
+            {
+                temp_local_index_ += n;
+            }
+            else
+            {
+                temp_local_index_ = n;
+            }
+            return segmented_vector_iterator(temp_curr_bfg_pair, temp_local_index_, temp_state_);
+        }//End of a + n
+
 //        self_type operator - (std::size_t n) const
 //        {
 //            vector_type::const_iterator temp_curr_bfg_pair = this->curr_bfg_pair_;
@@ -344,11 +345,11 @@ namespace hpx
                 return false;
         }// End of >=
 
-//        //COMPOUND ASSIGNMENT
-//        void operator +=(std::size_t n)
-//        {
-//            *this = *this + n;
-//        }//End of +=
+        //COMPOUND ASSIGNMENT
+        void operator +=(std::size_t n)
+        {
+            *this = *this + n;
+        }//End of +=
 //
 //        void operator -=(std::size_t n)
 //        {
