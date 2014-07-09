@@ -165,6 +165,20 @@ namespace hpx{
             {
                 create(num_chunks, chunk_size, val);
             }
+            explicit vector(self_type const& other) //Copy Constructor
+            {
+                this->base_sf_of_gid_pair_ = other.base_sf_of_gid_pair_;
+            }
+
+            //
+            // OVERLOADED OPERATOR API's
+            //
+
+            self_type& operator=(self_type const& other)
+            {
+                this->base_sf_of_gid_pair_ = other.base_sf_of_gid_pair_;
+                return *this;
+            }
 
             //
             // Capacity related API's in vector class

@@ -81,7 +81,7 @@ namespace hpx
 
         //COPY ASSIGNMENT
         //Return allow a=b=c;
-        self_type operator = (self_type const & other)
+        self_type & operator = (self_type const & other)
         {
             this->curr_bfg_pair_ = other.curr_bfg_pair_;
             this->local_index_ = other.local_index_;
@@ -357,13 +357,13 @@ namespace hpx
         }// End of >=
 
         //COMPOUND ASSIGNMENT
-        self_type operator +=(std::size_t n) //return self_type to make (a = (b += n)) work
+        self_type & operator +=(std::size_t n) //return self_type to make (a = (b += n)) work
         {
             *this = *this + n;
             return *this;
         }//End of +=
 
-        self_type operator -=(std::size_t n) //return self_type to make (a = (b -= n)) work
+        self_type & operator -=(std::size_t n) //return self_type to make (a = (b -= n)) work
         {
             *this = *this - n;
             return *this;
