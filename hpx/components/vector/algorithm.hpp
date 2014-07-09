@@ -73,6 +73,32 @@ namespace hpx
                                               )
                               );
         }//end of for_each_async
+        
+        //
+        // FOR_EACH_N API
+        //
+        hpx::util::function<void(VALUE_TYPE&)> for_each_n(hpx::segmented_vector_iterator first,
+                                                        std::size_t n,
+                                                        hpx::util::function<void(VALUE_TYPE&)> fn)
+        {
+            return hpx::for_each(first, first + n, fn);
+        }//end of for_each_n
+
+        hpx::lcos::future<hpx::util::function<void(VALUE_TYPE&)>>
+         for_each_n_async(hpx::segmented_vector_iterator first,
+                         std::size_t n,
+                         hpx::util::function<void(VALUE_TYPE&)> fn)
+        {
+            return hpx::async(launch::async,
+                              hpx::util::bind((&hpx::for_each),
+                                               first,
+                                               first + n,
+                                               fn
+                                              )
+                              );
+        }//end of for_each _n_async
+        
+        
 }//end of hpx namespace
 
 #endif // ALGORITHM_HPP
