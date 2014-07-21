@@ -31,7 +31,7 @@ namespace hpx{
         typedef std::vector< bfg_pair > vector_type;
         typedef hpx::vector self_type;
         
-        typedef hpx::lcos::future <std::size_t> size_future;
+        typedef hpx::lcos::future<std::size_t> size_future;
     private:
             //It is the vector representing the base_index and corresponding gid's
             //Taken as future of hpx_id's as it delay the .get() as far as possible
@@ -237,18 +237,32 @@ namespace hpx{
             }
 
               //This constructor complicates the push_back operation as on which gid we have to push back and create function as all base are same
-            explicit vector(std::size_t num_chunks)
-            {
-                create(num_chunks, 0, 0);
-            }
+//            explicit vector(std::size_t num_chunks)
+//            {
+//                create(num_chunks, 0, 0);
+//            }
 
             explicit vector(std::size_t num_chunks, std::size_t chunk_size)
             {
+                // If num_chunks = 0 no operation can be carried on that vector as 
+                //every further operation throw exception
+                // and if ( num_chunks > 1 && chunk_size == 0 ) then it violates 
+                //the condition that the base index should be unique
+            	if(num_chunks == 0 || (num_chunks > 1 && chunk_size == 0))
+                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "vector", "Invalid Vector: num_chunks, chunk_size should be greater than zero");
+                
                 create(num_chunks, chunk_size, 0);
             }
 
             explicit vector(std::size_t num_chunks, std::size_t chunk_size, VALUE_TYPE val)
             {
+                // If num_chunks = 0 no operation can be carried on that vector as 
+                //every further operation throw exception
+                // and if ( num_chunks > 1 && chunk_size == 0 ) then it violates 
+                //the condition that the base index should be unique
+            	if(num_chunks == 0 || (num_chunks > 1 && chunk_size == 0))
+                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "vector", "Invalid Vector: num_chunks, chunk_size should be greater than zero");
+                
                 create(num_chunks, chunk_size, val);
             }
             explicit vector(self_type const& other) //Copy Constructor
@@ -280,7 +294,7 @@ namespace hpx{
                 return size_helper(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1).get();
             }
 
-            hpx::lcos::future<std::size_t> size_async() const
+            size_future size_async() const
             {
                 if (base_sf_of_gid_pair_.size() == 0)
                     return hpx::make_ready_future(static_cast<std::size_t>(0));
@@ -298,7 +312,7 @@ namespace hpx{
                 //Here end -1 is because we have the LAST in the vector
                 return max_size_helper(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1).get();
             }
-            hpx::lcos::future<std::size_t> max_size_async() const
+            size_future max_size_async() const
             {
                 if (base_sf_of_gid_pair_.size() == 1) //If no chunk_created then we can not push_back hence maxsize=0 make sense
                     return hpx::make_ready_future(static_cast<std::size_t>(0));
@@ -355,7 +369,7 @@ namespace hpx{
                 return capacity_helper(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1).get();
             }
 
-            hpx::lcos::future<std::size_t> capacity_async() const
+            size_future capacity_async() const
             {
                 if (base_sf_of_gid_pair_.size() == 1) //If no chunk_created then we can not push_back hence capacity=0 make sense
                     return hpx::make_ready_future(static_cast<std::size_t>(0));

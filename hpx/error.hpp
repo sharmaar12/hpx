@@ -79,6 +79,7 @@ namespace hpx
         bad_function_call = 52,                     ///< equivalent of std::bad_function_call
 	out_of_range = 53,			    ///< Equivalent to std::out_of_range
 	length_error = 54,			    ///< Equivalent to std::length_error
+	invalid_vector_error = 55,		    ///< An error occurred when Invalid hpx::vector is created [Invalid Conditions: num_chunk !> 0 || chunk_size !> 0 ]
 	
         /// \cond NOINTERNAL
         last_error,
@@ -144,6 +145,7 @@ namespace hpx
         /* 52 */ "bad_function_call",
 	/* 53 */ "out_of_range",
 	/* 54 */ "length_error",
+	/* 55 */ "invalid_vector_error",
 
         /*    */ ""
     };
