@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2013 Hartmut Kaiser
+# Copyright (c) 2007-2014 Hartmut Kaiser
 # Copyright (c) 2011-2012 Thomas Heller
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -27,7 +27,8 @@ foreach(file ${function_argument_limit_preprocessing_files})
 endforeach()
 
 set(tuple_argument_limit_preprocessing_files
-  "hpx/util/tuple.hpp")
+  "hpx/util/tuple.hpp"
+  "hpx/util/zip_iterator.hpp")
 foreach(file ${tuple_argument_limit_preprocessing_files})
   hpx_partial_preprocess_header(${file} LIMIT HPX_LIMIT)
 endforeach()
@@ -82,11 +83,13 @@ endforeach()
 
 set(wait_argument_limit_preprocessing_files
   "hpx/lcos/wait_all.hpp"
-  "hpx/lcos/wait_n.hpp"
+  "hpx/lcos/wait_some.hpp"
   "hpx/lcos/wait_any.hpp"
+  "hpx/lcos/wait_each.hpp"
   "hpx/lcos/when_all.hpp"
-  "hpx/lcos/when_n.hpp"
+  "hpx/lcos/when_some.hpp"
   "hpx/lcos/when_any.hpp"
+  "hpx/lcos/when_each.hpp"
   "hpx/runtime/components/memory_block.hpp")
 foreach(file ${wait_argument_limit_preprocessing_files})
   hpx_partial_preprocess_header(${file} LIMIT HPX_LIMIT)

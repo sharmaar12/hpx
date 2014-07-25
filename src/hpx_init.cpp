@@ -277,8 +277,15 @@ namespace hpx { namespace detail
     ///////////////////////////////////////////////////////////////////////////
     void print_counters(boost::shared_ptr<util::query_counters> const& qc)
     {
-        HPX_ASSERT(qc);
-        qc->start();
+        try {
+            HPX_ASSERT(qc);
+            qc->start();
+        }
+        catch (...) {
+            std::cerr << hpx::diagnostic_information(boost::current_exception())
+                << std::flush;
+            hpx::terminate();
+        }
     }
 }}
 
@@ -1231,12 +1238,11 @@ namespace hpx
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    void terminate(error_code& ec)
+    void terminate()
     {
         if (!threads::get_self_ptr()) {
-            HPX_THROWS_IF(ec, invalid_status, "hpx::terminate",
-                "this function can be called from an HPX thread only");
-            return;
+            // hpx::terminate shouldn't be called from a non-HPX thread
+            std::terminate();
         }
 
         components::server::runtime_support* p =
@@ -1244,9 +1250,8 @@ namespace hpx
                   get_runtime().get_runtime_support_lva());
 
         if (0 == p) {
-            components::stubs::runtime_support::terminate_all(
-                naming::get_id_from_locality_id(HPX_AGAS_BOOTSTRAP_PREFIX));
-            return;
+            // the runtime system is not running, just terminate
+            std::terminate();
         }
 
         p->terminate_all();

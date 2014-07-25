@@ -7,55 +7,15 @@
 #if !defined(HPX_4AFE0EEA_49F8_4F4C_8945_7B55BF395DA0)
 #define HPX_4AFE0EEA_49F8_4F4C_8945_7B55BF395DA0
 
-#include <hpx/config.hpp>
 #include <hpx/hpx_fwd.hpp>
-#include <hpx/util/spinlock.hpp>
 #include <hpx/components/iostreams/write_functions.hpp>
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/split_member.hpp>
+#include <hpx/components/iostreams/server/buffer.hpp>
+#include <hpx/components/iostreams/server/order_output.hpp>
 
 // TODO: Error handling?
-
-namespace hpx { namespace iostreams { namespace detail
-{
-    struct buffer
-    {
-        buffer()
-          : data_(new std::vector<char>)
-        {}
-
-        std::vector<char>& data() { return *data_; }
-        std::vector<char> const& data() const { return *data_; }
-
-        bool empty() const
-        {
-            return !data_.get() || data().empty();
-        }
-
-        buffer init()
-        {
-            buffer b;
-            boost::swap(b.data_, data_);
-            return b;
-        }
-
-    private:
-        boost::shared_ptr<std::vector<char> > data_;
-
-    private:
-        friend class boost::serialization::access;
-
-        HPX_COMPONENT_EXPORT void save(
-            hpx::util::portable_binary_oarchive& ar, unsigned) const;
-        HPX_COMPONENT_EXPORT void load(
-            hpx::util::portable_binary_iarchive& ar, unsigned);
-
-        BOOST_SERIALIZATION_SPLIT_MEMBER();
-    };
-}}}
 
 namespace hpx { namespace iostreams { namespace server
 {
@@ -64,19 +24,22 @@ namespace hpx { namespace iostreams { namespace server
     {
         // {{{ types
         typedef components::managed_component_base<output_stream> base_type;
-        typedef hpx::util::spinlock mutex_type;
+        typedef lcos::local::spinlock mutex_type;
         // }}}
 
-      private:
-        mutex_type mtx;
+    private:
+        mutable mutex_type mtx_;
         write_function_type write_f;
+        detail::order_output pending_output_;
 
         // Executed in an io_pool thread to prevent io from blocking an HPX
         // shepherd thread.
-        void call_write_async(detail::buffer const& in);
-        void call_write_sync(detail::buffer const& in, threads::thread_id_type caller);
+        void call_write_async(boost::uint32_t locality_id, boost::uint64_t count,
+            detail::buffer in);
+        void call_write_sync(boost::uint32_t locality_id, boost::uint64_t count,
+            detail::buffer in, threads::thread_id_type caller);
 
-      public:
+    public:
         explicit output_stream(write_function_type write_f_ = write_function_type())
           : write_f(write_f_)
         {}
@@ -92,8 +55,10 @@ namespace hpx { namespace iostreams { namespace server
           : write_f(make_std_ostream_write_function(os.get()))
         {}
 
-        void write_async(detail::buffer const& in);
-        void write_sync(detail::buffer const& in);
+        void write_async(boost::uint32_t locality_id,
+            boost::uint64_t count, detail::buffer const& in);
+        void write_sync(boost::uint32_t locality_id,
+            boost::uint64_t count, detail::buffer const& in);
 
         HPX_DEFINE_COMPONENT_ACTION(output_stream, write_async);
         HPX_DEFINE_COMPONENT_ACTION(output_stream, write_sync);

@@ -508,11 +508,12 @@ namespace hpx { namespace components { namespace server
             if (agas::is_local_address_cached(respond_to, addr)) {
                 // execute locally, action is executed immediately as it is
                 // a direct_action
-                hpx::applier::detail::apply_l<action_type>(respond_to, addr);
+                hpx::applier::detail::apply_l<action_type>(respond_to,
+                    std::move(addr));
             }
             else {
                 // apply remotely, parcel is sent synchronously
-                hpx::applier::detail::apply_r_sync<action_type>(addr,
+                hpx::applier::detail::apply_r_sync<action_type>(std::move(addr),
                     respond_to);
             }
         }
@@ -1047,12 +1048,13 @@ namespace hpx { namespace components { namespace server
                 if (agas::is_local_address_cached(respond_to, addr)) {
                     // execute locally, action is executed immediately as it is
                     // a direct_action
-                    hpx::applier::detail::apply_l<action_type>(respond_to, addr);
+                    hpx::applier::detail::apply_l<action_type>(respond_to,
+                        std::move(addr));
                 }
                 else {
                     // apply remotely, parcel is sent synchronously
-                    hpx::applier::detail::apply_r_sync<action_type>(addr,
-                        respond_to);
+                    hpx::applier::detail::apply_r_sync<action_type>(
+                        std::move(addr), respond_to);
                 }
             }
 
@@ -1111,18 +1113,29 @@ namespace hpx { namespace components { namespace server
 
     void runtime_support::call_shutdown_functions(bool pre_shutdown)
     {
+        runtime& rt = get_runtime();
         if (pre_shutdown) {
-            get_runtime().set_state(runtime::state_pre_shutdown);
+            rt.set_state(runtime::state_pre_shutdown);
             BOOST_FOREACH(HPX_STD_FUNCTION<void()> const& f, pre_shutdown_functions_)
             {
-                f();
+                try {
+                    f();
+                }
+                catch (...) {
+                    rt.report_error(boost::current_exception());
+                }
             }
         }
         else {
-            get_runtime().set_state(runtime::state_shutdown);
+            rt.set_state(runtime::state_shutdown);
             BOOST_FOREACH(HPX_STD_FUNCTION<void()> const& f, shutdown_functions_)
             {
-                f();
+                try {
+                    f();
+                }
+                catch (...) {
+                    rt.report_error(boost::current_exception());
+                }
             }
         }
     }
@@ -1562,8 +1575,8 @@ namespace hpx { namespace components { namespace server
                 return false;
             }
 
-            // secondary command line handling, looking for --exit and --hpx:print-bind
-            // option
+            // secondary command line handling, looking for --exit and other
+            // options
             std::string cmd_line(ini.get_entry("hpx.cmd_line", ""));
             if (!cmd_line.empty()) {
                 std::string runtime_mode(ini.get_entry("hpx.runtime_mode", ""));
@@ -1580,6 +1593,8 @@ namespace hpx { namespace components { namespace server
                     util::handle_print_bind(vm, num_threads);
                 }
 #endif
+                if (vm.count("hpx:list-parcel-ports"))
+                    util::handle_list_parcelports();
 
                 if (vm.count("hpx:exit"))
                     return false;

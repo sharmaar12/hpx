@@ -77,10 +77,12 @@ namespace hpx
         security_error = 50,                        ///< An error occurred in the security component
         filesystem_error = 51,                      ///< The specified file does not exist or other filesystem related error
         bad_function_call = 52,                     ///< equivalent of std::bad_function_call
-	out_of_range = 53,			    ///< Equivalent to std::out_of_range
-	length_error = 54,			    ///< Equivalent to std::length_error
-	invalid_vector_error = 55,		    ///< An error occurred when Invalid hpx::vector is created [Invalid Conditions: num_chunk !> 0 || chunk_size !> 0 ]
-	
+        task_canceled_exception = 53,               ///< parallel::v2::task_canceled_exception
+        task_region_not_active = 54,                ///< task_region is not active
+	out_of_range = 55,			    ///< Equivalent to std::out_of_range
+	length_error = 56,			    ///< Equivalent to std::length_error
+	invalid_vector_error = 57,		    ///< An error occurred when Invalid hpx::vector is created [Invalid Conditions: num_chunk !> 0 || chunk_size !> 0 ]
+
         /// \cond NOINTERNAL
         last_error,
         error_upper_bound = 0x7fffL   // force this enum type to be at least 16 bits.
@@ -143,9 +145,11 @@ namespace hpx
         /* 50 */ "security_error",
         /* 51 */ "filesystem_error",
         /* 52 */ "bad_function_call",
-	/* 53 */ "out_of_range",
-	/* 54 */ "length_error",
-	/* 55 */ "invalid_vector_error",
+        /* 53 */ "task_canceled_exception",
+        /* 54 */ "task_region_not_active",
+	/* 55 */ "out_of_range",
+	/* 56 */ "length_error",
+	/* 57 */ "invalid_vector_error",
 
         /*    */ ""
     };
