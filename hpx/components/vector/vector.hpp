@@ -20,6 +20,7 @@
 
 #define VALUE_TYPE double
 
+
 namespace hpx{
 
     class vector
@@ -30,7 +31,7 @@ namespace hpx{
         typedef std::pair<std::size_t, hpx::lcos::shared_future<hpx::naming::id_type>> bfg_pair;
         typedef std::vector< bfg_pair > vector_type;
         typedef hpx::vector self_type;
-        
+
         typedef hpx::lcos::future<std::size_t> size_future;
     private:
             //It is the vector representing the base_index and corresponding gid's
@@ -224,6 +225,16 @@ namespace hpx{
                 }
             }//end of capacity_helper
 
+            void adjust_base_index(vector_type::iterator begin, vector_type::iterator end, std::size_t new_chunk_size)
+            {
+                std::size_t i = 0;
+                for(vector_type::iterator it = begin; it != end; it++, i++)
+                {
+                    it->first = i * new_chunk_size;
+                }
+            }//end of adjust_base_index
+
+
         public:
             typedef hpx::segmented_vector_iterator iterator;
 
@@ -236,6 +247,7 @@ namespace hpx{
                 create(1, 0, 0);
             }
 
+            //This is the problem if num_chunk > 1 and chunk_size = 0; thats why commented
               //This constructor complicates the push_back operation as on which gid we have to push back and create function as all base are same
 //            explicit vector(std::size_t num_chunks)
 //            {
@@ -244,25 +256,19 @@ namespace hpx{
 
             explicit vector(std::size_t num_chunks, std::size_t chunk_size)
             {
-                // If num_chunks = 0 no operation can be carried on that vector as 
+                // If num_chunks = 0 no operation can be carried on that vector as
                 //every further operation throw exception
-                // and if ( num_chunks > 1 && chunk_size == 0 ) then it violates 
+                // and if ( num_chunks > 1 && chunk_size == 0 ) then it violates
                 //the condition that the base index should be unique
-            	if(num_chunks == 0 || (num_chunks > 1 && chunk_size == 0))
+                if(num_chunks == 0 || (num_chunks > 1 && chunk_size == 0) )
                     HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "vector", "Invalid Vector: num_chunks, chunk_size should be greater than zero");
-                
                 create(num_chunks, chunk_size, 0);
             }
 
             explicit vector(std::size_t num_chunks, std::size_t chunk_size, VALUE_TYPE val)
             {
-                // If num_chunks = 0 no operation can be carried on that vector as 
-                //every further operation throw exception
-                // and if ( num_chunks > 1 && chunk_size == 0 ) then it violates 
-                //the condition that the base index should be unique
-            	if(num_chunks == 0 || (num_chunks > 1 && chunk_size == 0))
+                if(num_chunks == 0 || (num_chunks > 1 && chunk_size == 0))
                     HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "vector", "Invalid Vector: num_chunks, chunk_size should be greater than zero");
-                
                 create(num_chunks, chunk_size, val);
             }
             explicit vector(self_type const& other) //Copy Constructor
@@ -321,20 +327,23 @@ namespace hpx{
                 return max_size_helper(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1);
             }
 
-
             //RESIZE (without value) (SEMANTIC DIFFERENCE: It is resize with respective chunk not whole vector)
             void resize(std::size_t n)
             {
+                if(n == 0)
+                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "resize", "Invalid Vector: new_chunk_size should be greater than zero");
+
                 std::vector<hpx::lcos::future<void>> resize_lazy_sync;
                 //Resizing the vector chunks
                 //AS we have to iterate until we hit LAST
                 BOOST_FOREACH(bfg_pair const& p, std::make_pair(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1) )
                 {
-                    resize_lazy_sync.push_back(hpx::stubs::chunk_vector::resize_only_async((p.second).get(), n));
+                    resize_lazy_sync.push_back(hpx::stubs::chunk_vector::resize_async((p.second).get(), n));
                 }
                 HPX_ASSERT(base_sf_of_gid_pair_.size() > 1); //As this function changes the size we should have LAST always.
                 //waiting for the resizing
                 hpx::wait_all(resize_lazy_sync);
+                adjust_base_index(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1, n);
             }
             hpx::lcos::future<void> resize_async(std::size_t n)
             {
@@ -345,13 +354,18 @@ namespace hpx{
             //RESIZE (with value)
             void resize(std::size_t n, VALUE_TYPE const& val)
             {
+                if(n == 0)
+                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "resize", "Invalid Vector: new_chunk_size should be greater than zero");
+
                 std::vector<hpx::lcos::future<void>> resize_lazy_sync;
                 BOOST_FOREACH(bfg_pair const& p, std::make_pair(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1))
                 {
-                    resize_lazy_sync.push_back(hpx::stubs::chunk_vector::resize_with_val_async((p.second).get(), n, val));
+                    resize_lazy_sync.push_back(hpx::stubs::chunk_vector::resize_async((p.second).get(), n, val));
                 }
                 HPX_ASSERT(base_sf_of_gid_pair_.size() > 1); //As this function changes the size we should have LAST always.
                 hpx::wait_all(resize_lazy_sync);
+
+                adjust_base_index(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1, n);
             }
             hpx::lcos::future<void> resize_async(std::size_t n, VALUE_TYPE const& val)
             {
@@ -377,7 +391,6 @@ namespace hpx{
                 //Here end -1 is because we have the LAST in the vector
                 return capacity_helper(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1);
             }
-
 
             //EMPTY
             bool empty() const
@@ -469,12 +482,16 @@ namespace hpx{
             //ASSIGN
             void assign(std::size_t n, VALUE_TYPE const& val)
             {
+                if(n == 0)
+                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "assign", "Invalid Vector: new_chunk_size should be greater than zero");
+
                 std::vector<hpx::lcos::future<void>> assign_lazy_sync;
                 BOOST_FOREACH(bfg_pair const& p, std::make_pair(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1))
                 {
                     assign_lazy_sync.push_back(hpx::stubs::chunk_vector::assign_async((p.second).get(), n, val));
                 }
                 hpx::wait_all(assign_lazy_sync);
+                adjust_base_index(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1, n);
                 HPX_ASSERT(base_sf_of_gid_pair_.size() > 1); //As this function changes the size we should have LAST always.
             }
             hpx::lcos::future<void> assign_async(std::size_t n, VALUE_TYPE const& val)
@@ -634,14 +651,13 @@ namespace hpx{
             hpx::vector::iterator end()
             {
                 return iterator((base_sf_of_gid_pair_.end() - 2),
-                                hpx::stubs::chunk_vector::size_async( ((base_sf_of_gid_pair_.end() - 2)->second).get() ).get(),\
+                                hpx::stubs::chunk_vector::size_async( ((base_sf_of_gid_pair_.end() - 2)->second).get() ).get(),
                                 valid);
             }//end of begin
 
             //
             // Destructor
             //
-
             ~vector()
             {
                 //DEFAULT destructor
