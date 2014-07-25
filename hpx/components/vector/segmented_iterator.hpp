@@ -315,7 +315,6 @@ namespace hpx
                 else if(this->state_ == other.state_ && this->local_index_ < other.local_index_)//if both are same then check local index
                     return true;
             }
-            else
                 return false;
         }// End of <
 
@@ -332,7 +331,6 @@ namespace hpx
                 else if (this->state_ == other.state_ && this->local_index_ > other.local_index_)
                     return true;
             }
-            else
                 return false;
         }// End of >
 
