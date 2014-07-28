@@ -10,14 +10,39 @@
 #ifndef ALGORITHM_HPP
 #define ALGORITHM_HPP
 
-#include <hpx/include/util.hpp>
+/** @file hpx/components/vector/algorithm.hpp
+ *
+ *  @brief This file contain the implementation of standard algorithm from stl library.
+ *
+ *  This file contain the implementation of the standard algorithm in stl in hpx and also contain their
+ *  Asynchronous API. It also contain some additional algorithm from thrust library.
+ */
+
 #include <hpx/include/lcos.hpp>
+#include <hpx/include/util.hpp>
+
+#include <vector>
+
 #include <hpx/components/vector/chunk_vector_component.hpp>
+#include <hpx/components/vector/segmented_iterator.hpp>
+
+//#define VALUE_TYPE double;
 
 namespace hpx
 {
  //   template<class input_iterator, class fun>
-        void for_each(hpx::segmented_vector_iterator first, segmented_vector_iterator last, hpx::util::function<void(VALUE_TYPE&)> fn)
+
+        /** @brief Apply the function fn to each element in the range [first, last).
+         *
+         *  @param first    Vector iterator to the initial position of the in the sequence [Note the first position in the vector is 0]
+         *  @param last     Vector iterator to the final position of the in the sequence [Note the last element is not inclusive in the range[first, last)]
+         *  @param fn       Unary function (either function pointer or move constructible function object) that accept an element in the range as argument.
+         *                  The return value of the fn is ignored.
+         *
+         */
+        void for_each(hpx::segmented_vector_iterator first,
+                                                        segmented_vector_iterator last,
+                                                        hpx::util::function<void(VALUE_TYPE&)> fn)
         {
             auto sfirst_ = segmented_vector_iterator::segment(first);
             auto slast_ = segmented_vector_iterator::segment(last);
@@ -63,7 +88,19 @@ namespace hpx
             hpx::wait_all(for_each_lazy_sync);
         }//end of for_each
 
-        hpx::lcos::future<void> for_each_async(hpx::segmented_vector_iterator first, segmented_vector_iterator last, hpx::util::function<void(VALUE_TYPE&)> fn)
+        /** @brief Asynchronous API for the for_each().
+         *
+         *  @param first    Vector iterator to the initial position of the in the sequence [Note the first position in the vector is 0]
+         *  @param last     Vector iterator to the final position of the in the sequence [Note the last element is not inclusive in the range[first, last)]
+         *  @param fn       Unary function (either function pointer or move constructible function object) that accept an element in the range as argument.
+         *                  The return value of the fn is ignored.
+         *
+         *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not]
+         */
+        hpx::lcos::future<void>
+         for_each_async(hpx::segmented_vector_iterator first,
+                         segmented_vector_iterator last,
+                         hpx::util::function<void(VALUE_TYPE&)> fn)
         {
             return hpx::async(launch::async,
                               hpx::util::bind((&hpx::for_each),
@@ -73,18 +110,36 @@ namespace hpx
                                               )
                               );
         }//end of for_each_async
-        
+
         //
         // FOR_EACH_N API
         //
-        hpx::util::function<void(VALUE_TYPE&)> for_each_n(hpx::segmented_vector_iterator first,
+
+        /** @brief Apply the function fn to each element in the range [first, first + n).
+         *
+         *  @param first    Vector iterator to the initial position of the in the sequence [Note the first position in the vector is 0]
+         *  @param n        The size of input sequence
+         *  @param fn       Unary function (either function pointer or move constructible function object) that accept an element in the range as argument.
+         *                  The return value of the fn is ignored.
+         *
+         */
+        void for_each_n(hpx::segmented_vector_iterator first,
                                                         std::size_t n,
                                                         hpx::util::function<void(VALUE_TYPE&)> fn)
         {
             return hpx::for_each(first, first + n, fn);
         }//end of for_each_n
 
-        hpx::lcos::future<hpx::util::function<void(VALUE_TYPE&)>>
+        /** @brief Asynchronous API for for_each_n().
+         *
+         *  @param first    Vector iterator to the initial position of the in the sequence [Note the first position in the vector is 0]
+         *  @param n        The size of input sequence
+         *  @param fn       Unary function (either function pointer or move constructible function object) that accept an element in the range as argument.
+         *                  The return value of the fn is ignored.
+         *
+         *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not]
+         */
+        hpx::lcos::future<void>
          for_each_n_async(hpx::segmented_vector_iterator first,
                          std::size_t n,
                          hpx::util::function<void(VALUE_TYPE&)> fn)
@@ -97,8 +152,6 @@ namespace hpx
                                               )
                               );
         }//end of for_each _n_async
-        
-        
 }//end of hpx namespace
 
 #endif // ALGORITHM_HPP
