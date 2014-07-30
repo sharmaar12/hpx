@@ -12,6 +12,7 @@ set(subdirs
     iostreams
     memory
     remote_object
+    vector
    )
 
 if(PAPI_FOUND)
