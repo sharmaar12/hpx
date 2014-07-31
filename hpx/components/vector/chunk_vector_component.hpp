@@ -159,7 +159,7 @@ namespace hpx
                 {
                     chunk_vector_.reserve(n);
                 }
-                catch(std::length_error const& le)
+                catch(std::length_error const& /*le*/)
                 {
                     HPX_THROW_EXCEPTION(hpx::length_error, "reserve" , "Can not reserve the space for vector of given size");
                 }
@@ -181,7 +181,7 @@ namespace hpx
                 {
                     return chunk_vector_.at(pos);
                 }
-                catch(const std::out_of_range& e)
+                catch(const std::out_of_range& /*e*/)
                 {
                     HPX_THROW_EXCEPTION(hpx::out_of_range, "get_value", "Value of 'pos' is out of range");
                 }
@@ -266,7 +266,7 @@ namespace hpx
                 {
                     chunk_vector_.at(pos) = val;
                 }
-                catch(const std::out_of_range& e)
+                catch(const std::out_of_range& /*e*/)
                 {
                     HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Value of 'pos' is out of range");
                 }
@@ -285,7 +285,7 @@ namespace hpx
                 {
                     chunk_vector_.at(pos) = std::move(val);
                 }
-                catch(const std::out_of_range& e)
+                catch(const std::out_of_range& /*e*/)
                 {
                     HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value_rval", "Value of 'pos' is out of range");
                 }
