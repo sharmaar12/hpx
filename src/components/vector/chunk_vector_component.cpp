@@ -3,17 +3,19 @@
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-/** @file hpx/components/vector/chunk_vector_component.cpp
+/** @file src/components/vector/chunk_vector_component.cpp
  *
  *  @brief Define the necessary component action boilerplate code.
  *
- *  This file define the necessary component action boilerplate code for each component action
- *  which is required for proper functioning of component actions in the context of HPX.
+ *  This file define the necessary component action boilerplate code for each
+ *   component action which is required for proper functioning of component
+ *   actions in the context of HPX.
  */
 #include <hpx/components/vector/chunk_vector_component.hpp>
 HPX_REGISTER_COMPONENT_MODULE();
 
-typedef hpx::components::managed_component<hpx::server::chunk_vector> chunk_vector_type;
+typedef hpx::components::managed_component<hpx::server::chunk_vector>
+                                                    chunk_vector_type;
 
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(chunk_vector_type, chunk_vector);
 
@@ -66,7 +68,9 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::push_back_action,
     chunk_vector_push_back_action);
-/** @brief Macro to define the boilerplate code for push_back_rval component action.*/
+/** @brief Macro to define the boilerplate code for push_back_rval component
+*           action.
+*/
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::push_back_rval_action,
     chunk_vector_push_back_rval_action);
@@ -78,7 +82,9 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::set_value_action,
     chunk_vector_set_value_action);
-/** @brief Macro to define the boilerplate code for set_value_rval component action.*/
+/** @brief Macro to define the boilerplate code for set_value_rval component
+ *          action.
+ */
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::set_value_rval_action,
     chunk_vector_set_value_rval_action);
@@ -92,3 +98,4 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::chunk_for_each_action,
     chunk_vector_chunk_for_each_action);
+

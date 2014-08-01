@@ -11,8 +11,9 @@
  *
  *  @brief The chunk_vector as the hpx component is defined here.
  *
- *        The chunk_vector is the wrapper to the stl vector class except all API's are defined as component action.
- *        All the API's in stubs classes are asynchronous API which return the futures.
+ *   The chunk_vector is the wrapper to the stl vector class except all API's
+ *    are defined as component action. All the API's in stubs classes are
+ *    asynchronous API which return the futures.
  *
  */
 //#include <hpx/hpx_fwd.hpp>
@@ -34,7 +35,8 @@
  *  @namespace hpx
  *  @brief Main namespace of the HPX.
  *
- *  This holds all hpx API such as some distributed data structure eg. vector, components, dataflow, parallel Algorithms implemented in hpx etc.
+ *  This holds all hpx API such as some distributed data structure eg. vector,
+ *   components, dataflow, parallel Algorithms implemented in hpx etc.
  *
  */
 namespace hpx
@@ -50,10 +52,12 @@ namespace hpx
 
     /** @brief This is the basic wrapper class for stl vector.
     *
-    * This contain the implementation of the chunk_vector's component functionality.
+    * This contain the implementation of the chunk_vector's component
+    *  functionality.
     */
-        class HPX_COMPONENT_EXPORT chunk_vector : public hpx::components::locking_hook<
-            hpx::components::managed_component_base<chunk_vector> >
+        class HPX_COMPONENT_EXPORT chunk_vector
+            : public hpx::components::locking_hook<
+                hpx::components::managed_component_base<chunk_vector> >
         {
             typedef std::vector<VALUE_TYPE>::const_iterator const_iterator_type;
             typedef std::vector<VALUE_TYPE>::iterator iterator_type;
@@ -70,14 +74,16 @@ namespace hpx
             /** @brief Default Constructor which create chunk_vector with size 0.*/
             explicit chunk_vector(): chunk_vector_(0,0) {}
 
-            /** @brief Constructor which create and initialize chunk_vector with all elements as 0.
+            /** @brief Constructor which create and initialize chunk_vector with
+             *          all elements as 0.
              *
              *  @param chunk_size The size of vector
              */
             explicit chunk_vector(std::size_t chunk_size)
                 : chunk_vector_(chunk_size,0) {}
 
-            /** @brief Constructor which create ans initialize chunk_vector with all elements as val.
+            /** @brief Constructor which create ans initialize chunk_vector with
+             *          all elements as val.
              *
              *  @param chunk_size The size of vector
              *  @param val Default value for the element in chunk_vector
@@ -97,7 +103,8 @@ namespace hpx
             //Capacity Related API's in the server class
             //
 
-            /** @brief Compute the size as the number of elements the chunk_vector it contains.
+            /** @brief Compute the size as the number of elements the
+             *          chunk_vector it contains.
              *
              *  @return Return the number of element in the chunk_vector
              */
@@ -108,7 +115,8 @@ namespace hpx
 
             /** @brief Compute the max_size of chunk_vector.
              *
-             *  @return Return maximum number of element the chunk_vector can hold
+             *  @return Return maximum number of element the chunk_vector can
+             *           hold
              */
             std::size_t max_size() const
             {
@@ -118,16 +126,19 @@ namespace hpx
             /** @brief Resize the chunk_vector so that it contain n elements.
              *
              *  @param n    new size of the chunk_vector
-             *  @param val  value to be copied if n is greater than the current size
+             *  @param val  value to be copied if n is greater than the current
+             *               size
              */
             void resize(std::size_t n, VALUE_TYPE const& val)
             {
                 chunk_vector_.resize(n, val);
             }
 
-            /** @brief Compute the size of currently allocated storage capacity for chunk_vector.
+            /** @brief Compute the size of currently allocated storage capacity
+             *          for chunk_vector.
              *
-             *  @return Returns capacity of chunk_vector, expressed in terms of elements
+             *  @return Returns capacity of chunk_vector, expressed in terms of
+             *           elements
              */
             std::size_t capacity() const
             {
@@ -143,15 +154,21 @@ namespace hpx
                 return chunk_vector_.empty();
             }
 
-            /** @brief Request the change in chunk_vector capacity so that it can hold n elements. Throws the hpx::length_error exception.
+            /** @brief Request the change in chunk_vector capacity so that it
+             *          can hold n elements. Throws the hpx::length_error
+             *          exception.
              *
-             *  This function request chunk_vector capacity should be at least enough to contain n elements.
-             *  If n is greater than current chunk_vector capacity, the function causes the chunk_vector to reallocate its storage increasing its capacity to n (or greater).
-             *  In other cases the chunk_vector capacity does not got affected. It does not change the chunk_vector size.
+             *  This function request chunk_vector capacity should be at least
+             *   enough to contain n elements. If n is greater than current
+             *   chunk_vector capacity, the function causes the chunk_vector to
+             *   reallocate its storage increasing its capacity to n (or greater).
+             *  In other cases the chunk_vector capacity does not got affected. It
+             *   does not change the chunk_vector size.
              *
              * @param n minimum capacity of chunk_vector
              *
-             * @exception hpx::length_error If n is greater than max_size then function throw hpx::length_error exception.
+             * @exception hpx::length_error If n is greater than max_size then
+             *             function throw hpx::length_error exception.
              */
             void reserve(std::size_t n)
             {
@@ -161,19 +178,28 @@ namespace hpx
                 }
                 catch(std::length_error const& le)
                 {
-                    HPX_THROW_EXCEPTION(hpx::length_error, "reserve" , "Can not reserve the space for vector of given size");
+                    HPX_THROW_EXCEPTION(
+                        hpx::length_error,
+                        "reserve" ,
+                        "Can not reserve the space for vector of given size");
                 }
             }
 
             //
             // Element access API's
             //
-            /** @brief Returns the element at position pos in the chunk_vector container. It throws the hpx::out_of_bound exception.
+            /** @brief Returns the element at position pos in the chunk_vector
+             *          container. It throws the hpx::out_of_bound exception.
              *
-             *  @param pos Position of the element in the chunk_vector [Note the first position in the chunk_vector is 0]
-             *  @return Return the value of the element at position represented by pos [Note that this is not the reference to the element]
+             *  @param pos Position of the element in the chunk_vector [Note the
+             *              first position in the chunk_vector is 0]
+             *  @return Return the value of the element at position represented
+             *           by pos [Note that this is not the reference to the
+             *           element]
              *
-             *  @exception hpx::out_of_range The pos is bound checked and if pos is out of bound then it throws the hpx::out_of_bound exception.
+             *  @exception hpx::out_of_range The pos is bound checked and if pos
+             *              is out of bound then it throws the hpx::out_of_bound
+             *              exception.
              */
             VALUE_TYPE get_value(std::size_t pos) const
             {
@@ -183,7 +209,10 @@ namespace hpx
                 }
                 catch(const std::out_of_range& e)
                 {
-                    HPX_THROW_EXCEPTION(hpx::out_of_range, "get_value", "Value of 'pos' is out of range");
+                    HPX_THROW_EXCEPTION(
+                        hpx::out_of_range,
+                        "get_value",
+                        "Value of 'pos' is out of range");
                 }
             }
 
@@ -214,7 +243,8 @@ namespace hpx
             // Modifiers API's in server class
             //
 
-            /** @brief Assigns new contents to the chunk_vector, replacing its current contents, and modifying its size accordingly.
+            /** @brief Assigns new contents to the chunk_vector, replacing its
+             *          current contents, and modifying its size accordingly.
              *
              * @param n     new size of chunk_vector
              * @param val   Value to fill the container with
@@ -224,7 +254,8 @@ namespace hpx
                 chunk_vector_.assign(n, val);
             }
 
-            /** @brief Add new element at the end of chunk_vector. The added element contain the val as value.
+            /** @brief Add new element at the end of chunk_vector. The added
+             *          element contain the val as value.
              *
              * @param val Value to be copied to new element
              */
@@ -233,7 +264,8 @@ namespace hpx
                 chunk_vector_.push_back(val);
             }
 
-            /** @brief Add new element at the end of chunk_vector. The added element contain the val as value.
+            /** @brief Add new element at the end of chunk_vector. The added
+             *          element contain the val as value.
              *
              * @param val Value to be moved to new element
              */
@@ -244,21 +276,28 @@ namespace hpx
 
             /** @brief Remove the last element from chunk_vector.
              *
-             *  Removes the last element in the vector, effectively reducing the container size by one. The removed element is destroyed.
+             *  Removes the last element in the vector, effectively reducing the
+             *   container size by one. The removed element is destroyed.
              */
             void pop_back()
             {
                 chunk_vector_.pop_back();
             }
 
-            //this API is required as we do not returning the reference to the element in Any API.
+            //  This API is required as we do not returning the reference to the
+            //  element in Any API.
 
-            /** @brief Copy the value of val in the element at position pos in the chunk_vector container. It throws the hpx::out_of_bound exception.
+            /** @brief Copy the value of val in the element at position pos in
+             *          the chunk_vector container. It throws the
+             *          hpx::out_of_bound exception.
              *
-             *  @param pos   Position of the element in the chunk_vector [Note the first position in the chunk_vector is 0]
+             *  @param pos   Position of the element in the chunk_vector [Note
+             *                the first position in the chunk_vector is 0]
              *  @param val   The value to be copied
              *
-             *  @exception hpx::out_of_range The pos is bound checked and if pos is out of bound then it throws the hpx::out_of_bound exception.
+             *  @exception hpx::out_of_range The pos is bound checked and if pos
+             *              is out of bound then it throws the hpx::out_of_bound
+             *              exception.
              */
             void set_value(std::size_t pos, VALUE_TYPE const& val)
             {
@@ -268,16 +307,24 @@ namespace hpx
                 }
                 catch(const std::out_of_range& e)
                 {
-                    HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value", "Value of 'pos' is out of range");
+                    HPX_THROW_EXCEPTION(
+                        hpx::out_of_range,
+                        "set_value",
+                        "Value of 'pos' is out of range");
                 }
             }
 
-            /** @brief Move the val in the element at position pos in the chunk_vector container. It throws the hpx::out_of_bound exception.
+            /** @brief Move the val in the element at position pos in the
+             *          chunk_vector container. It throws the
+             *          hpx::out_of_bound exception.
              *
-             *  @param pos   Position of the element in the chunk_vector [Note the first position in the chunk_vector is 0]
+             *  @param pos   Position of the element in the chunk_vector
+             *                [Note the first position in the chunk_vector is 0]
              *  @param val   The value to be moved
              *
-             *  @exception hpx::out_of_range The pos is bound checked and if pos is out of bound then it throws the hpx::out_of_bound exception.
+             *  @exception hpx::out_of_range The pos is bound checked and if pos
+             *              is out of bound then it throws the hpx::out_of_bound
+             *              exception.
              */
             void set_value_rval(std::size_t pos, VALUE_TYPE const&& val)
             {
@@ -287,7 +334,10 @@ namespace hpx
                 }
                 catch(const std::out_of_range& e)
                 {
-                    HPX_THROW_EXCEPTION(hpx::out_of_range, "set_value_rval", "Value of 'pos' is out of range");
+                    HPX_THROW_EXCEPTION(
+                        hpx::out_of_range,
+                        "set_value_rval",
+                        "Value of 'pos' is out of range");
                 }
             }
 
@@ -302,14 +352,23 @@ namespace hpx
             // Algorithm API's
             //
 
-            /** @brief Apply the function fn to each element in the range [first, last).
+            /** @brief Apply the function fn to each element in the range
+             *          [first, last).
              *
-             *  @param first    Initial position of the element in the sequence [Note the first position in the chunk_vector is 0]
-             *  @param last     final position of the element in the sequence [Note the last element is not inclusive in the range[first, last)]
-             *  @param fn       Unary function (either function pointer or move constructible function object) that accept an element in the range as argument.
+             *  @param first    Initial position of the element in the sequence
+             *                   [Note the first position in the chunk_vector
+             *                   is 0]
+             *  @param last     Final position of the element in the sequence
+             *                   [Note the last element is not inclusive in the
+             *                   range[first, last)]
+             *  @param fn       Unary function (either function pointer or move
+             *                   constructible function object) that accept an
+             *                   element in the range as argument.
              *                  The return value of the fn is ignored.
              */
-            void chunk_for_each(std::size_t first, std::size_t last, hpx::util::function<void(VALUE_TYPE &)> fn)
+            void chunk_for_each(std::size_t first,
+                                std::size_t last,
+                                hpx::util::function<void(VALUE_TYPE &)> fn)
             {
                 std::for_each( chunk_vector_.begin() + first,
                               chunk_vector_.begin() + last,
@@ -321,45 +380,77 @@ namespace hpx
             //
 
             //capacity related component action
-            /** @brief Macro to define size function as HPX component action type.*/
+            /** @brief Macro to define size function as HPX component action
+            *           type.
+            */
             HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, size);
-            /** @brief Macro to define max_size function as HPX component action type.*/
+            /** @brief Macro to define max_size function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, max_size);
-            /** @brief Macro to define resize function as HPX component action type.*/
+            /** @brief Macro to define resize function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, resize);
-            /** @brief Macro to define capacity function as HPX component action type.*/
+            /** @brief Macro to define capacity function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, capacity);
-            /** @brief Macro to define empty function as HPX component action type.*/
+            /** @brief Macro to define empty function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, empty);
-            /** @brief Macro to define reserve function as HPX component action type.*/
+            /** @brief Macro to define reserve function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, reserve);
 
             //Element access component action
-            /** @brief Macro to define get_value function as HPX component action type.*/
+            /** @brief Macro to define get_value function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, get_value);
-            /** @brief Macro to define front function as HPX component action type.*/
+            /** @brief Macro to define front function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, front);
-            /** @brief Macro to define back function as HPX component action type.*/
+            /** @brief Macro to define back function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, back);
 
             //Modifiers component action
-            /** @brief Macro to define assign function as HPX component action type.*/
+            /** @brief Macro to define assign function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, assign);
-            /** @brief Macro to define push_back function as HPX component action type.*/
+            /** @brief Macro to define push_back function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back);
-            /** @brief Macro to define push_back_rval function as HPX component action type.*/
+            /** @brief Macro to define push_back_rval function as HPX component
+             *          action type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, push_back_rval);
-            /** @brief Macro to define pop_back function as HPX component action type.*/
+            /** @brief Macro to define pop_back function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, pop_back);
-            /** @brief Macro to define set_value function as HPX component action type.*/
+            /** @brief Macro to define set_value function as HPX component action
+             *          type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value);
-            /** @brief Macro to define set_value_rval function as HPX component action type.*/
+            /** @brief Macro to define set_value_rval function as HPX component
+             *          action type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, set_value_rval);
 
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, clear);
 
             //Algorithm API action
-            /** @brief Macro to define chunk_for_each function as HPX component action type.*/
+            /** @brief Macro to define chunk_for_each function as HPX component
+             *          action type.
+             */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, chunk_for_each);
 
         };//end of class chunk_vector
@@ -369,7 +460,8 @@ namespace hpx
 /**
  *  @namespace hpx::stubs
  *
- *  @brief This contain the implementation of the lower-level interface to instances of the component.
+ *  @brief This contain the implementation of the lower-level interface to
+ *          instances of the component.
  *
  */
     namespace stubs
@@ -377,9 +469,10 @@ namespace hpx
 
         /** @brief This is the low level interface to the chunk_vector.
          *
-         * This class contain the implementation of the low level interface to the chunk_vector.
-         * All the function provides asynchronous interface which mean every function does not block the caller
-         * and returns the future as return value.
+         * This class contain the implementation of the low level interface to
+         *  the chunk_vector. All the function provides asynchronous interface
+         *  which mean every function does not block the caller and returns the
+         *  future as return value.
          */
         struct chunk_vector : hpx::components::stub_base <server::chunk_vector>
         {
@@ -391,11 +484,13 @@ namespace hpx
 
             /** @brief Calculate the size of the chunk_vector component.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *
              *  @return This return size as the hpx::future of type std::size_t
              */
-            static hpx::lcos::future<std::size_t> size_async(hpx::naming::id_type const& gid)
+            static hpx::lcos::future<std::size_t>
+                size_async(hpx::naming::id_type const& gid)
             {
                 return hpx::async<hpx::server::chunk_vector::size_action>(gid);
             }
@@ -408,11 +503,13 @@ namespace hpx
             //MAX_SIZE
             /** @brief Calculate the max_size of the chunk_vector component.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *
              *  @return This return max_size the hpx::future of type std::size_t
              */
-            static hpx::lcos::future<std::size_t> max_size_async(hpx::naming::id_type const& gid)
+            static hpx::lcos::future<std::size_t>
+                max_size_async(hpx::naming::id_type const& gid)
             {
                 return hpx::async<hpx::server::chunk_vector::max_size_action>(gid);
             }
@@ -427,15 +524,24 @@ namespace hpx
              *
              *  If the val is not specified then it take as 0.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *  @param n    new size of the chunk_vector
-             *  @param val  value to be copied if n is greater than the current size
+             *  @param val  value to be copied if n is greater than the current
+             *               size
              *
-             *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not]
+             *  @return This return the hpx::future of type void [The void return
+             *           type can help to check whether the action is completed or
+             *           not]
              */
-            static hpx::lcos::future<void> resize_async(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val = 0)
+            static hpx::lcos::future<void>
+                resize_async(hpx::naming::id_type const& gid,
+                             std::size_t n,
+                             VALUE_TYPE const& val = 0)
             {
-                return hpx::async<hpx::server::chunk_vector::resize_action>(gid, n, val);
+                return hpx::async<hpx::server::chunk_vector::resize_action>(gid,
+                                                                             n,
+                                                                            val);
             }
 //            static void resize_with_val_non_blocking(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val)
 //            {
@@ -446,11 +552,13 @@ namespace hpx
             //CAPACITY
             /** @brief Calculate the capacity of the chunk_vector component.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *
              *  @return This return capacity the hpx::future of type std::size_t
              */
-            static hpx::lcos::future<std::size_t> capacity_async(hpx::naming::id_type const& gid)
+            static hpx::lcos::future<std::size_t>
+                capacity_async(hpx::naming::id_type const& gid)
             {
                 return hpx::async<hpx::server::chunk_vector::capacity_action>(gid);
             }
@@ -463,11 +571,14 @@ namespace hpx
             //EMPTY
             /** @brief Check whether chunk_vector component is empty.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *
-             *  @return This function return result as the hpx::future of type bool
+             *  @return This function return result as the hpx::future of type
+             *           bool
              */
-            static hpx::lcos::future<bool> empty_async(hpx::naming::id_type const& gid)
+            static hpx::lcos::future<bool>
+                empty_async(hpx::naming::id_type const& gid)
             {
                 return hpx::async<hpx::server::chunk_vector::empty_action>(gid);
             }
@@ -479,18 +590,25 @@ namespace hpx
 
             //RESERVE
 
-            /** @brief Reserve the storage space for chunk_vector component. Throws the hpx::length_error exception.
+            /** @brief Reserve the storage space for chunk_vector component.
+             *          Throws the hpx::length_error exception.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *  @param n    minimum size of the chunk_vector
              *
-             *  @exception hpx::length_error If n is greater than max_size then function throw hpx::length_error exception.
+             *  @exception hpx::length_error If n is greater than max_size then
+             *              function throw hpx::length_error exception.
              *
-             *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not]
+             *  @return This return the hpx::future of type void [The void return
+             *           type can help to check whether the action is completed
+             *           or not]
              */
-            static hpx::lcos::future<void> reserve_async(hpx::naming::id_type const& gid, std::size_t n)
+            static hpx::lcos::future<void>
+                reserve_async(hpx::naming::id_type const& gid, std::size_t n)
             {
-                return hpx::async<hpx::server::chunk_vector::reserve_action>(gid, n);
+                return hpx::async<hpx::server::chunk_vector::reserve_action>(gid,
+                                                                             n);
             }
 //            static void reserve_non_blocking(hpx::naming::id_type const& gid, std::size_t n)
 //            {
@@ -503,18 +621,25 @@ namespace hpx
             //
 
             //GET_VALUE
-            /** @brief Return the value at position pos in the chunk_vector component. It throws the hpx::out_of_bound exception.
+            /** @brief Return the value at position pos in the chunk_vector
+             *          component. It throws the hpx::out_of_bound exception.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
-             *  @param pos  Position of the element in the chunk_vector [Note the first position in the chunk_vector is 0]
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
+             *  @param pos  Position of the element in the chunk_vector [Note
+             *               the first position in the chunk_vector is 0]
              *
-             * @exception hpx::out_of_bound The pos is bound checked and if pos is out of bound then it throws the hpx::out_of_bound exception.
+             * @exception hpx::out_of_bound The pos is bound checked and if pos
+             *             is out of bound then it throws the hpx::out_of_bound
+             *             exception.
              *
              *  @return This return value as the hpx::future
              */
-            static hpx::lcos::future<VALUE_TYPE> get_value_async(hpx::naming::id_type const& gid, std::size_t pos)
+            static hpx::lcos::future<VALUE_TYPE>
+                get_value_async(hpx::naming::id_type const& gid, std::size_t pos)
             {
-                return hpx::async<hpx::server::chunk_vector::get_value_action>(gid, pos);
+                return hpx::async<hpx::server::chunk_vector::get_value_action>(gid,
+                                                                               pos);
             }
 
 //            static VALUE_TYPE get_value_sync(hpx::naming::id_type const& gid, std::size_t pos)
@@ -524,13 +649,16 @@ namespace hpx
 
             //FRONT
 
-            /** @brief Access the value of first element in chunk_vector component.
+            /** @brief Access the value of first element in chunk_vector
+             *          component.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component
+             *               register with HPX
              *
              *  @return This return Value as the hpx::future
              */
-            static hpx::lcos::future<VALUE_TYPE> front_async(hpx::naming::id_type const& gid)
+            static hpx::lcos::future<VALUE_TYPE>
+                front_async(hpx::naming::id_type const& gid)
             {
                 return hpx::async<hpx::server::chunk_vector::front_action>(gid);
             }
@@ -541,13 +669,16 @@ namespace hpx
 //            }
 
             //BACK
-            /** @brief Access the value of last element in chunk_vector component.
+            /** @brief Access the value of last element in chunk_vector
+             *          component.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *
              *  @return This return Value as the hpx::future
              */
-            static hpx::lcos::future<VALUE_TYPE> back_async(hpx::naming::id_type const& gid)
+            static hpx::lcos::future<VALUE_TYPE>
+                back_async(hpx::naming::id_type const& gid)
             {
                 return hpx::async<hpx::server::chunk_vector::back_action>(gid);
             }
@@ -563,17 +694,27 @@ namespace hpx
 
             //ASSIGN
 
-            /** @brief Assign the new content to the elements in chunk_vector component, replacing the current content and modifying the size accordingly.
+            /** @brief Assign the new content to the elements in chunk_vector
+             *          component, replacing the current content and modifying
+             *          the size accordingly.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *  @param n    new size of the chunk_vector
              *  @param val  value to fill the container with
              *
-             *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not]
+             *  @return This return the hpx::future of type void [The void
+             *           return type can help to check whether the action is
+             *           completed or not]
              */
-            static hpx::lcos::future<void> assign_async(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val)
+            static hpx::lcos::future<void>
+                assign_async(hpx::naming::id_type const& gid,
+                             std::size_t n,
+                             VALUE_TYPE const& val)
             {
-                return hpx::async<hpx::server::chunk_vector::assign_action>(gid, n, val);
+                return hpx::async<hpx::server::chunk_vector::assign_action>(gid,
+                                                                            n,
+                                                                            val);
             }
 //            static void assign_non_blocking(hpx::naming::id_type const& gid, std::size_t n, VALUE_TYPE const& val)
 //            {
@@ -583,14 +724,20 @@ namespace hpx
             //PUSH_BACK
             /** @brief Add the new element at the end of chunk_vector component.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *  @param val  value to be copied to new element
              *
-             *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not]
+             *  @return This return the hpx::future of type void [The void
+             *           return type can help to check whether the action is
+             *           completed or not]
              */
-            static hpx::lcos::future<void> push_back_async(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
+            static hpx::lcos::future<void>
+                push_back_async(hpx::naming::id_type const& gid,
+                                VALUE_TYPE const& val)
             {
-                return hpx::async<hpx::server::chunk_vector::push_back_action>(gid, val);
+                return hpx::async<hpx::server::chunk_vector::push_back_action>(gid,
+                                                                               val);
             }
 //            static void push_back_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const& val)
 //            {
@@ -601,14 +748,20 @@ namespace hpx
             //PUSH_BACK_RVAL
             /** @brief Add the new element at the end of chunk_vector component.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
              *  @param val  value to be moved to new element
              *
-             *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not].
+             *  @return This return the hpx::future of type void [The void
+             *           return type can help to check whether the action is
+             *           completed or not].
              */
-            static hpx::lcos::future<void> push_back_rval_async(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
+            static hpx::lcos::future<void>
+                push_back_rval_async(hpx::naming::id_type const& gid,
+                                     VALUE_TYPE const&& val)
             {
-                return hpx::async<hpx::server::chunk_vector::push_back_rval_action>(gid, std::move(val));
+                return hpx::async<hpx::server::chunk_vector::push_back_rval_action>(gid,
+                                                                                    std::move(val));
             }
 //            static void push_back_rval_non_blocking(hpx::naming::id_type const& gid, VALUE_TYPE const&& val)
 //            {
@@ -616,7 +769,8 @@ namespace hpx
 //            }
 
             //POP_BACK
-            static hpx::lcos::future<void> pop_back_async(hpx::naming::id_type const& gid)
+            static hpx::lcos::future<void>
+                pop_back_async(hpx::naming::id_type const& gid)
             {
                 return hpx::async<hpx::server::chunk_vector::pop_back_action>(gid);
             }
@@ -626,19 +780,32 @@ namespace hpx
 //            }
 
             //SET_VALUE
-            /** @brief Copy the value of val in the element at position pos in the chunk_vector component. It throws the hpx::out_of_bound exception.
+            /** @brief Copy the value of val in the element at position pos in
+             *          the chunk_vector component. It throws the
+             *          hpx::out_of_bound exception.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
-             *  @param pos  Position of the element in the chunk_vector [Note the first position in the chunk_vector is 0].
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
+             *  @param pos  Position of the element in the chunk_vector [Note
+             *               the first position in the chunk_vector is 0].
              *  @param val  The value to be copied
              *
-             * @exception hpx::out_of_bound The pos is bound checked and if pos is out of bound then it throws the hpx::out_of_bound exception.
+             * @exception hpx::out_of_bound The pos is bound checked and if pos
+             *             is out of bound then it throws the hpx::out_of_bound
+             *             exception.
              *
-             *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not].
+             *  @return This return the hpx::future of type void [The void
+             *           return type can help to check whether the action is
+             *           completed or not].
              */
-            static hpx::lcos::future<void> set_value_async(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const& val)
+            static hpx::lcos::future<void>
+                set_value_async(hpx::naming::id_type const& gid,
+                                std::size_t pos,
+                                VALUE_TYPE const& val)
             {
-                return hpx::async<hpx::server::chunk_vector::set_value_action>(gid, pos, val);
+                return hpx::async<hpx::server::chunk_vector::set_value_action>(gid,
+                                                                               pos,
+                                                                               val);
             }
 //            static void set_value_non_blocking(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const& val)
 //            {
@@ -646,19 +813,32 @@ namespace hpx
 //            }
 
             //SET_VALUE_RVAL
-            /** @brief Move the val in the element at position pos in the chunk_vector component. It throws the hpx::out_of_bound exception.
+            /** @brief Move the val in the element at position pos in the
+             *          chunk_vector component. It throws the
+             *          hpx::out_of_bound exception.
              *
-             *  @param gid  The global id of the chunk_vector component register with HPX
-             *  @param pos  Position of the element in the chunk_vector [Note the first position in the chunk_vector is 0].
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
+             *  @param pos  Position of the element in the chunk_vector [Note
+             *               the first position in the chunk_vector is 0].
              *  @param val  The value to be moved
              *
-             * @exception hpx::out_of_bound The pos is bound checked and if pos is out of bound then it throws the hpx::out_of_bound exception.
+             * @exception hpx::out_of_bound The pos is bound checked and if pos
+             *             is out of bound then it throws the hpx::out_of_bound
+             *             exception.
              *
-             *  @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not].
+             *  @return This return the hpx::future of type void [The void
+             *           return type can help to check whether the action is
+             *           completed or not].
              */
-            static hpx::lcos::future<void> set_value_rval_async(hpx::naming::id_type const& gid, std::size_t pos, VALUE_TYPE const&& val)
+            static hpx::lcos::future<void>
+                set_value_rval_async(hpx::naming::id_type const& gid,
+                                     std::size_t pos,
+                                     VALUE_TYPE const&& val)
             {
-                return hpx::async<hpx::server::chunk_vector::set_value_rval_action>(gid, pos, std::move(val));
+                return hpx::async<hpx::server::chunk_vector::set_value_rval_action>(gid,
+                                                                                    pos,
+                                                                                    std::move(val));
             }
 //            static void set_value_rval_non_blocking(hpx::naming::id_type const& gid, std::size_t pos,  VALUE_TYPE const&& val)
 //            {
@@ -679,22 +859,35 @@ namespace hpx
         // Algorithm API's in Stubs class
         //
 
-        /** @brief Apply the function fn to each element in the range [first, last) in chunk_vector component.
+        /** @brief Apply the function fn to each element in the range
+         *          [first, last) in chunk_vector component.
          *
-         *  @param gid      The global id of the chunk_vector component register with HPX
-         *  @param first    Initial position of the element in the sequence [Note the first position in the chunk_vector is 0].
-         *  @param last     final position of the element in the sequence [Note the last element is not inclusive in the range[first, last)].
-         *  @param fn       Unary function (either function pointer or move constructible function object) that accept an element in the range as argument.
+         *  @param gid      The global id of the chunk_vector component register
+         *                   with HPX
+         *  @param first    Initial position of the element in the sequence
+         *                   [Note the first position in the chunk_vector is 0].
+         *  @param last     final position of the element in the sequence [Note
+         *                   the last element is not inclusive in the range
+         *                   [first, last)].
+         *  @param fn       Unary function (either function pointer or move
+         *                   constructible function object) that accept an
+         *                   element in the range as argument.
          *                  The return value of the fn is ignored.
          *
-         * @return This return the hpx::future of type void [The void return type can help to check whether the action is completed or not]
+         * @return This return the hpx::future of type void [The void return
+         *          type can help to check whether the action is completed or
+         *          not]
          */
-        static hpx::lcos::future<void> chunk_for_each_async(hpx::naming::id_type const& gid,
-                                                            std::size_t first,
-                                                            std::size_t last,
-                                                            hpx::util::function<void(VALUE_TYPE &)> fn)
+        static hpx::lcos::future<void>
+            chunk_for_each_async(hpx::naming::id_type const& gid,
+                                 std::size_t first,
+                                 std::size_t last,
+                                 hpx::util::function<void(VALUE_TYPE &)> fn)
         {
-            return hpx::async<hpx::server::chunk_vector::chunk_for_each_action>(gid, first, last, fn);
+            return hpx::async<hpx::server::chunk_vector::chunk_for_each_action>(gid,
+                                                                                first,
+                                                                                last,
+                                                                                fn);
 
         }//end of chunk_vector_for_each_async
 
@@ -703,14 +896,17 @@ namespace hpx
     }//end of the namespace stubs
 
 
-    class chunk_vector : public hpx::components::client_base<chunk_vector, stubs::chunk_vector>
+    class chunk_vector
+        : public hpx::components::client_base<chunk_vector, stubs::chunk_vector>
     {
-        typedef hpx::components::client_base<chunk_vector, stubs::chunk_vector> base_type;
+        typedef hpx::components::client_base<chunk_vector,
+                                            stubs::chunk_vector> base_type;
     public:
 
         chunk_vector() {}
         chunk_vector(hpx::naming::id_type const& gid): base_type(gid) {}
-        chunk_vector(hpx::shared_future<hpx::naming::id_type> const& gid): base_type(gid) {}
+        chunk_vector(hpx::shared_future<hpx::naming::id_type> const& gid)
+            : base_type(gid) {}
 
         //Destructor
         ~chunk_vector()
@@ -907,7 +1103,9 @@ namespace hpx
         void set_value(std::size_t pos, VALUE_TYPE const&& val)
         {
             HPX_ASSERT(this->get_gid());
-            (this->base_type::set_value_rval_async(this->get_gid(), pos, std::move(val))).get();
+            (this->base_type::set_value_rval_async(this->get_gid(),
+                                                   pos,
+                                                   std::move(val))).get();
         }
 //        void set_value_non_blocking(std::size_t pos, VALUE_TYPE const&& val)
 //        {
