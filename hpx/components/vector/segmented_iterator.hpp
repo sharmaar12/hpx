@@ -13,6 +13,13 @@
  *
  */
 
+
+// PROGRAMMER DOCUMENTATION:
+ //     The idea of these iterator is taken from
+ //     http://lafstern.org/matt/segmented.pdf with some modification
+ //
+
+
 #include <hpx/include/util.hpp>
 
 // headers for checking the ranges of the Datatypes
@@ -27,7 +34,7 @@ namespace hpx
 {
     //For checking the state of the iterator
 
-    //INVALID STATE:  represent the iterator goes below the 0'th position on the
+    //INVALID STATE:  Represent the iterator goes below the 0'th position on the
     // first gid in the vector which actually mean that -ve in the overall index
 
     /**  @brief This enum define the iterator state. */
@@ -145,7 +152,8 @@ namespace hpx
         }
 
         //COPY ASSIGNMENT
-        //Return allow a=b=c;
+        //  PROGRAMMER DOCUMENTATION:
+        //  Return allow a=b=c;
         /** @brief Copy one iterator into other.
          *
          *  @param other    This the hpx::segmented_vector_iterator objects which
@@ -194,7 +202,12 @@ namespace hpx
         //DEREFERENCE
         /** @brief Dereferences the iterator and returns the value of the element.
          *
-         *  @return Value in the element pointed by the iterator
+         *  @return Value in the element pointed by the iterator [Note like
+         *           standard iterator it does not return reference just value]
+         *
+         *  @exception hpx::out_of_range The pos is bound checked and if pos is
+         *              out of bound then it throws the hpx::out_of_bound
+         *              exception.
          */
         VALUE_TYPE operator * () const
         {
@@ -205,6 +218,17 @@ namespace hpx
         }
 
         //INCREMENT
+        //  PROGRAMMER DOCUMENTATION:
+        //    ALGO:
+        //      1. If vector is in INVALID STATE (Refer programmer documentation
+        //         for enum above) then we have to increment until we get the
+        //         begin of vector. Then change the state to valid.
+        //      2. Else just increment the local_index until you go beyond
+        //         the actual size of that chunk. If you go beyond then go to the
+        //         next gid in the available vector
+        //      3. The step 2 is repeated until you hit last valid gid in the list
+        //         for the last valid gid you just increment local_index
+        //
         /** @brief Increment the iterator position by one unit.
          *
          *  @return Return the incremented hpx::segmented_vector_iterator object
@@ -252,6 +276,14 @@ namespace hpx
         }
 
         //DECREMENT
+        // PROGRAMMER DOCUMENTATION:
+        //  ALGO:
+        //    1. If local_index equal to zero then we have to check is it first
+        //       VALID gid in the list. If so the decrement make iterator to
+        //       invalid state. Other wise we have to move the immediate previous
+        //       gid.
+        //    2. Else just decrement the local_index.
+        //
         /** @brief Decrement the iterator position by one unit.
          *
          *  @return Return the decremented hpx::segmented_vector_iterator object
@@ -313,9 +345,10 @@ namespace hpx
 
             if(temp_state == hpx::iter_state::invalid)
             {
+                //calculate the length through which it is invalid
                 std::size_t diff = (std::numeric_limits<std::size_t>::max() -
                                     temp_local_index + 1);
-                //calculate the interval through which it is invalid
+
                 if(n < diff )
                 {
                     return hpx::segmented_vector_iterator(
@@ -341,12 +374,14 @@ namespace hpx
             while( n >= size)
             {
                  //Break this loop if this is previous to LAST gid
+                 // i.e. last valid gid in the list
                 if(((temp_curr_bfg_pair + 1)->second).get() == invalid_id )
                     break;
 
                 same_chunk = false;
                 n = n - size;
                 ++temp_curr_bfg_pair;
+                // calculate the size of current chunk
                 size = hpx::stubs::chunk_vector::size_async(
                                     (temp_curr_bfg_pair->second).get()
                                                             ).get();
@@ -619,7 +654,6 @@ namespace hpx
                                                          ).get()
                                  );
         }
-
 
         //
         // Destructor

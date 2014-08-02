@@ -35,6 +35,10 @@ namespace hpx
 {
  //   template<class input_iterator, class fun>
 
+        // PROGRAMMER DOCUMENTATION:
+        // The idea of this implementation is taken from
+        // http://lafstern.org/matt/segmented.pdf fill algorithm. [page no 7-8]
+        //
         /** @brief Apply the function fn to each element in the
          *         range [first, last).
          *
