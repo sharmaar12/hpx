@@ -77,6 +77,13 @@ namespace hpx{
 
         // Short name for the std::size future.
         typedef hpx::lcos::future<std::size_t> size_future;
+
+    public:
+        //  Short name for the segmented_vector_iterator. It also maintain to
+        //  the same API just like standard vector.
+        typedef hpx::segmented_vector_iterator iterator;
+        typedef hpx::const_segmented_vector_iterator const_iterator;
+
     private:
 
             //PROGRAMMER DOCUMENTATION:
@@ -142,6 +149,7 @@ namespace hpx{
         } // End of create function
 
 
+        //  PROGRAMMER DOCUMENTATION:
         //  Return the bgf_pair in which the element represented by pos must be
         //  present. Here one assumption is made that in any case the
         //  num_elements in the hpx::vector must be less than max possible value
@@ -410,9 +418,6 @@ namespace hpx{
 
 
     public:
-        //  Short name for the segmented_vector_iterator. It also maintain to
-        //  the same API just like standard vector.
-        typedef hpx::segmented_vector_iterator iterator;
 
         //
         // Constructors

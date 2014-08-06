@@ -19,6 +19,7 @@ typedef hpx::components::managed_component<hpx::server::chunk_vector>
 
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(chunk_vector_type, chunk_vector);
 
+
 //Capacity related action registration
 /** @brief Macro to define the boilerplate code for size component action.*/
 HPX_REGISTER_ACTION(
@@ -98,4 +99,8 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::chunk_for_each_action,
     chunk_vector_chunk_for_each_action);
+/** @brief Macro to define the boilerplate code for chunk_for_each_const component action.*/
+HPX_REGISTER_ACTION(
+    hpx::server::chunk_vector::chunk_for_each_const_action,
+    chunk_vector_chunk_for_each_const_action);
 
