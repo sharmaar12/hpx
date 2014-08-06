@@ -43,37 +43,21 @@ namespace hpx
         valid = 1      /**< This represent the iterator is in valid state */
         };
 
-//    class const_segmented_vector_iterator
-//    {
-//        typedef const_segmented_vector_iterator self_type;
-//        typedef std::pair<std::size_t,
-//                           hpx::lcos::shared_future<hpx::naming::id_type>
-//                          >
-//                   bfg_pair;
-//        typedef std::vector< bfg_pair > vector_type;
-//
-//    private:
-//        std::vector<VALUE_TYPE>::const_iterator chunk_vec_iterator_;
-//        vector_type::const_iterator vec_iterator_;
-//
-//    public:
-//
-//    };//End of const_segmented_vector_iterator
 
 
-
-    /** @brief This is the segmented_vector_iterator class which implement
+    /** @brief This is the const_segmented_vector_iterator class which implement
     *           iterator functionality for hpx::vector.
     *
     *   This contain the implementation of the all random access iterator API
     *    need. This Class also contain some additional API which is needed to
     *    iterate over segmented data structure.
     */
-    class segmented_vector_iterator
+    class const_segmented_vector_iterator
     {
         // This typedef helps to call object of same class.
-        typedef segmented_vector_iterator self_type;
+        typedef const_segmented_vector_iterator self_type;
 
+        public:
         //PROGRAMMER DOCUMENTATION:
         //  For the following two typedefs refer to hpx::vector class in
         //  hpx/components/vector/vector.hpp
@@ -90,8 +74,6 @@ namespace hpx
                             hpx::lcos::shared_future<hpx::naming::id_type>,
                              std::size_t
                          > local_return_type;
-
-    private:
 
 //        // PROGRAMMER DOCUMENTATION: This is the helper function for
 //        std::size_t diff_helper(vector_type::const_iterator src,
@@ -131,20 +113,20 @@ namespace hpx
         // constructors
         //
 
-        segmented_vector_iterator(){}
-        segmented_vector_iterator(vector_type::const_iterator curr_bfg_pair,
-                                  std::size_t local_index,
-                                  iter_state state)
+        const_segmented_vector_iterator(){}
+        const_segmented_vector_iterator(vector_type::const_iterator curr_bfg_pair,
+                                        std::size_t local_index,
+                                        iter_state state)
         : curr_bfg_pair_(curr_bfg_pair), local_index_(local_index),
          state_(state) {}
 
 
-        /** @brief Copy Constructor for segmented_vector_iterator.
+        /** @brief Copy Constructor for const_segmented_vector_iterator.
          *
-         *  @param other    This the hpx::segmented_vector_iterator object which
+         *  @param other    This the hpx::const_segmented_vector_iterator object which
          *                   is to be copied
          */
-        segmented_vector_iterator(self_type const& other)
+        const_segmented_vector_iterator(self_type const& other)
         {
             this->curr_bfg_pair_ = other.curr_bfg_pair_;
             this->local_index_ = other.local_index_;
@@ -156,11 +138,11 @@ namespace hpx
         //  Return allow a=b=c;
         /** @brief Copy one iterator into other.
          *
-         *  @param other    This the hpx::segmented_vector_iterator objects which
+         *  @param other    This the hpx::const_segmented_vector_iterator objects which
          *                   is to be copied
          *
          *  @return This return the reference to the newly created
-         *           segmented_vector_iterator
+         *           const_segmented_vector_iterator
          */
         self_type & operator = (self_type const & other)
         {
@@ -171,9 +153,9 @@ namespace hpx
         }
 
         //COMPARISON API
-        /** @brief Compare the two hpx::segmented_vector_iterator for equality.
+        /** @brief Compare the two segmented_vector_iterator for equality.
          *
-         *  @param other    This the hpx::segmented_vector_iterator objects
+         *  @param other    This the hpx::const_segmented_vector_iterator objects
          *                   which is to be compared
          *
          *  @return Return true if both are equal, false otherwise
@@ -351,11 +333,9 @@ namespace hpx
 
                 if(n < diff )
                 {
-                    return hpx::segmented_vector_iterator(
-                                                        temp_curr_bfg_pair,
-                                                        (temp_local_index + n),
-                                                        temp_state
-                                                        );
+                    return self_type(temp_curr_bfg_pair,
+                                    (temp_local_index + n),
+                                     temp_state);
                 }
                 else
                 {
@@ -394,9 +374,9 @@ namespace hpx
             {
                 temp_local_index = n;
             }
-            return segmented_vector_iterator(temp_curr_bfg_pair,
-                                             temp_local_index,
-                                              temp_state);
+            return self_type(temp_curr_bfg_pair,
+                             temp_local_index,
+                             temp_state);
         }//End of a + n
 
         /** @brief Return the iterator pointing to the position which is n units
@@ -414,7 +394,7 @@ namespace hpx
             std::size_t size = 0;
             if(temp_state == hpx::iter_state::invalid)
             {
-                return hpx::segmented_vector_iterator(temp_curr_bfg_pair,
+                return self_type(temp_curr_bfg_pair,
                                                       (temp_local_index - n),
                                                       temp_state );
             }
@@ -452,7 +432,7 @@ namespace hpx
                 temp_local_index = size - (n + 1);
             }
 
-            return segmented_vector_iterator(temp_curr_bfg_pair,
+            return self_type(temp_curr_bfg_pair,
                                               temp_local_index,
                                                temp_state);
         }//end of a - n
@@ -659,11 +639,102 @@ namespace hpx
         // Destructor
         //
         /** @brief Default destructor for hpx::segmented_vector_iterator.*/
-        ~segmented_vector_iterator()
+        ~const_segmented_vector_iterator()
             {
                 //DEFAULT destructor
             }
-    };//end of segmented vector iterator
+    };//end of const_segmented_vector_iterator
+
+    class segmented_vector_iterator : public const_segmented_vector_iterator
+    {
+        typedef hpx::segmented_vector_iterator          self_type;
+        typedef hpx::const_segmented_vector_iterator    base_type;
+
+        segmented_vector_iterator(base_type const& other): base_type(other){}
+    public:
+        typedef base_type::vector_type                  vector_type;
+
+
+        segmented_vector_iterator():base_type() {}
+        segmented_vector_iterator(vector_type::const_iterator curr_bfg_pair,
+                                  std::size_t local_index,
+                                  iter_state state)
+                        :base_type(curr_bfg_pair,
+                                   local_index,
+                                   state) {}
+        segmented_vector_iterator(self_type const& other)
+                        : base_type(other.curr_bfg_pair_,
+                                    other.local_index_,
+                                    other.state_) {}
+
+        self_type & operator = (self_type const& other)
+        {
+            this->curr_bfg_pair_ = other.curr_bfg_pair_;
+            this->local_index_ = other.local_index_;
+            this->state_ = other.state_;
+            return *this;
+        }
+
+        self_type operator + (std::size_t n) const
+        {
+            base_type temp = *this;
+            return self_type(temp + n);
+        }
+
+        self_type operator - (std::size_t n) const
+        {
+            base_type temp = *this;
+            return self_type(temp - n);
+        }
+
+        self_type operator ++ ()  //prefix behavior
+        {
+            base_type temp = *(this);
+            *this = ++temp;
+            return *this;
+        }
+
+        self_type operator ++ (int) //postfix behavior
+        {
+            //return_temp object should be return to simulate the postfix behavior
+            base_type temp = *this;
+            base_type return_temp = temp;
+            *this = ++temp;
+            return return_temp;
+        }
+
+        self_type operator -- () //prefix behavior
+        {
+            base_type temp = *(this);
+            *this = --temp;
+            return *this;
+        }
+
+        self_type operator -- (int) //postfix behavior
+        {
+            //return_temp object should be return to simulate the postfix behavior
+            base_type temp = *this;
+            base_type return_temp = temp;
+            *this = --temp;
+            return return_temp;
+        }
+
+        self_type & operator +=(std::size_t n)
+        {
+            *this = *this + n;
+           //return self_type to make (a = (b += n)) work
+            return *this;
+        }//End of +=
+
+        self_type & operator -=(std::size_t n)
+        {
+            *this = *this - n;
+            //return self_type to make (a = (b -= n)) work
+            return *this;
+        }//End of +=
+
+    };//End of segmented_vector_iterator
+
 }//end of hpx namespace
 
 #endif //  SEGMENTED_ITERATOR_HPP
