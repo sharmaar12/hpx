@@ -33,161 +33,277 @@
 
 namespace hpx
 {
- //   template<class input_iterator, class fun>
+    // PROGRAMMER DOCUMENTATION:
+    // The idea of this implementation is taken from
+    // http://lafstern.org/matt/segmented.pdf fill algorithm. [page no 7-8]
+    //
 
-        // PROGRAMMER DOCUMENTATION:
-        // The idea of this implementation is taken from
-        // http://lafstern.org/matt/segmented.pdf fill algorithm. [page no 7-8]
-        //
-        /** @brief Apply the function fn to each element in the
-         *         range [first, last).
-         *
-         *  @param first    Vector iterator to the initial position of the in
-         *                  the sequence
-         *                  [Note the first position in the vector is 0]
-         *  @param last     Vector iterator to the final position of the in
-         *                  the sequence [Note the last element is not inclusive
-         *                  in the range[first, last)]
-         *  @param fn       Unary function (either function pointer or move
-         *                  constructible function object) that accept an
-         *                  element in the range as argument.
-         *                  fn should return void.
-         *
-         */
-        void for_each(  hpx::segmented_vector_iterator first,
-                        segmented_vector_iterator last,
-                        hpx::util::function<void(VALUE_TYPE&)> fn)
+    typedef typename boost::mpl::true_    true_type;
+    typedef typename boost::mpl::false_   false_type;
+
+
+    template <class iterator>
+    struct segmented_iterator_traits{
+        typedef false_type is_const_segmented_iterator;
+    };
+
+    template<>
+    struct segmented_iterator_traits<hpx::const_segmented_vector_iterator>{
+        typedef true_type is_const_segmented_iterator;
+    };
+
+    //TODO modify the comment if you are unable to add the template support in backend
+
+    /** @brief Apply the function fn to each element in the
+     *         range [first, last).
+     *
+     *  @tparam input_iterator  Segmented iterator to the sequence
+     *
+     *  @tparam fun             Unary Function returning void
+     *
+     *  @param first    Input iterator to the initial position of the in
+     *                  the sequence
+     *                  [Note the first position in the vector is 0]
+     *  @param last     Input iterator to the final position of the in
+     *                  the sequence [Note the last element is not inclusive
+     *                  in the range[first, last)]
+     *  @param fn       Unary function (either function pointer or move
+     *                  constructible function object) that accept an
+     *                  element in the range as argument.
+     */
+    template<class input_iterator, class fun>
+    void for_each(  input_iterator first,
+                    input_iterator last,
+                    fun fn,
+                    false_type)
+    {
+        auto sfirst_ = input_iterator::segment(first);
+        auto slast_ = input_iterator::segment(last);
+
+        std::vector<hpx::lcos::future<void>> for_each_lazy_sync;
+
+        if(sfirst_ == slast_)
         {
-            auto sfirst_ = segmented_vector_iterator::segment(first);
-            auto slast_ = segmented_vector_iterator::segment(last);
-
-            std::vector<hpx::lcos::future<void>> for_each_lazy_sync;
-
-            if(sfirst_ == slast_)
+            for_each_lazy_sync.push_back(
+                hpx::stubs::chunk_vector::chunk_for_each_async(
+                    (input_iterator::local(first).first).get(), //gives gid
+                     input_iterator::local(first).second, // gives first index
+                     input_iterator::local(last).second, //gives last index
+                     fn) //gives the functor
+                                         );
+        }
+        else
+        {
+            for_each_lazy_sync.push_back(
+                hpx::stubs::chunk_vector::chunk_for_each_async(
+                    (input_iterator::local(first).first).get(), //gives gid
+                     input_iterator::local(first).second, // gives first index
+                     input_iterator::end(sfirst_).second, //gives last index
+                     fn) //gives the functor
+                                         );
+            ++sfirst_;
+            while(sfirst_ != slast_)
             {
                 for_each_lazy_sync.push_back(
                     hpx::stubs::chunk_vector::chunk_for_each_async(
-                        (segmented_vector_iterator::local(first).first).get(), //gives gid
-                        segmented_vector_iterator::local(first).second, // gives first index
-                        segmented_vector_iterator::local(last).second, //gives last index
-                        fn) //gives the functor
-                                             );
-            }
-            else
-            {
-                for_each_lazy_sync.push_back(
-                    hpx::stubs::chunk_vector::chunk_for_each_async(
-                        (segmented_vector_iterator::local(first).first).get(), //gives gid
-                        segmented_vector_iterator::local(first).second, // gives first index
-                        segmented_vector_iterator::end(sfirst_).second, //gives last index
-                        fn) //gives the functor
-                                             );
+                        (input_iterator::begin(sfirst_).first).get(), //gives gid
+                         input_iterator::begin(sfirst_).second, // gives first index
+                         input_iterator::end(sfirst_).second, //gives last index
+                         fn) //gives the functor
+                                              );
                 ++sfirst_;
-                while(sfirst_ != slast_)
-                {
-                    for_each_lazy_sync.push_back(
-                        hpx::stubs::chunk_vector::chunk_for_each_async(
-                            (segmented_vector_iterator::begin(sfirst_).first).get(), //gives gid
-                            segmented_vector_iterator::begin(sfirst_).second, // gives first index
-                            segmented_vector_iterator::end(sfirst_).second, //gives last index
-                            fn) //gives the functor
-                                                  );
-                    ++sfirst_;
-                }
+            }
+            for_each_lazy_sync.push_back(
+                hpx::stubs::chunk_vector::chunk_for_each_async(
+                    (input_iterator::begin(slast_).first).get(), //gives gid
+                     input_iterator::begin(slast_).second, // gives first index
+                     input_iterator::local(last).second, //gives last index
+                     fn) //gives the functor
+                                         );
+        }//end of else
+
+        hpx::wait_all(for_each_lazy_sync);
+    }//end of for_each
+
+
+    /** @brief Apply the function fn to each element in the
+     *         range [first, last).
+     *
+     *  @tparam const_input_iterator  Constant Segmented iterator to the sequence
+     *
+     *  @tparam fun             Unary Function returning void
+     *
+     *  @param first    Constant input iterator to the initial position of the in
+     *                  the sequence
+     *                  [Note the first position in the vector is 0]
+     *  @param last     Constant input iterator to the final position of the in
+     *                  the sequence [Note the last element is not inclusive
+     *                  in the range[first, last)]
+     *  @param fn       Unary function (either function pointer or move
+     *                  constructible function object) that accept an
+     *                  element in the range as argument.
+     */
+    template<class const_input_iterator, class fun>
+    void for_each(  const_input_iterator first,
+                    const_input_iterator last,
+                    fun fn,
+                    true_type)
+    {
+        auto sfirst_ = const_input_iterator::segment(first);
+        auto slast_ = const_input_iterator::segment(last);
+
+        std::vector<hpx::lcos::future<void>> for_each_lazy_sync;
+
+        if(sfirst_ == slast_)
+        {
+            for_each_lazy_sync.push_back(
+                hpx::stubs::chunk_vector::chunk_for_each_const_async(
+                    (const_input_iterator::local(first).first).get(), //gives gid
+                     const_input_iterator::local(first).second, // gives first index
+                     const_input_iterator::local(last).second, //gives last index
+                     fn) //gives the functor
+                                         );
+        }
+        else
+        {
+            for_each_lazy_sync.push_back(
+                hpx::stubs::chunk_vector::chunk_for_each_const_async(
+                    (const_input_iterator::local(first).first).get(), //gives gid
+                     const_input_iterator::local(first).second, // gives first index
+                     const_input_iterator::end(sfirst_).second, //gives last index
+                     fn) //gives the functor
+                                         );
+            ++sfirst_;
+            while(sfirst_ != slast_)
+            {
                 for_each_lazy_sync.push_back(
-                    hpx::stubs::chunk_vector::chunk_for_each_async(
-                        (segmented_vector_iterator::begin(slast_).first).get(), //gives gid
-                        segmented_vector_iterator::begin(slast_).second, // gives first index
-                        segmented_vector_iterator::local(last).second, //gives last index
-                        fn) //gives the functor
-                                             );
-            }//end of else
+                    hpx::stubs::chunk_vector::chunk_for_each_const_async(
+                        (const_input_iterator::begin(sfirst_).first).get(), //gives gid
+                         const_input_iterator::begin(sfirst_).second, // gives first index
+                         const_input_iterator::end(sfirst_).second, //gives last index
+                         fn) //gives the functor
+                                              );
+                ++sfirst_;
+            }
+            for_each_lazy_sync.push_back(
+                hpx::stubs::chunk_vector::chunk_for_each_const_async(
+                    (const_input_iterator::begin(slast_).first).get(), //gives gid
+                     const_input_iterator::begin(slast_).second, // gives first index
+                     const_input_iterator::local(last).second, //gives last index
+                     fn) //gives the functor
+                                         );
+        }//end of else
 
-            hpx::wait_all(for_each_lazy_sync);
-        }//end of for_each
+        hpx::wait_all(for_each_lazy_sync);
+    }//end of for_each
 
-        /** @brief Asynchronous API for the for_each().
-         *
-         *  @param first    Vector iterator to the initial position of the in
-         *                  the sequence [Note the first position in the vector
-         *                   is 0]
-         *  @param last     Vector iterator to the final position of the in the
-         *                   sequence [Note the last element is not inclusive in
-         *                   the range[first, last)]
-         *  @param fn       Unary function (either function pointer or move
-         *                   constructible function object) that accept an
-         *                   element in the range as argument.
-         *                   fn should return void.
-         *
-         *  @return This return the hpx::future of type void
-         *           [The void return type can help to check whether the action
-         *           is completed or not]
-         */
-        hpx::lcos::future<void>
-         for_each_async(hpx::segmented_vector_iterator first,
-                         segmented_vector_iterator last,
-                         hpx::util::function<void(VALUE_TYPE&)> fn)
-        {
-            return hpx::async(launch::async,
-                              hpx::util::bind((&hpx::for_each),
-                                               first,
-                                               last,
-                                               fn
-                                              )
-                              );
-        }//end of for_each_async
+    template <class iter, class fun>
+    inline void for_each(iter first, iter last, fun fn)
+    {
+        typedef segmented_iterator_traits<iter> traits;
+        for_each(first, last, fn, typename traits::is_const_segmented_iterator());
+    }
 
-        //
-        // FOR_EACH_N API
-        //
 
-        /** @brief Apply the function fn to each element in the range
-         *          [first, first + n).
-         *
-         *  @param first    Vector iterator to the initial position of the in
-         *                   the sequence [Note the first position in the vector
-         *                   is 0]
-         *  @param n        The size of input sequence
-         *  @param fn       Unary function (either function pointer or move
-         *                   constructible function object) that accept an
-         *                   element in the range as argument.
-         *                   fn should return void.
-         */
-        void for_each_n(hpx::segmented_vector_iterator first,
-                        std::size_t n,
-                        hpx::util::function<void(VALUE_TYPE&)> fn)
-        {
-            return hpx::for_each(first, first + n, fn);
-        }//end of for_each_n
 
-        /** @brief Asynchronous API for for_each_n().
-         *
-         *  @param first    Vector iterator to the initial position of the in
-         *                   the sequence [Note the first position in the vector
-         *                   is 0]
-         *  @param n        The size of input sequence
-         *  @param fn       Unary function (either function pointer or move
-         *                   constructible function object) that accept an
-         *                   element in the range as argument.
-         *                   fn should return void.
-         *
-         *  @return This return the hpx::future of type void [The void return
-         *           type can help to check whether the action is completed or
-         *           not]
-         */
-        hpx::lcos::future<void>
-         for_each_n_async(hpx::segmented_vector_iterator first,
-                         std::size_t n,
-                         hpx::util::function<void(VALUE_TYPE&)> fn)
-        {
-            return hpx::async(launch::async,
-                              hpx::util::bind((&hpx::for_each),
-                                               first,
-                                               first + n,
-                                               fn
-                                              )
-                              );
-        }//end of for_each _n_async
+    /** @brief Apply the function fn to each element in the
+     *         range [first, last).
+     *
+     *  @tparam input_iterator  Segmented iterator to the sequence
+     *
+     *  @tparam fun             Unary Function returning void
+     *
+     *  @param first    Input iterator to the initial position of the in
+     *                  the sequence
+     *                  [Note the first position in the vector is 0]
+     *  @param last     Input iterator to the final position of the in
+     *                  the sequence [Note the last element is not inclusive
+     *                  in the range[first, last)]
+     *  @param fn       Unary function (either function pointer or move
+     *                  constructible function object) that accept an
+     *                  element in the range as argument.
+     *  @return This return the hpx::future of type void
+     *           [The void return type can help to check whether the action
+     *           is completed or not]
+     */
+    template<class input_iterator, class fun>
+    hpx::lcos::future<void>
+     for_each_async(input_iterator first,
+                    input_iterator last,
+                    fun fn)
+    {
+        typedef segmented_iterator_traits<input_iterator> traits;
+        typedef typename traits::is_const_segmented_iterator iter_type;
+        return hpx::async(launch::async,
+                          hpx::util::bind((&hpx::for_each<input_iterator, fun>),
+                                           first,
+                                           last,
+                                           fn,
+                                           iter_type()
+                                          )
+                          );
+    }//end of for_each_async
+
+    /** @brief Apply the function fn to each element in the range
+     *          [first, first + n).
+     *
+     *  @tparam input_iterator  Segmented iterator to the sequence
+     *
+     *  @tparam fun             Unary Function returning void
+     *
+     *  @param first    Input iterator to the initial position of the in
+     *                   the sequence [Note the first position in the vector
+     *                   is 0]
+     *  @param n        The size of input sequence
+     *  @param fn       Unary function (either function pointer or move
+     *                   constructible function object) that accept an
+     *                   element in the range as argument.
+     */
+    template<class input_iterator, class fun>
+    void for_each_n(input_iterator first,
+                    std::size_t n,
+                    fun fn)
+    {
+        hpx::for_each(first, first + n, fn);
+    }//end of for_each_n
+
+    /** @brief Apply the function fn to each element in the range
+     *          [first, first + n).
+     *
+     *  @tparam input_iterator  Segmented iterator to the sequence
+     *
+     *  @tparam fun             Unary Function returning void
+     *
+     *  @param first    Input iterator to the initial position of the in
+     *                   the sequence [Note the first position in the vector
+     *                   is 0]
+     *  @param n        The size of input sequence
+     *  @param fn       Unary function (either function pointer or move
+     *                   constructible function object) that accept an
+     *                   element in the range as argument.
+     *
+     *  @return This return the hpx::future of type void [The void return
+     *           type can help to check whether the action is completed or
+     *           not]
+     */
+    template<class input_iterator, class fun>
+    hpx::lcos::future<void>
+     for_each_n_async( input_iterator first,
+                       std::size_t n,
+                       fun fn)
+    {
+        typedef segmented_iterator_traits<input_iterator> traits;
+        typedef typename traits::is_const_segmented_iterator iter_type;
+        return hpx::async(launch::async,
+                          hpx::util::bind((&hpx::for_each<input_iterator, fun>),
+                                           first,
+                                           first + n,
+                                           fn,
+                                           iter_type()
+                                          )
+                          );
+    }//end of for_each_n_async
+
 }//end of hpx namespace
 
 #endif // ALGORITHM_HPP

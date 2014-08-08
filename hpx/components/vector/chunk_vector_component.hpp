@@ -375,6 +375,28 @@ namespace hpx
                               fn);
             }
 
+            /** @brief Apply the function fn to each element in the range
+             *          [first, last).
+             *
+             *  @param first    Initial position of the element in the sequence
+             *                   [Note the first position in the chunk_vector
+             *                   is 0]
+             *  @param last     Final position of the element in the sequence
+             *                   [Note the last element is not inclusive in the
+             *                   range[first, last)]
+             *  @param fn       Unary function (either function pointer or move
+             *                   constructible function object) that accept an
+             *                   const element in the range as argument.
+             */
+            void chunk_for_each_const(std::size_t first,
+                                std::size_t last,
+                                hpx::util::function<void(VALUE_TYPE const&)> fn)
+            {
+                std::for_each( chunk_vector_.begin() + first,
+                              chunk_vector_.begin() + last,
+                              fn);
+            }
+
             //
             //Define the component action here
             //
@@ -453,6 +475,10 @@ namespace hpx
              */
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, chunk_for_each);
 
+            /** @brief Macro to define chunk_for_each_const_iterator function as
+             *          HPX component action type.
+             */
+            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, chunk_for_each_const);
         };//end of class chunk_vector
 
     }//end of server namespace
@@ -892,6 +918,40 @@ namespace hpx
         }//end of chunk_vector_for_each_async
 
 
+        /** @brief Apply the function fn to each element in the range
+         *          [first, last) in chunk_vector component.
+         *
+         *  @param gid      The global id of the chunk_vector component register
+         *                   with HPX
+         *  @param first    Initial position of the element in the sequence
+         *                   [Note the first position in the chunk_vector is 0].
+         *  @param last     final position of the element in the sequence [Note
+         *                   the last element is not inclusive in the range
+         *                   [first, last)].
+         *  @param fn       Unary function (either function pointer or move
+         *                   constructible function object) that accept an
+         *                   const element in the range as argument
+         *
+         * @return This return the hpx::future of type void [The void return
+         *          type can help to check whether the action is completed or
+         *          not]
+         */
+        static hpx::lcos::future<void>
+            chunk_for_each_const_async(hpx::naming::id_type const& gid,
+                                 std::size_t first,
+                                 std::size_t last,
+                                 hpx::util::function<void(VALUE_TYPE const &)> fn)
+        {
+            return hpx::async<hpx::server::chunk_vector::
+                                chunk_for_each_const_action>(gid,
+                                                             first,
+                                                             last,
+                                                             fn);
+
+        }//end of chunk_vector_for_each_const_async
+
+
+
         };//end of chunk_vector(stubs)
     }//end of the namespace stubs
 
@@ -1206,5 +1266,11 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::chunk_for_each_action,
     chunk_vector_chunk_for_each_action);
+/** @brief Macro to register chunk_for_each_const component action type with
+ *          HPX AGAS.
+ */
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::chunk_for_each_const_action,
+    chunk_vector_chunk_for_each_const_action);
 
 #endif // CHUNK_VECTOR_COMPONENT_HPP
