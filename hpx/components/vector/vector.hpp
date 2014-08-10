@@ -21,6 +21,7 @@
 
 #include <hpx/include/lcos.hpp>
 #include <hpx/include/util.hpp>
+#include <hpx/runtime/components/new.hpp>
 
 // headers for checking the ranges of the Datatypes
 #include <cstdint>
