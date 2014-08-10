@@ -193,7 +193,7 @@ namespace hpx
          */
         VALUE_TYPE operator * () const
         {
-            return (hpx::stubs::chunk_vector::get_value_async(
+            return (hpx::stubs::chunk_vector::get_value_noexpt_async(
                                             (curr_bfg_pair_->second).get(),
                                             local_index_)
                     ).get();
