@@ -81,8 +81,8 @@ namespace hpx{
     public:
         //  Short name for the segmented_vector_iterator. It also maintain to
         //  the same API just like standard vector.
-        typedef hpx::segmented_vector_iterator iterator;
-        typedef hpx::const_segmented_vector_iterator const_iterator;
+        typedef hpx::segmented_vector_iterator          iterator;
+        typedef hpx::const_segmented_vector_iterator    const_iterator;
 
     private:
 
@@ -157,6 +157,7 @@ namespace hpx{
         vector_type::const_iterator get_base_gid_pair(std::size_t pos) const
         {
             hpx::lcos::shared_future<hpx::naming::id_type> sf;
+            hpx::naming::id_type invalid_id;
 
             // Return the iterator to the first element which does not comparable
             // less than value (i.e equal or greater)
@@ -174,7 +175,9 @@ namespace hpx{
                             return middle.first < val.first;
                         }
                                     );
-            if(it->first == pos)
+            //  Second condition avoid the boundry case where the get_value can be
+            //  called on invalid gid. This occurs when pos = -1 only
+            if(it->first == pos && (it->second).get() != invalid_id)
             {
                 return it;
             }
@@ -422,8 +425,9 @@ namespace hpx{
         //
         // Constructors
         //
-        /** @brief Default Constructor which create vector with num_chunk = 0
+        /** @brief Default Constructor which create vector with num_chunk = 1
          *          and chunk_size = 0. Hence overall size of the vector is 0.
+         *          All the elements are initialized to 0.
          */
         explicit vector()
         {
@@ -462,7 +466,7 @@ namespace hpx{
         }
 
         /** @brief Constructor which create and initialize vector with all
-         *          elements as 0.
+         *          elements with val.
          *
          *  @param num_chunks   The number of chunks to be created
          *  @param chunk_size   The size of each chunk
@@ -495,6 +499,24 @@ namespace hpx{
         // OVERLOADED OPERATOR API's
         //
 
+        /** @brief Array subscript operator. This does not throw any exception.
+         *
+         *  @param pos Position of the element in the vector [Note the first
+         *              position in the chunk_vector is 0]
+         *
+         *  @return Return the value of the element at position represented by
+         *           pos [Note that this is not the reference to the element]
+         *
+         */
+        VALUE_TYPE operator [](std::size_t pos)
+        {
+            vector_type::const_iterator it = get_base_gid_pair(pos);
+            return hpx::stubs::chunk_vector::get_value_noexpt_async(
+                                                            (it->second).get(),
+                                                            (pos - (it->first))
+                                                                   ).get();
+        }
+
         /** @brief Copy assignment operator.
          *
          *  @param other    This the hpx::vector object which is to be copied
@@ -506,6 +528,7 @@ namespace hpx{
             this->base_sf_of_gid_pair_ = other.base_sf_of_gid_pair_;
             return *this;
         }
+
 
         //
         // Capacity related API's in vector class
@@ -1173,7 +1196,7 @@ namespace hpx{
         //   chunk_vector.
         //
         /**  @brief Return the iterator at the beginning of the vector. */
-        hpx::vector::iterator begin()
+        iterator begin()
         {
             return iterator(base_sf_of_gid_pair_.begin(), 0, valid);
         }//end of begin
@@ -1184,9 +1207,34 @@ namespace hpx{
         //   bfg_pair which immediately precedes the LAST (for LAST Refer
         //   the Create PROGRAMMER DOCUMENTATION).
         /**  @brief Return the iterator at the beginning of the vector. */
-        hpx::vector::iterator end()
+        iterator end()
         {
             return iterator((base_sf_of_gid_pair_.end() - 2),
+                            hpx::stubs::chunk_vector::size_async(
+                                        ((base_sf_of_gid_pair_.end() - 2)->second).get()
+                                                                ).get(),
+                            valid);
+        }//end of begin
+
+        // PROGRAMMER DOCUMENTATION:
+        //  The beginning id represented by the 0'th position of the first
+        //   chunk_vector.
+        //
+        /**  @brief Return the iterator at the beginning of the vector. */
+        const_iterator cbegin()
+        {
+            return const_iterator(base_sf_of_gid_pair_.begin(), 0, valid);
+        }//end of begin
+
+        // PROGRAMMER DOCUMENTATION:
+        //   The end of vector is represented by the last position
+        //   (std::vector's last iterator position) of the chunk_vector in
+        //   bfg_pair which immediately precedes the LAST (for LAST Refer
+        //   the Create PROGRAMMER DOCUMENTATION).
+        /**  @brief Return the iterator at the beginning of the vector. */
+        const_iterator cend()
+        {
+            return const_iterator((base_sf_of_gid_pair_.end() - 2),
                             hpx::stubs::chunk_vector::size_async(
                                         ((base_sf_of_gid_pair_.end() - 2)->second).get()
                                                                 ).get(),

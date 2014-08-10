@@ -47,6 +47,12 @@ HPX_REGISTER_ACTION(
     chunk_vector_reserve_action);
 
 //Element access component action registration
+/** @brief Macro to define the boilerplate code for get_value_noexpt component
+ *          action.
+ */
+HPX_REGISTER_ACTION(
+    hpx::server::chunk_vector::get_value_noexpt_action,
+    chunk_vector_get_value_noexpt_action);
 /** @brief Macro to define the boilerplate code for get_value component action.*/
 HPX_REGISTER_ACTION(
     hpx::server::chunk_vector::get_value_action,

@@ -188,6 +188,21 @@ namespace hpx
             //
             // Element access API's
             //
+
+            /** @brief Returns the element at the position pos in the chunk_vector
+             *          container. It does not throw the exception
+             *
+             *  @param pos Position of the element in the chunk_vector [Note the
+             *              first position in the chunk_vector is 0]
+             *  @return Return the value of the element at position represented
+             *           by pos [Note that this is not the reference to the
+             *           element]
+             */
+            VALUE_TYPE get_value_noexpt(std::size_t pos)
+            {
+                return chunk_vector_[pos];
+            }
+
             /** @brief Returns the element at position pos in the chunk_vector
              *          container. It throws the hpx::out_of_bound exception.
              *
@@ -428,6 +443,10 @@ namespace hpx
             HPX_DEFINE_COMPONENT_ACTION(chunk_vector, reserve);
 
             //Element access component action
+            /** @brief Macro to define get_value_noexpt function as HPX component
+             *          action type.
+             */
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, get_value_noexpt);
             /** @brief Macro to define get_value function as HPX component action
              *          type.
              */
@@ -645,6 +664,26 @@ namespace hpx
             //
             //  Element Access API's in stubs class
             //
+
+            //GET_VALUE_NOEXPT
+            /** @brief Return the value at position pos in the chunk_vector
+             *          component. It does not throw any exception exception.
+             *
+             *  @param gid  The global id of the chunk_vector component register
+             *               with HPX
+             *  @param pos  Position of the element in the chunk_vector [Note
+             *               the first position in the chunk_vector is 0]
+             *
+             *  @return This return value as the hpx::future
+             */
+            static hpx::lcos::future<VALUE_TYPE>
+                get_value_noexpt_async(hpx::naming::id_type const& gid,
+                                        std::size_t pos)
+            {
+                return hpx::async<hpx::server::chunk_vector::
+                                        get_value_noexpt_action>(gid,
+                                                                 pos);
+            }
 
             //GET_VALUE
             /** @brief Return the value at position pos in the chunk_vector
@@ -1218,6 +1257,10 @@ HPX_REGISTER_ACTION_DECLARATION(
     chunk_vector_reserve_action);
 
 //Element access component action declaration
+/** @brief Macro to register get_value_noexpt component action type with HPX AGAS.*/
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::server::chunk_vector::get_value_noexpt_action,
+    chunk_vector_get_value_noexpt_action);
 /** @brief Macro to register get_value component action type with HPX AGAS.*/
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::get_value_action,
