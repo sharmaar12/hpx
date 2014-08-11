@@ -907,7 +907,7 @@ namespace hpx{
         hpx::future< VALUE_TYPE > back_async() const
         {
             //As the LAST pair is there
-            return hpx::stubs::chunk_vector::front_async(
+            return hpx::stubs::chunk_vector::back_async(
                                     ((base_sf_of_gid_pair_.end() - 2)->second).get()
                                                          );
         }//end of back_async
