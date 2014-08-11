@@ -45,7 +45,7 @@ void test_constructor()
     std::for_each(v_with_val.begin(), v_with_val.end(),
                   [&count] (VAL_TYPE val)
                   {
-                    //Check all element is initialized to the zero
+                    //Check all element is initialized to the INITIAL_VALUE
                     HPX_TEST_EQ(val, (VAL_TYPE)INITIAL_VALUE);
                     ++count;
                   });
@@ -61,7 +61,7 @@ void test_constructor()
     std::for_each(v_copy.begin(), v_copy.end(),
                   [&count] (VAL_TYPE val)
                   {
-                    //Check all element is initialized to the zero
+                    //Check all element is initialized to the INITIAL_VALUE
                     HPX_TEST_EQ(val, (VAL_TYPE)INITIAL_VALUE);
                     ++count;
                   });

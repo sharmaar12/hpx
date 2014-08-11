@@ -29,7 +29,7 @@ void test_copy_assignment_operator()
     std::for_each(v_with_size_less.begin(), v_with_size_less.end(),
                   [&count] (VAL_TYPE val)
                   {
-                    //Check all element is initialized to the zero
+                    //Check all element is initialized to the INITIAL_VALUE
                     HPX_TEST_EQ(val, (VAL_TYPE)INITIAL_VALUE);
                     ++count;
                   });
@@ -55,7 +55,7 @@ void test_copy_assignment_operator()
     std::for_each(v_with_size_more.begin(), v_with_size_more.end(),
                   [&count] (VAL_TYPE val)
                   {
-                    //Check all element is initialized to the zero
+                    //Check all element is initialized to the INITIAL_VALUE
                     HPX_TEST_EQ(val, (VAL_TYPE)INITIAL_VALUE);
                     ++count;
                   });
@@ -79,7 +79,7 @@ void test_copy_assignment_operator()
     std::for_each(v_with_size_equal.begin(), v_with_size_equal.end(),
                   [&count] (VAL_TYPE val)
                   {
-                    //Check all element is initialized to the zero
+                    //Check all element is initialized to the INITIAL_VALUE
                     HPX_TEST_EQ(val, (VAL_TYPE)INITIAL_VALUE);
                     ++count;
                   });

@@ -72,7 +72,7 @@ void test_resize_helper_increase(std::size_t num_chunks,
         {
             //NOTE: I have not resized using val if val == 0 (I.e. the value for
             // val is not provided) hence in case where val is not specified
-            // this checks the newly created elements are initialized to zero.
+            // this checks the newly created elements are initialized to val.
             HPX_TEST_EQ(v[ (chunks * new_chunk_size) + i],
                         (VAL_TYPE) val);
             ++count_new_ele;
@@ -222,7 +222,7 @@ void test_resize_async_helper_increase(std::size_t num_chunks,
         {
             //NOTE: I have not resized using val if val == 0 (I.e. the value for
             // val is not provided) hence in case where val is not specified
-            // this checks the newly created elements are initialized to zero.
+            // this checks the newly created elements are initialized to val.
             HPX_TEST_EQ(v[ (chunks * new_chunk_size) + i],
                         (VAL_TYPE) val);
             ++count_new_ele;
