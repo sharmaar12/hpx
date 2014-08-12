@@ -15,12 +15,20 @@ void test_constructor()
     //Vector created with default constructor
     hpx::vector v;
     HPX_TEST_EQ(v.size(), (std::size_t) 0);
+    //Tests iterator API are behaving correctly
+    HPX_TEST(v.begin() == v.end());
+    HPX_TEST(v.cbegin() == v.cend());
 
     //Vector created with 100 chunks and each chunk is having 10005 elements
     std::size_t num_chunks = 100, chunk_size = 10005;
     std::size_t expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v_with_size(num_chunks, chunk_size);
+
+    //Tests iterator API are behaving correctly
+    HPX_TEST(v_with_size.begin() != v_with_size.end());
+    HPX_TEST(v_with_size.cbegin() != v_with_size.cend());
+
     std::size_t count = 0;
 
     //Segmented iterator work for std:for_each as lamda is taking value not
@@ -38,6 +46,12 @@ void test_constructor()
     //Vector Created with 100 chunks and each chunk is having 10005 elements
     //All elements of vector are initialized to INITIAL_VALUE
     hpx::vector v_with_val(num_chunks, chunk_size, INITIAL_VALUE);
+
+
+    //Tests iterator API are behaving correctly
+    HPX_TEST(v_with_val.begin() != v_with_val.end());
+    HPX_TEST(v_with_val.cbegin() != v_with_val.cend());
+
     count = 0;
 
     //Segmented iterator work for std:for_each as lamda is taking value not
@@ -55,6 +69,11 @@ void test_constructor()
 
     //COPY CONSTRUCTOR TEST
     hpx::vector v_copy(v_with_val);
+
+    //Tests iterator API are behaving correctly
+    HPX_TEST(v_copy.begin() != v_copy.end());
+    HPX_TEST(v_copy.cbegin() != v_copy.cend());
+
     count = 0;
     //Segmented iterator work for std:for_each as lamda is taking value not
     // reference and all other iterator API is implemented.
