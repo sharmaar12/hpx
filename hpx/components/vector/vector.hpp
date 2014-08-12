@@ -1215,7 +1215,7 @@ namespace hpx{
                                         ((base_sf_of_gid_pair_.end() - 2)->second).get()
                                                                 ).get(),
                             valid);
-        }//end of begin
+        }//end of end
 
         // PROGRAMMER DOCUMENTATION:
         //  The beginning id represented by the 0'th position of the first
@@ -1225,7 +1225,7 @@ namespace hpx{
         const_iterator cbegin()
         {
             return const_iterator(base_sf_of_gid_pair_.begin(), 0, valid);
-        }//end of begin
+        }//end of cbegin
 
         // PROGRAMMER DOCUMENTATION:
         //   The end of vector is represented by the last position
@@ -1240,7 +1240,7 @@ namespace hpx{
                                         ((base_sf_of_gid_pair_.end() - 2)->second).get()
                                                                 ).get(),
                             valid);
-        }//end of begin
+        }//end of cend
 
         //
         // Destructor
