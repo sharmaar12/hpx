@@ -34,7 +34,7 @@
 namespace hpx
 {
     // PROGRAMMER DOCUMENTATION:
-    // The idea of this implementation is taken from
+    // The idea of this implementation is taken from [Specially for for_each()]
     // http://lafstern.org/matt/segmented.pdf fill algorithm. [page no 7-8]
     //
 
