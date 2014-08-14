@@ -482,7 +482,7 @@ namespace hpx
          *  @return Return true if object with which it called is less than
          *           other, false otherwise
          */
-        bool operator < (self_type const& other)
+        bool operator < (self_type const& other) const
         {
              //If both are from diff gid
             if (this->curr_bfg_pair_ < other.curr_bfg_pair_)
@@ -513,7 +513,7 @@ namespace hpx
          *  @return Return true if object with which it called is greater than
          *           other, false otherwise
          */
-        bool operator > (self_type const& other)
+        bool operator > (self_type const& other) const
         {
             if (this->curr_bfg_pair_ > other.curr_bfg_pair_)
             {
@@ -540,7 +540,7 @@ namespace hpx
          *  @return Return true if object with which it called is less than or
          *           equal to the other, false otherwise
          */
-        bool operator <= (self_type const& other)
+        bool operator <= (self_type const& other) const
         {
             if ( (*this) < other || (*this) == other )
             {
@@ -559,7 +559,7 @@ namespace hpx
          *  @return Return true if object with which it called is greater than
          *           or equal to the other, false otherwise
          */
-        bool operator >= (self_type const& other)
+        bool operator >= (self_type const& other) const
         {
             if ( (*this) > other || (*this) == other )
             {
@@ -599,7 +599,7 @@ namespace hpx
          *  @return Value in the element which is at n position ahead of the
          *           current iterator
          */
-        VALUE_TYPE operator[](std::size_t n)
+        VALUE_TYPE operator[](std::size_t n) const
         {
             self_type temp = *this;
             temp = temp + n;

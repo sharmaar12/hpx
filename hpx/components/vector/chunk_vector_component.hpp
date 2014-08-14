@@ -198,7 +198,7 @@ namespace hpx
              *           by pos [Note that this is not the reference to the
              *           element]
              */
-            VALUE_TYPE get_value_noexpt(std::size_t pos)
+            VALUE_TYPE get_value_noexpt(std::size_t pos) const
             {
                 return chunk_vector_[pos];
             }
@@ -405,7 +405,7 @@ namespace hpx
              */
             void chunk_for_each_const(std::size_t first,
                                 std::size_t last,
-                                hpx::util::function<void(VALUE_TYPE const&)> fn)
+                                hpx::util::function<void(VALUE_TYPE const&)> fn) const
             {
                 std::for_each( chunk_vector_.begin() + first,
                               chunk_vector_.begin() + last,
@@ -497,7 +497,7 @@ namespace hpx
             /** @brief Macro to define chunk_for_each_const_iterator function as
              *          HPX component action type.
              */
-            HPX_DEFINE_COMPONENT_ACTION(chunk_vector, chunk_for_each_const);
+            HPX_DEFINE_COMPONENT_CONST_ACTION(chunk_vector, chunk_for_each_const);
         };//end of class chunk_vector
 
     }//end of server namespace
@@ -1315,5 +1315,5 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::server::chunk_vector::chunk_for_each_const_action,
     chunk_vector_chunk_for_each_const_action);
-
+		
 #endif // CHUNK_VECTOR_COMPONENT_HPP

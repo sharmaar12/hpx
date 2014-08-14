@@ -177,7 +177,7 @@ namespace hpx{
                         }
                                     );
             //  Second condition avoid the boundry case where the get_value can be
-            //  called on invalid gid. This occurs when pos = -1 only
+            //  called on invalid gid. This occurs when pos = -1 (maximum value)
             if(it->first == pos && (it->second).get() != invalid_id)
             {
                 return it;
@@ -509,7 +509,7 @@ namespace hpx{
          *           pos [Note that this is not the reference to the element]
          *
          */
-        VALUE_TYPE operator [](std::size_t pos)
+        VALUE_TYPE operator [](std::size_t pos) const
         {
             vector_type::const_iterator it = get_base_gid_pair(pos);
             return hpx::stubs::chunk_vector::get_value_noexpt_async(
@@ -1202,6 +1202,12 @@ namespace hpx{
             return iterator(base_sf_of_gid_pair_.begin(), 0, valid);
         }//end of begin
 
+        /**  @brief Return the const_iterator at the beginning of the vector. */
+        const_iterator begin() const
+        {
+            return const_iterator(base_sf_of_gid_pair_.begin(), 0, valid);
+        }//end of begin
+
         // PROGRAMMER DOCUMENTATION:
         //   The end of vector is represented by the last position
         //   (std::vector's last iterator position) of the chunk_vector in
@@ -1217,12 +1223,22 @@ namespace hpx{
                             valid);
         }//end of end
 
+        /**  @brief Return the iterator at the beginning of the vector. */
+        const_iterator end() const
+        {
+            return const_iterator((base_sf_of_gid_pair_.end() - 2),
+                            hpx::stubs::chunk_vector::size_async(
+                                        ((base_sf_of_gid_pair_.end() - 2)->second).get()
+                                                                ).get(),
+                            valid);
+        }//end of end
+
         // PROGRAMMER DOCUMENTATION:
         //  The beginning id represented by the 0'th position of the first
         //   chunk_vector.
         //
         /**  @brief Return the iterator at the beginning of the vector. */
-        const_iterator cbegin()
+        const_iterator cbegin() const
         {
             return const_iterator(base_sf_of_gid_pair_.begin(), 0, valid);
         }//end of cbegin
@@ -1233,7 +1249,7 @@ namespace hpx{
         //   bfg_pair which immediately precedes the LAST (for LAST Refer
         //   the Create PROGRAMMER DOCUMENTATION).
         /**  @brief Return the iterator at the beginning of the vector. */
-        const_iterator cend()
+        const_iterator cend() const
         {
             return const_iterator((base_sf_of_gid_pair_.end() - 2),
                             hpx::stubs::chunk_vector::size_async(
