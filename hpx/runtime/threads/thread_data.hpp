@@ -18,11 +18,7 @@
 #include <hpx/runtime/threads/detail/tagged_thread_state.hpp>
 #include <hpx/lcos/base_lco.hpp>
 #include <hpx/lcos/local/spinlock.hpp>
-<<<<<<< HEAD
-#include <hpx/util/spinlock_pool.hpp>
-=======
 #include <hpx/lcos/local/spinlock_pool.hpp>
->>>>>>> aff65a20ab3b54fb9f9eb2cc2756201877e06d35
 #include <hpx/util/assert.hpp>
 #include <hpx/util/backtrace.hpp>
 #include <hpx/util/coroutine/coroutine.hpp>
