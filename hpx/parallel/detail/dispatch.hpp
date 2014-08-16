@@ -40,7 +40,12 @@
             __VA_ARGS__, boost::mpl::false_());                               \
                                                                               \
     case detail::execution_policy_enum::task:                                 \
-        return call(par, __VA_ARGS__, boost::mpl::false_());                  \
+        {                                                                     \
+            task_execution_policy const& t =                                  \
+                *policy.get<task_execution_policy>();                         \
+            return call(par(t.get_executor(), t.get_chunk_size()),            \
+                __VA_ARGS__, boost::mpl::false_());                           \
+        }                                                                     \
                                                                               \
     default:                                                                  \
         HPX_THROW_EXCEPTION(hpx::bad_parameter,                               \
@@ -57,7 +62,7 @@ namespace hpx { namespace parallel { HPX_INLINE_NAMESPACE(v1) { namespace detail
         typedef Result result_type;
 
 #define BOOST_PP_ITERATION_PARAMS_1                                           \
-    (3, (3, 5, "hpx/parallel/detail/dispatch.hpp"))                           \
+    (3, (2, 5, "hpx/parallel/detail/dispatch.hpp"))                           \
     /**/
 
 #include BOOST_PP_ITERATE()

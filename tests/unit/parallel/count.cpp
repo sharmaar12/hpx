@@ -30,9 +30,9 @@ void test_count(ExPolicy const& policy, IteratorTag)
     }
 
     boost::int64_t num_items = hpx::parallel::count(policy,
-        iterator(boost::begin(c)), iterator(boost::end(c)), (std::size_t)0);
+        iterator(boost::begin(c)), iterator(boost::end(c)), std::size_t(0));
 
-    HPX_TEST_EQ(num_items, find_count);
+    HPX_TEST_EQ(boost::int64_t(num_items), find_count);
 
 }
 
@@ -55,9 +55,9 @@ void test_count(hpx::parallel::task_execution_policy, IteratorTag)
     hpx::future<boost::int64_t> f =
         hpx::parallel::count(hpx::parallel::task,
             iterator(boost::begin(c)), iterator(boost::end(c)),
-            (std::size_t)0);
+            std::size_t(0));
 
-    HPX_TEST_EQ(find_count, f.get());
+    HPX_TEST_EQ(boost::int64_t(find_count), f.get());
 }
 
 template <typename IteratorTag>
@@ -101,13 +101,13 @@ void test_count_exception(ExPolicy const& policy, IteratorTag)
             decorated_iterator(
                 boost::begin(c),
                 [](){ throw std::runtime_error("test"); }),
-            decorated_iterator(boost::end(c), [](){}),
-            (std::size_t)10);
+            decorated_iterator(boost::end(c)),
+            std::size_t(10));
         HPX_TEST(false);
     }
     catch(hpx::exception_list const& e) {
         caught_exception = true;
-        test::test_num_exeptions<ExPolicy, IteratorTag>::call(policy, e);
+        test::test_num_exceptions<ExPolicy, IteratorTag>::call(policy, e);
     }
     catch(...) {
         HPX_TEST(false);
@@ -133,15 +133,15 @@ void test_count_exception(hpx::parallel::task_execution_policy, IteratorTag)
                 decorated_iterator(
                     boost::begin(c),
                     [](){ throw std::runtime_error("test"); }),
-                decorated_iterator(boost::end(c), [](){}),
-                (std::size_t)10);
+                decorated_iterator(boost::end(c)),
+                std::size_t(10));
         f.get();
 
         HPX_TEST(false);
     }
     catch(hpx::exception_list const& e) {
         caught_exception = true;
-        test::test_num_exeptions<
+        test::test_num_exceptions<
             hpx::parallel::task_execution_policy, IteratorTag
         >::call(hpx::parallel::task, e);
     }
@@ -195,8 +195,8 @@ void test_count_bad_alloc(ExPolicy const& policy, IteratorTag)
             decorated_iterator(
                 boost::begin(c),
                 [](){ throw std::bad_alloc(); }),
-            decorated_iterator(boost::end(c), [](){}),
-            (std::size_t)0);
+            decorated_iterator(boost::end(c)),
+            std::size_t(10));
         HPX_TEST(false);
     }
     catch (std::bad_alloc const&) {
@@ -226,8 +226,8 @@ void test_count_bad_alloc(hpx::parallel::task_execution_policy, IteratorTag)
                 decorated_iterator(
                     boost::begin(c),
                     [](){ throw std::bad_alloc(); }),
-                decorated_iterator(boost::end(c), [](){}),
-                (std::size_t)0);
+                decorated_iterator(boost::end(c)),
+                std::size_t(10));
 
         f.get();
 

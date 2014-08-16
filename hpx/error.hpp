@@ -1,6 +1,5 @@
 //  Copyright (c) 2007-2013 Hartmut Kaiser
 //  Copyright (c) 2011      Bryce Lelbach
-//  Copyright (c) 2014      Anuj R. Sharma
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -12,7 +11,6 @@
 
 #include <hpx/config.hpp>
 #include <hpx/config/export_definitions.hpp>
-#include <boost/exception/detail/attribute_noreturn.hpp>
 #include <string>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,9 +78,6 @@ namespace hpx
         bad_function_call = 52,                     ///< equivalent of std::bad_function_call
         task_canceled_exception = 53,               ///< parallel::v2::task_canceled_exception
         task_region_not_active = 54,                ///< task_region is not active
-	out_of_range = 55,			    ///< Equivalent to std::out_of_range
-	length_error = 56,			    ///< Equivalent to std::length_error
-	invalid_vector_error = 57,		    ///< An error occurred when Invalid hpx::vector is created [Invalid Conditions: num_chunk !> 0 || chunk_size !> 0 ]
 
         /// \cond NOINTERNAL
         last_error,
@@ -148,9 +143,6 @@ namespace hpx
         /* 52 */ "bad_function_call",
         /* 53 */ "task_canceled_exception",
         /* 54 */ "task_region_not_active",
-	/* 55 */ "out_of_range",
-	/* 56 */ "length_error",
-	/* 57 */ "invalid_vector_error",
 
         /*    */ ""
     };
@@ -159,7 +151,7 @@ namespace hpx
     /// \cond NOINTERNAL
 
     /// \brief throw an hpx::exception initialized from the given arguments
-    BOOST_ATTRIBUTE_NORETURN HPX_EXPORT
+    HPX_ATTRIBUTE_NORETURN HPX_EXPORT
     void throw_exception(error e, std::string const& msg,
         std::string const& func, std::string const& file = "", long line = -1);
     /// \endcond

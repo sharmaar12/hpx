@@ -189,8 +189,6 @@ namespace hpx
 
             struct lockfree_fifo;
             struct lockfree_lifo;
-            struct lockfree_abp_fifo;
-            struct lockfree_abp_lifo;
 
             template <typename Mutex = boost::mutex
                     , typename PendingQueuing = lockfree_fifo
@@ -221,7 +219,7 @@ namespace hpx
                     , typename StagedQueuing = lockfree_fifo
                     , typename TerminatedQueuing = lockfree_lifo
                      >
-            class HPX_API_EXPORT static_priority_queue_scheduler;
+            class HPX_EXPORT static_priority_queue_scheduler;
 #endif
 
 #if defined(HPX_HIERARCHY_SCHEDULER)
@@ -240,12 +238,9 @@ namespace hpx
                 lockfree_lifo  // LIFO terminated queuing
             > fifo_priority_queue_scheduler;
 
-            typedef local_priority_queue_scheduler<
-                boost::mutex,
-                lockfree_lifo, // LIFO pending queuing
-                lockfree_lifo, // LIFO staged queuing
-                lockfree_lifo  // LIFO terminated queuing
-            > lifo_priority_queue_scheduler;
+#if defined(HPX_ABP_SCHEDULER)
+            struct lockfree_abp_fifo;
+            struct lockfree_abp_lifo;
 
             typedef local_priority_queue_scheduler<
                 boost::mutex,
@@ -253,13 +248,7 @@ namespace hpx
                 lockfree_abp_fifo, // FIFO + ABP staged queuing
                 lockfree_lifo  // LIFO terminated queuing
             > abp_fifo_priority_queue_scheduler;
-
-            typedef local_priority_queue_scheduler<
-                boost::mutex,
-                lockfree_abp_lifo, // LIFO + ABP pending queuing
-                lockfree_abp_lifo, // LIFO + ABP staged queuing
-                lockfree_lifo  // LIFO terminated queuing
-            > abp_lifo_priority_queue_scheduler;
+#endif
 
             // define the default scheduler to use
             typedef fifo_priority_queue_scheduler queue_scheduler;
@@ -276,6 +265,7 @@ namespace hpx
             typename NotificationPolicy = threads::policies::callback_notifier>
         class HPX_EXPORT threadmanager_impl;
 
+        ///////////////////////////////////////////////////////////////////////
         /// \enum thread_state_enum
         ///
         /// The \a thread_state_enum enumerator encodes the current state of a
@@ -302,12 +292,15 @@ namespace hpx
                                      thread objects */
         };
 
+        HPX_API_EXPORT char const* get_thread_state_name(thread_state_enum state);
+
         /// \ cond NODETAIL
         ///   Please note that if you change the value of threads::terminated
         ///   above, you will need to adjust do_call(dummy<1> = 1) in
         ///   util/coroutine/detail/coroutine_impl.hpp as well.
         /// \ endcond
 
+        ///////////////////////////////////////////////////////////////////////
         /// \enum thread_priority
         enum thread_priority
         {
@@ -315,14 +308,15 @@ namespace hpx
             thread_priority_default = 0,      ///< use default priority
             thread_priority_low = 1,          ///< low thread priority
             thread_priority_normal = 2,       ///< normal thread priority (default)
-            thread_priority_critical = 3      ///< high thread priority
+            thread_priority_critical = 3,     ///< high thread priority
+            thread_priority_boost = 4         ///< high thread priority for first invocation, normal afterwards
         };
 
         typedef threads::detail::tagged_thread_state<thread_state_enum> thread_state;
 
-        HPX_API_EXPORT char const* get_thread_state_name(thread_state_enum state);
         HPX_API_EXPORT char const* get_thread_priority_name(thread_priority priority);
 
+        ///////////////////////////////////////////////////////////////////////
         /// \enum thread_state_ex_enum
         ///
         /// The \a thread_state_ex_enum enumerator encodes the reason why a
@@ -341,9 +335,11 @@ namespace hpx
         typedef thread_state_enum thread_function_sig(thread_state_ex_enum);
         typedef util::unique_function_nonser<thread_function_sig> thread_function_type;
 
+        ///////////////////////////////////////////////////////////////////////
         /// \enum thread_stacksize
         enum thread_stacksize
         {
+            thread_stacksize_unknown = -1,
             thread_stacksize_small = 1,         ///< use small stack size
             thread_stacksize_medium = 2,        ///< use medium sized stack size
             thread_stacksize_large = 3,         ///< use large stack size
@@ -354,6 +350,8 @@ namespace hpx
             thread_stacksize_minimal = thread_stacksize_small,  ///< use minimally possible stack size
             thread_stacksize_maximal = thread_stacksize_huge,   ///< use maximally possible stack size
         };
+
+        HPX_API_EXPORT char const* get_stack_size_name(std::ptrdiff_t size);
 
         class HPX_EXPORT executor;
 
@@ -768,7 +766,11 @@ namespace hpx
         deferred = 0x02,
         task = 0x04,        // see N3632
         sync = 0x08,
-        all = 0x0f          // async | deferred | task | sync
+        fork = 0x10,        // same as async, but forces continuation stealing
+
+        sync_policies = 0x0a,       // sync | deferred
+        async_policies = 0x15,      // async | task | fork
+        all = 0x1f                  // async | deferred | task | sync | fork
     };
     BOOST_SCOPED_ENUM_END
 

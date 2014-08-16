@@ -368,7 +368,15 @@ namespace hpx { namespace threads { namespace policies
                 return high_priority_queues_[num]->create_thread(data,
                     initial_state, run_now, ec);
             }
-            else if (data.priority == thread_priority_low) {
+
+            if (data.priority == thread_priority_boost) {
+                data.priority = thread_priority_normal;
+                std::size_t num = num_thread % high_priority_queues_.size();
+                return high_priority_queues_[num]->create_thread(data,
+                    initial_state, run_now, ec);
+            }
+
+            if (data.priority == thread_priority_low) {
                 return low_priority_queue_.create_thread(data, initial_state,
                     run_now, ec);
             }
@@ -491,7 +499,9 @@ namespace hpx { namespace threads { namespace policies
             if (std::size_t(-1) == num_thread)
                 num_thread = ++curr_queue_ % queues_.size();
 
-            if (priority == thread_priority_critical) {
+            if (priority == thread_priority_critical ||
+                priority == thread_priority_boost)
+            {
                 std::size_t num = num_thread % high_priority_queues_.size();
                 high_priority_queues_[num]->schedule_thread(thrd);
             }
@@ -507,7 +517,22 @@ namespace hpx { namespace threads { namespace policies
         void schedule_thread_last(threads::thread_data_base* thrd, std::size_t num_thread,
             thread_priority priority = thread_priority_normal)
         {
-            local_priority_queue_scheduler::schedule_thread(thrd, num_thread, priority);
+            if (std::size_t(-1) == num_thread)
+                num_thread = ++curr_queue_ % queues_.size();
+
+            if (priority == thread_priority_critical ||
+                priority == thread_priority_boost)
+            {
+                std::size_t num = num_thread % high_priority_queues_.size();
+                high_priority_queues_[num]->schedule_thread(thrd, true);
+            }
+            else if (priority == thread_priority_low) {
+                low_priority_queue_.schedule_thread(thrd, true);
+            }
+            else {
+                HPX_ASSERT(num_thread < queues_.size());
+                queues_[num_thread]->schedule_thread(thrd, true);
+            }
         }
 
         /// Destroy the passed thread as it has been terminated
@@ -598,6 +623,7 @@ namespace hpx { namespace threads { namespace policies
                 case thread_priority_normal:
                     return queues_[num_thread]->get_thread_count(state);
 
+                case thread_priority_boost:
                 case thread_priority_critical:
                     {
                         if (num_thread < high_priority_queues_.size())
@@ -628,6 +654,8 @@ namespace hpx { namespace threads { namespace policies
 
                     for (std::size_t i = 0; i != queues_.size(); ++i)
                         count += queues_[i]->get_thread_count(state);
+
+                    break;
                 }
 
             case thread_priority_low:
@@ -640,6 +668,7 @@ namespace hpx { namespace threads { namespace policies
                     break;
                 }
 
+            case thread_priority_boost:
             case thread_priority_critical:
                 {
                     for (std::size_t i = 0; i != high_priority_queues_.size(); ++i)

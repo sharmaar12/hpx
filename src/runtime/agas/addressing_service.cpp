@@ -203,7 +203,7 @@ addressing_service::addressing_service(
   , runtime_mode runtime_type_
     )
   : gva_cache_(new gva_cache_type)
-  , console_cache_(0)
+  , console_cache_(naming::invalid_locality_id)
   , max_refcnt_requests_(ini_.get_agas_max_pending_refcnt_requests())
   , refcnt_requests_count_(0)
   , enable_refcnt_caching_(true)
@@ -213,7 +213,7 @@ addressing_service::addressing_service(
   , caching_(ini_.get_agas_caching_mode())
   , range_caching_(caching_ ? ini_.get_agas_range_caching_mode() : false)
   , action_priority_(ini_.get_agas_dedicated_server() ?
-        threads::thread_priority_normal : threads::thread_priority_critical)
+        threads::thread_priority_normal : threads::thread_priority_boost)
   , here_()         // defer initializing this
   , rts_lva_(0)
   , mem_lva_(0)
@@ -608,7 +608,7 @@ bool addressing_service::get_console_locality(
         {
             mutex_type::scoped_lock lock(console_cache_mtx_);
 
-            if (console_cache_)
+            if (console_cache_ != naming::invalid_locality_id)
             {
                 prefix = naming::get_gid_from_locality_id(console_cache_);
                 if (&ec != &throws)
@@ -635,7 +635,7 @@ bool addressing_service::get_console_locality(
 
             {
                 mutex_type::scoped_lock lock(console_cache_mtx_);
-                if (!console_cache_) {
+                if (console_cache_ == naming::invalid_locality_id) {
                     console_cache_ = console;
                 }
                 else {
@@ -2510,6 +2510,55 @@ std::size_t addressing_service::get_cache_insertions(bool reset)
     return gva_cache_->get_statistics().insertions(reset);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+std::size_t addressing_service::get_cache_get_entry_count(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_get_entry_count(reset);
+}
+
+std::size_t addressing_service::get_cache_insert_entry_count(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_insert_entry_count(reset);
+}
+
+std::size_t addressing_service::get_cache_update_entry_count(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_update_entry_count(reset);
+}
+
+std::size_t addressing_service::get_cache_erase_entry_count(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_erase_entry_count(reset);
+}
+
+std::size_t addressing_service::get_cache_get_entry_time(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_get_entry_time(reset);
+}
+
+std::size_t addressing_service::get_cache_insert_entry_time(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_insert_entry_time(reset);
+}
+
+std::size_t addressing_service::get_cache_update_entry_time(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_update_entry_time(reset);
+}
+
+std::size_t addressing_service::get_cache_erase_entry_time(bool reset)
+{
+    cache_mutex_type::scoped_lock lock(gva_cache_mtx_);
+    return gva_cache_->get_statistics().get_erase_entry_time(reset);
+}
+
 /// Install performance counter types exposing properties from the local cache.
 void addressing_service::register_counter_types()
 { // {{{
@@ -2522,6 +2571,24 @@ void addressing_service::register_counter_types()
         boost::bind(&addressing_service::get_cache_evictions, this, ::_1));
     HPX_STD_FUNCTION<boost::int64_t(bool)> cache_insertions(
         boost::bind(&addressing_service::get_cache_insertions, this, ::_1));
+
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_get_entry_count(
+        boost::bind(&addressing_service::get_cache_get_entry_count, this, ::_1));
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_insert_entry_count(
+        boost::bind(&addressing_service::get_cache_insert_entry_count, this, ::_1));
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_update_entry_count(
+        boost::bind(&addressing_service::get_cache_update_entry_count, this, ::_1));
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_erase_entry_count(
+        boost::bind(&addressing_service::get_cache_erase_entry_count, this, ::_1));
+
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_get_entry_time(
+        boost::bind(&addressing_service::get_cache_get_entry_time, this, ::_1));
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_insert_entry_time(
+        boost::bind(&addressing_service::get_cache_insert_entry_time, this, ::_1));
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_update_entry_time(
+        boost::bind(&addressing_service::get_cache_update_entry_time, this, ::_1));
+    HPX_STD_FUNCTION<boost::int64_t(bool)> cache_erase_entry_time(
+        boost::bind(&addressing_service::get_cache_erase_entry_time, this, ::_1));
 
     performance_counters::generic_counter_type_data const counter_types[] =
     {
@@ -2556,6 +2623,80 @@ void addressing_service::register_counter_types()
               _1, cache_insertions, _2),
           &performance_counters::locality_counter_discoverer,
           ""
+        },
+
+        { "/agas/count/cache_get_entry", performance_counters::counter_raw,
+          "returns the number of invocations of get_entry function of the "
+                "AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_get_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          ""
+        },
+        { "/agas/count/cache_insert_entry", performance_counters::counter_raw,
+          "returns the number of invocations of insert_entry function of the "
+                "AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_insert_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          ""
+        },
+        { "/agas/count/cache_update_entry", performance_counters::counter_raw,
+          "returns the number of invocations of update_entry function of the "
+                "AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_update_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          ""
+        },
+        { "/agas/count/cache_erase_entry", performance_counters::counter_raw,
+          "returns the number of invocations of erase_entry function of the "
+                "AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_erase_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          ""
+        },
+
+        { "/agas/time/cache_get_entry", performance_counters::counter_raw,
+          "returns the the overall time spent executing of the get_entry API "
+                "function of the AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_get_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          "ns"
+        },
+        { "/agas/time/cache_insert_entry", performance_counters::counter_raw,
+          "returns the the overall time spent executing of the insert_entry API "
+              "function of the AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_insert_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          "ns"
+        },
+        { "/agas/time/cache_update_entry", performance_counters::counter_raw,
+          "returns the the overall time spent executing of the update_entry API "
+                "function of the AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_update_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          "ns"
+        },
+        { "/agas/time/cache_erase_entry", performance_counters::counter_raw,
+          "returns the the overall time spent executing of the erase_entry API "
+                "function of the AGAS cache",
+          HPX_PERFORMANCE_COUNTER_V1,
+          boost::bind(&performance_counters::locality_raw_counter_creator,
+              _1, cache_erase_entry_count, _2),
+          &performance_counters::locality_counter_discoverer,
+          "ns"
         }
     };
     performance_counters::install_counter_types(
@@ -2583,7 +2724,9 @@ void addressing_service::garbage_collect_non_blocking(
     error_code& ec
     )
 {
-    mutex_type::scoped_lock l(refcnt_requests_mtx_);
+    mutex_type::scoped_lock l(refcnt_requests_mtx_, boost::try_to_lock);
+    if (!l) return;     // no need to compete for garbage collection
+
     send_refcnt_requests_non_blocking(l, ec);
 }
 
@@ -2591,7 +2734,9 @@ void addressing_service::garbage_collect(
     error_code& ec
     )
 {
-    mutex_type::scoped_lock l(refcnt_requests_mtx_);
+    mutex_type::scoped_lock l(refcnt_requests_mtx_, boost::try_to_lock);
+    if (!l) return;     // no need to compete for garbage collection
+
     send_refcnt_requests_sync(l, ec);
 }
 
@@ -2890,8 +3035,8 @@ namespace hpx
                 "no basename specified");
         }
 
-        if (sequence_nr == ~0U)
-            sequence_nr = naming::get_locality_id_from_id(find_here());
+        if (sequence_nr == std::size_t(~0U))
+            sequence_nr = std::size_t(naming::get_locality_id_from_id(find_here()));
 
         std::string name = detail::name_from_basename(basename, sequence_nr);
         return agas::on_symbol_namespace_event(name, agas::symbol_ns_bind, true);
@@ -2907,8 +3052,8 @@ namespace hpx
                 "no basename specified");
         }
 
-        if (sequence_nr == ~0U)
-            sequence_nr = naming::get_locality_id_from_id(find_here());
+        if (sequence_nr == std::size_t(~0U))
+            sequence_nr = std::size_t(naming::get_locality_id_from_id(find_here()));
 
         std::string name = detail::name_from_basename(basename, sequence_nr);
         return agas::register_name(name, id);
@@ -2924,8 +3069,8 @@ namespace hpx
                 "no basename specified");
         }
 
-        if (sequence_nr == ~0U)
-            sequence_nr = naming::get_locality_id_from_id(find_here());
+        if (sequence_nr == std::size_t(~0U))
+            sequence_nr = std::size_t(naming::get_locality_id_from_id(find_here()));
 
         std::string name = detail::name_from_basename(basename, sequence_nr);
         return agas::unregister_name(name);

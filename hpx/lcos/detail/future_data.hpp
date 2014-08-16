@@ -59,6 +59,11 @@ namespace detail
 
         virtual ~future_data_refcnt_base() {}
 
+        virtual bool requires_delete()
+        {
+            return 0 == --count_;
+        }
+
     protected:
         future_data_refcnt_base() : count_(0) {}
 
@@ -76,7 +81,7 @@ namespace detail
     }
     inline void intrusive_ptr_release(future_data_refcnt_base* p)
     {
-        if (0 == --p->count_)
+        if (p->requires_delete())
             delete p;
     }
 
@@ -142,8 +147,6 @@ namespace detail
         future_data()
           : data_(), state_(empty)
         {}
-
-        virtual void deleting_owner() {}
 
         // cancellation is disabled by default
         virtual bool cancelable() const
@@ -484,7 +487,7 @@ namespace detail
 
             // start new thread at given point in time
             threads::set_thread_state(id, tpoint, threads::pending,
-                threads::wait_timeout, threads::thread_priority_critical, ec);
+                threads::wait_timeout, threads::thread_priority_boost, ec);
             if (ec) {
                 // thread scheduling failed, report error to the new future
                 this->base_type::set_exception(hpx::detail::access_exception(ec));
@@ -598,7 +601,8 @@ namespace detail
         }
 
         // run in a separate thread
-        void apply(threads::thread_priority priority,
+        void apply(BOOST_SCOPED_ENUM(launch) policy,
+            threads::thread_priority priority,
             threads::thread_stacksize stacksize, error_code& ec)
         {
             check_started();
@@ -611,6 +615,13 @@ namespace detail
             if (sched_) {
                 sched_->add(util::bind(&task_base::run_impl, this_),
                     desc ? desc : "task_base::apply", threads::pending, false,
+                    stacksize, ec);
+            }
+            else if (policy == launch::fork) {
+                threads::register_thread_plain(
+                    util::bind(&task_base::run_impl, this_),
+                    desc ? desc : "task_base::apply", threads::pending, false,
+                    threads::thread_priority_boost, get_worker_thread_num(),
                     stacksize, ec);
             }
             else {
@@ -645,17 +656,6 @@ namespace detail
         }
 
     public:
-        void deleting_owner()
-        {
-            typename mutex_type::scoped_lock l(this->mtx_);
-            if (!started_) {
-                started_ = true;
-                l.unlock();
-                this->set_error(broken_task, "task_base::deleting_owner",
-                    "deleting task owner before future has become ready");
-            }
-        }
-
         template <typename T>
         void set_data(T && result)
         {

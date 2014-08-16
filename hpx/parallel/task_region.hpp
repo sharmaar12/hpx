@@ -206,7 +206,7 @@ namespace hpx { namespace parallel { HPX_INLINE_NAMESPACE(v2)
                     "the task_region_handle is not active");
             }
 
-            hpx::future<void> result = hpx::async(boost::move(f));
+            hpx::future<void> result = hpx::async(hpx::launch::fork, boost::move(f));
 
             mutex_type::scoped_lock l(mtx_);
             tasks_.push_back(std::move(result));
@@ -397,6 +397,7 @@ namespace hpx { namespace parallel { HPX_INLINE_NAMESPACE(v2)
     }
 }}}
 
+/// \cond NOINTERNAL
 #if !defined(BOOST_NO_CXX11_DELETED_FUNCTIONS)
 namespace std
 {
@@ -409,5 +410,6 @@ namespace boost
     addressof(hpx::parallel::v2::task_region_handle&) = delete;
 }
 #endif
+/// \endcond
 
 #endif
