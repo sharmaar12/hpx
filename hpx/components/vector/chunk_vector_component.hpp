@@ -72,15 +72,15 @@ namespace hpx
             //
 
             /** @brief Default Constructor which create chunk_vector with size 0.*/
-            explicit chunk_vector(): chunk_vector_(0,0) {}
+            explicit chunk_vector(): chunk_vector_(0, VALUE_TYPE()) {}
 
-            /** @brief Constructor which create and initialize chunk_vector with
-             *          all elements as 0.
-             *
-             *  @param chunk_size The size of vector
-             */
-            explicit chunk_vector(std::size_t chunk_size)
-                : chunk_vector_(chunk_size,0) {}
+//            /** @brief Constructor which create and initialize chunk_vector with
+//             *          all elements as 0.
+//             *
+//             *  @param chunk_size The size of vector
+//             */
+//            explicit chunk_vector(std::size_t chunk_size)
+//                : chunk_vector_(chunk_size, VALUE_TYPE()) {}
 
             /** @brief Constructor which create ans initialize chunk_vector with
              *          all elements as val.
@@ -582,7 +582,7 @@ namespace hpx
             static hpx::lcos::future<void>
                 resize_async(hpx::naming::id_type const& gid,
                              std::size_t n,
-                             VALUE_TYPE const& val = 0)
+                             VALUE_TYPE const& val = VALUE_TYPE())
             {
                 return hpx::async<hpx::server::chunk_vector::resize_action>(gid,
                                                                              n,

@@ -55,8 +55,18 @@ namespace hpx{
     */
     class vector
     {
+    public:
+        //  Short name for the segmented_vector_iterator. It also maintain to
+        //  the same API just like standard vector.
+        typedef hpx::segmented_vector_iterator          iterator;
+        typedef hpx::const_segmented_vector_iterator    const_iterator;
+        typedef std::size_t                             size_type;
+        typedef hpx::lcos::future<size_type>          size_future;
+
+    private:
         //Short name for chunk_vector class in hpx::server namespace.
-        typedef hpx::server::chunk_vector chunk_vector_type;
+        typedef hpx::server::chunk_vector   chunk_vector_type;
+
 
         //PROGRAMMER DOCUMENTATION:
         //  This pair consist of the base index of the first (0'th) element in
@@ -66,7 +76,7 @@ namespace hpx{
         //   far as possible. The shared_future is necessary as .get() function
         //   can be called more than once.
         typedef std::pair<
-                        std::size_t,
+                        size_type,
                          hpx::lcos::shared_future<hpx::naming::id_type>
                          > bfg_pair;
 
@@ -75,17 +85,6 @@ namespace hpx{
 
         // This typedef helps to call object of same class.
         typedef hpx::vector self_type;
-
-        // Short name for the std::size future.
-        typedef hpx::lcos::future<std::size_t> size_future;
-
-    public:
-        //  Short name for the segmented_vector_iterator. It also maintain to
-        //  the same API just like standard vector.
-        typedef hpx::segmented_vector_iterator          iterator;
-        typedef hpx::const_segmented_vector_iterator    const_iterator;
-
-    private:
 
             //PROGRAMMER DOCUMENTATION:
             // This is the vector representing the base_index and corresponding
@@ -115,13 +114,13 @@ namespace hpx{
         //
         //   What is LAST?
         //     This is the pair containing the max possible value for the
-        //     std::size_t and invalid global id which is created by default
+        //     size_type and invalid global id which is created by default
         //     when we create the hpx::naming::id_type variable.
         //
         //   LAST also helps in preventing the crash of the system due to invalid
         //   state of the iterator (segmented_iterator) defined for hpx::vector.
-        void create(std::size_t num_chunks,
-                    std::size_t chunk_size,
+        void create(size_type num_chunks,
+                    size_type chunk_size,
                      VALUE_TYPE val)
         {
             for (std::size_t chunk_index = 0;
@@ -141,7 +140,7 @@ namespace hpx{
             // Pushing LAST at the back
             hpx::naming::id_type invalid_id;
             base_sf_of_gid_pair_.push_back(
-                std::make_pair(std::numeric_limits<std::size_t>::max(),
+                std::make_pair(std::numeric_limits<size_type>::max(),
                                 hpx::make_ready_future(invalid_id)
                               )
                                           );
@@ -154,8 +153,8 @@ namespace hpx{
         //  Return the bgf_pair in which the element represented by pos must be
         //  present. Here one assumption is made that in any case the
         //  num_elements in the hpx::vector must be less than max possible value
-        //  of the std::size_t
-        vector_type::const_iterator get_base_gid_pair(std::size_t pos) const
+        //  of the size_type
+        vector_type::const_iterator get_base_gid_pair(size_type pos) const
         {
             hpx::lcos::shared_future<hpx::naming::id_type> sf;
             hpx::naming::id_type invalid_id;
@@ -190,7 +189,7 @@ namespace hpx{
 
 //        //Note num_chunks == represent then chunk vector index
 //        hpx::lcos::future<std::size_t>
-//            size_helper(std::size_t num_chunks) const
+//            size_helper(size_type num_chunks) const
 //        {
 //            if(num_chunks < 1)
 //            {
@@ -202,7 +201,7 @@ namespace hpx{
 //            else
 //                return hpx::lcos::local::dataflow(
 //                    [](hpx::lcos::future<std::size_t> s1,
-//                        hpx::lcos::future<std::size_t> s2) -> std::size_t
+//                        hpx::lcos::future<std::size_t> s2) -> size_type
 //                        {
 //                            return s1.get() + s2.get();
 //                        },
@@ -251,7 +250,7 @@ namespace hpx{
                                                         );
 
             return hpx::lcos::local::dataflow(
-                        [](size_future s1, size_future s2) -> std::size_t
+                        [](size_future s1, size_future s2) -> size_type
                         {
                             return s1.get() + s2.get();
                         },
@@ -262,7 +261,7 @@ namespace hpx{
         }//end of size_helper
 
 //        hpx::lcos::future<std::size_t>
-//            max_size_helper(std::size_t num_chunks) const
+//            max_size_helper(size_type num_chunks) const
 //        {
 //            if(num_chunks < 1)
 //            {
@@ -274,7 +273,7 @@ namespace hpx{
 //            else
 //                return hpx::lcos::local::dataflow(
 //                    [](hpx::lcos::future<std::size_t> s1,
-//                       hpx::lcos::future<std::size_t> s2) -> std::size_t
+//                       hpx::lcos::future<std::size_t> s2) -> size_type
 //                    {
 //                        return s1.get() + s2.get();
 //                    },
@@ -322,7 +321,7 @@ namespace hpx{
                                                         );
 
                 return hpx::lcos::local::dataflow(
-                            [](size_future s1, size_future s2) -> std::size_t
+                            [](size_future s1, size_future s2) -> size_type
                             {
                                 return s1.get() + s2.get();
                             },
@@ -334,7 +333,7 @@ namespace hpx{
 
 
 //        hpx::lcos::future<std::size_t>
-//            capacity_helper(std::size_t num_chunks) const
+//            capacity_helper(size_type num_chunks) const
 //        {
 //            if(num_chunks < 1)
 //            {
@@ -346,7 +345,7 @@ namespace hpx{
 //            else
 //                return hpx::lcos::local::dataflow(
 //                    [](hpx::lcos::future<std::size_t> s1,
-//                        hpx::lcos::future<std::size_t> s2) -> std::size_t
+//                        hpx::lcos::future<std::size_t> s2) -> size_type
 //                    {
 //                        return s1.get() + s2.get();
 //                    },
@@ -393,7 +392,7 @@ namespace hpx{
                                                         );
 
                 return hpx::lcos::local::dataflow(
-                            [](size_future s1, size_future s2) -> std::size_t
+                            [](size_future s1, size_future s2) -> size_type
                             {
                                 return s1.get() + s2.get();
                             },
@@ -411,9 +410,9 @@ namespace hpx{
         //
         void adjust_base_index(vector_type::iterator begin,
                                vector_type::iterator end,
-                               std::size_t new_chunk_size)
+                               size_type new_chunk_size)
         {
-            std::size_t i = 0;
+            size_type i = 0;
             for(vector_type::iterator it = begin; it != end; it++, i++)
             {
                 it->first = i * new_chunk_size;
@@ -432,16 +431,16 @@ namespace hpx{
          */
         explicit vector()
         {
-            create(1, 0, 0);
+            create(1, 0, VALUE_TYPE());
         }
 
         //  This is the problem if num_chunk > 1 and chunk_size = 0; thats why
         //  commented. This constructor complicates the push_back operation as
         //  on which gid we have to push back and create function as all base
         //  are same
-//        explicit vector(std::size_t num_chunks)
+//        explicit vector(size_type num_chunks)
 //        {
-//            create(num_chunks, 0, 0);
+//            create(num_chunks, 0, VALUE_TYPE());
 //        }
 
         /** @brief Constructor which create and initialize vector with all
@@ -450,7 +449,7 @@ namespace hpx{
          *  @param num_chunks   The number of chunks to be created
          *  @param chunk_size   The size of each chunk
          */
-        explicit vector(std::size_t num_chunks, std::size_t chunk_size)
+        explicit vector(size_type num_chunks, size_type chunk_size)
         {
             // If num_chunks = 0 no operation can be carried on that vector as
             // every further operation throw exception and if ( num_chunks > 1
@@ -463,7 +462,7 @@ namespace hpx{
                     "Invalid Vector: num_chunks, chunk_size should be greater than zero"
                     );
 
-            create(num_chunks, chunk_size, 0);
+            create(num_chunks, chunk_size, VALUE_TYPE());
         }
 
         /** @brief Constructor which create and initialize vector with all
@@ -473,8 +472,8 @@ namespace hpx{
          *  @param chunk_size   The size of each chunk
          *  @param val          Default value for the element in vector
          */
-        explicit vector(std::size_t num_chunks,
-                        std::size_t chunk_size,
+        explicit vector(size_type num_chunks,
+                        size_type chunk_size,
                         VALUE_TYPE val)
         {
             if(num_chunks == 0 || (num_chunks > 1 && chunk_size == 0))
@@ -509,7 +508,7 @@ namespace hpx{
          *           pos [Note that this is not the reference to the element]
          *
          */
-        VALUE_TYPE operator [](std::size_t pos) const
+        VALUE_TYPE operator [](size_type pos) const
         {
             vector_type::const_iterator it = get_base_gid_pair(pos);
             return hpx::stubs::chunk_vector::get_value_noexpt_async(
@@ -540,7 +539,7 @@ namespace hpx{
          *
          *  @return Return the number of element in the vector
          */
-        std::size_t size() const
+        size_type size() const
         {
             HPX_ASSERT(base_sf_of_gid_pair_.size() > 1);
             //Here end -1 is because we have the LAST in the vector
@@ -566,7 +565,7 @@ namespace hpx{
          *
          *  @return Return maximum number of element the vector can hold
          */
-        std::size_t max_size() const
+        size_type max_size() const
         {
             HPX_ASSERT(base_sf_of_gid_pair_.size() > 1);
             //Here end -1 is because we have the LAST in the vector
@@ -589,7 +588,7 @@ namespace hpx{
 
 //            //RESIZE (without value)
 //
-//            void resize(std::size_t n)
+//            void resize(size_type n)
 //            {
 //                if(n == 0)
 //                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "resize", "Invalid Vector: new_chunk_size should be greater than zero");
@@ -606,7 +605,7 @@ namespace hpx{
 //                hpx::wait_all(resize_lazy_sync);
 //                adjust_base_index(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1, n);
 //            }
-//            hpx::lcos::future<void> resize_async(std::size_t n)
+//            hpx::lcos::future<void> resize_async(size_type n)
 //            {
 //                //static_cast to resolve ambiguity of the overloaded function
 //                return hpx::async(launch::async, hpx::util::bind(static_cast<void(vector::*)(std::size_t)>(&vector::resize), this, n));
@@ -629,7 +628,7 @@ namespace hpx{
          *  @exception hpx::invalid_vector_error If the n is equal to zero then
          *              it throw invalid_vector_error.
          */
-        void resize(std::size_t n, VALUE_TYPE const& val = 0)
+        void resize(size_type n, VALUE_TYPE const& val = VALUE_TYPE())
         {
             if(n == 0)
                 HPX_THROW_EXCEPTION(
@@ -672,14 +671,14 @@ namespace hpx{
          *  @exception hpx::invalid_vector_error If the n is equal to zero then
          *              it throw invlid_vector_error.
          */
-        hpx::lcos::future<void> resize_async(std::size_t n,
-                                             VALUE_TYPE const& val = 0)
+        hpx::lcos::future<void> resize_async(size_type n,
+                                             VALUE_TYPE const& val = VALUE_TYPE())
         {
             //static_cast to resolve ambiguity of the overloaded function
             return hpx::async(launch::async,
                               hpx::util::bind(
                                 static_cast<
-                                void(vector::*)(std::size_t,
+                                void(vector::*)(size_type,
                                                 VALUE_TYPE const&)
                                             >
                                             (&vector::resize),
@@ -696,7 +695,7 @@ namespace hpx{
          *
          *  @return Returns capacity of vector, expressed in terms of elements
          */
-        std::size_t capacity() const
+        size_type capacity() const
         {
             HPX_ASSERT(base_sf_of_gid_pair_.size() > 1);
             //Here end -1 is because we have the LAST in the vector
@@ -754,7 +753,7 @@ namespace hpx{
          *             least one chunk_vector then function throw
          *             hpx::length_error exception.
          */
-        void reserve(std::size_t n)
+        void reserve(size_type n)
         {
             std::vector<hpx::lcos::future<void>> reserve_lazy_sync;
             BOOST_FOREACH(bfg_pair const& p,
@@ -782,7 +781,7 @@ namespace hpx{
          *              least one chunk_vector then function throw
          *              hpx::length_error exception.
          */
-        hpx::lcos::future<void> reserve_async(std::size_t n)
+        hpx::lcos::future<void> reserve_async(size_type n)
         {
             return hpx::async(launch::async,
                               hpx::util::bind(&vector::reserve, this, n));
@@ -807,7 +806,7 @@ namespace hpx{
          *              out of bound then it throws the hpx::out_of_bound
          *              exception.
          */
-        VALUE_TYPE get_value(std::size_t pos) const
+        VALUE_TYPE get_value(size_type pos) const
         {
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
@@ -836,7 +835,7 @@ namespace hpx{
          *              out of bound then it throws the hpx::out_of_bound
          *              exception.
          */
-        hpx::future< VALUE_TYPE > get_value_async(std::size_t pos) const
+        hpx::future< VALUE_TYPE > get_value_async(size_type pos) const
         {
             // Here you can call the get_val_sync API but you have already an API
             // to do that which reduce one function call
@@ -929,7 +928,7 @@ namespace hpx{
          *  @exception hpx::invalid_vector_error If the n is equal to zero then
          *              it throw invalid_vector_error.
          */
-        void assign(std::size_t n, VALUE_TYPE const& val)
+        void assign(size_type n, VALUE_TYPE const& val)
         {
             if(n == 0)
                 HPX_THROW_EXCEPTION(
@@ -962,7 +961,7 @@ namespace hpx{
          *           type can help to check whether the action is completed or
          *           not]
          */
-        hpx::lcos::future<void> assign_async(std::size_t n,
+        hpx::lcos::future<void> assign_async(size_type n,
                                              VALUE_TYPE const& val)
         {
             return hpx::async(launch::async,
@@ -1053,7 +1052,7 @@ namespace hpx{
          *  @exception hpx::out_of_range The pos is bound checked and if pos is
          *              out of bound then it throws the hpx::out_of_bound exception.
          */
-        void set_value(std::size_t pos, VALUE_TYPE const& val)
+        void set_value(size_type pos, VALUE_TYPE const& val)
         {
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
@@ -1081,7 +1080,7 @@ namespace hpx{
          *  @exception hpx::out_of_range The pos is bound checked and if pos is
          *              out of bound then it throws the hpx::out_of_bound exception.
          */
-        hpx::lcos::future<void> set_value_async(std::size_t pos,
+        hpx::lcos::future<void> set_value_async(size_type pos,
                                                 VALUE_TYPE const& val)
         {
             try{
@@ -1112,7 +1111,7 @@ namespace hpx{
          *  @exception hpx::out_of_range The pos is bound checked and if pos is
          *              out of bound then it throws the hpx::out_of_bound exception.
          */
-        void set_value(std::size_t pos, VALUE_TYPE const&& val)
+        void set_value(size_type pos, VALUE_TYPE const&& val)
         {
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
@@ -1140,7 +1139,7 @@ namespace hpx{
          *              out of bound then it throws the hpx::out_of_bound
          *              exception.
          */
-        hpx::lcos::future<void> set_value_async(std::size_t pos,
+        hpx::lcos::future<void> set_value_async(size_type pos,
                                                 VALUE_TYPE const&& val)
         {
             try{
