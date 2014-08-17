@@ -54,26 +54,28 @@ namespace hpx
     */
     class const_segmented_vector_iterator
     {
-        // This typedef helps to call object of same class.
-        typedef const_segmented_vector_iterator self_type;
+    public:
+        typedef std::size_t                                 size_type;
 
-        public:
-        //PROGRAMMER DOCUMENTATION:
-        //  For the following two typedefs refer to hpx::vector class in
-        //  hpx/components/vector/vector.hpp
-        typedef std::pair<
-                            std::size_t,
-                            hpx::lcos::shared_future<hpx::naming::id_type>
-                        > bfg_pair;
-        typedef std::vector< bfg_pair > vector_type;
+    private:
+        // This typedef helps to call object of same class.
+        typedef const_segmented_vector_iterator     self_type;
+        typedef hpx::naming::id_type                hpx_id;
+        typedef hpx::lcos::shared_future<hpx_id>    hpx_id_shared_future;
+        typedef hpx::stubs::chunk_vector            chunk_vector_stubs;
 
         //PROGRAMMER DOCUMENTATION:
         //  This represent the return type of the local(), begin() and end() API
         //   which are important for segmented_vector iterator.
-        typedef std::pair<
-                            hpx::lcos::shared_future<hpx::naming::id_type>,
-                             std::size_t
-                         > local_return_type;
+        typedef std::pair<hpx_id_shared_future, size_type > local_return_type;
+
+    protected:
+        //PROGRAMMER DOCUMENTATION:
+        //  For the following two typedefs refer to hpx::vector class in
+        //  hpx/components/vector/vector.hpp
+        typedef std::pair<size_type, hpx_id_shared_future>  bfg_pair;
+        typedef std::vector< bfg_pair >                     vector_type;
+
 
 //        // PROGRAMMER DOCUMENTATION: This is the helper function for
 //        std::size_t diff_helper(vector_type::const_iterator src,
@@ -85,37 +87,19 @@ namespace hpx
 //            // size_of_chunk (as that size is given by LAST_OBJECT.local_index)
 //            while(src != dest)
 //            {
-//                diff += hpx::stubs::chunk_vector::size_async(
-//                                                  (src->second).get()).get();
+//                diff += base_type::size_async((src->second).get()).get();
 //                src++;
 //            }
 //            return diff;
 //        }
 
-    protected:
-        //  PROGRAMMER DOCUMENTATION:
-        //  This is the iterator pointing the the vector which stores the
-        //   (base_index, gid) pair. (For base_index and gid refer to
-        //   hpx::vector class in hpx/components/vector/vector.hpp). This
-        //   actually represent to which gid pair our current iterator
-        //   position is pointing.
-        vector_type::const_iterator curr_bfg_pair_;
-
-        // This represent the local position in the current base_gid pair
-        //  pointed by the curr_bfg_pair_ (defined above) iterator.
-        std::size_t local_index_;
-
-        //This represent the state of the iterator
-        hpx::iter_state state_;
-
     public:
         //
         // constructors
         //
-
         const_segmented_vector_iterator(){}
         const_segmented_vector_iterator(vector_type::const_iterator curr_bfg_pair,
-                                        std::size_t local_index,
+                                        size_type local_index,
                                         iter_state state)
         : curr_bfg_pair_(curr_bfg_pair), local_index_(local_index),
          state_(state) {}
@@ -193,7 +177,7 @@ namespace hpx
          */
         VALUE_TYPE operator * () const
         {
-            return (hpx::stubs::chunk_vector::get_value_noexpt_async(
+            return (chunk_vector_stubs::get_value_noexpt_async(
                                             (curr_bfg_pair_->second).get(),
                                             local_index_)
                     ).get();
@@ -228,14 +212,14 @@ namespace hpx
             else
             {
                 ++local_index_;
-                hpx::naming::id_type invalid_id;
+                hpx_id invalid_id;
                 if(//this condition does not cause function call hence it must
                    // be first
                    ((curr_bfg_pair_ + 1)->second).get() != invalid_id
                    &&
-                   local_index_ >= hpx::stubs::chunk_vector::size_async(
+                   local_index_ >= chunk_vector_stubs::size_async(
                                                 (curr_bfg_pair_->second).get()
-                                                                        ).get()
+                                                                  ).get()
                    )
                 {
                     ++curr_bfg_pair_;
@@ -279,9 +263,9 @@ namespace hpx
                {
                     --curr_bfg_pair_;
                     local_index_ =
-                        ( hpx::stubs::chunk_vector::size_async(
+                        ( chunk_vector_stubs::size_async(
                                         (curr_bfg_pair_->second).get()
-                                                               ).get() - 1
+                                                         ).get() - 1
                          );
                }
                else
@@ -313,22 +297,22 @@ namespace hpx
         /** @brief Return the iterator pointing to the position which is n units
         *           ahead of the current position.
         */
-        self_type operator + (std::size_t n) const
+        self_type operator + (size_type n) const
         {
             //copying the current states of the iterator
             vector_type::const_iterator temp_curr_bfg_pair = this->curr_bfg_pair_;
-            std::size_t temp_local_index = this->local_index_;
+            size_type temp_local_index = this->local_index_;
             hpx::iter_state temp_state = this->state_;
 
             //temp variables
-            hpx::naming::id_type invalid_id;
+            hpx_id invalid_id;
             bool same_chunk = true;
-            std::size_t size = 0;
+            size_type size = 0;
 
             if(temp_state == hpx::iter_state::invalid)
             {
                 //calculate the length through which it is invalid
-                std::size_t diff = (std::numeric_limits<std::size_t>::max() -
+                size_type diff = (std::numeric_limits<size_type>::max() -
                                     temp_local_index + 1);
 
                 if(n < diff )
@@ -346,9 +330,9 @@ namespace hpx
             }
 
             //Calculating the size of the first chunk
-            size = hpx::stubs::chunk_vector::size_async(
+            size = chunk_vector_stubs::size_async(
                                     (temp_curr_bfg_pair->second).get()
-                                                        ).get()
+                                                  ).get()
                                      - temp_local_index;
 
             while( n >= size)
@@ -362,7 +346,7 @@ namespace hpx
                 n = n - size;
                 ++temp_curr_bfg_pair;
                 // calculate the size of current chunk
-                size = hpx::stubs::chunk_vector::size_async(
+                size = chunk_vector_stubs::size_async(
                                     (temp_curr_bfg_pair->second).get()
                                                             ).get();
             }
@@ -382,21 +366,21 @@ namespace hpx
         /** @brief Return the iterator pointing to the position which is n units
         *           behind the current position.
         */
-        self_type operator - (std::size_t n) const
+        self_type operator - (size_type n) const
         {
             //copying the current states of the iterator
             vector_type::const_iterator temp_curr_bfg_pair = this->curr_bfg_pair_;
-            std::size_t temp_local_index = this->local_index_;
+            size_type temp_local_index = this->local_index_;
             hpx::iter_state temp_state = this->state_;
 
             //Temp variables
             bool same_chunk = true;
-            std::size_t size = 0;
+            size_type size = 0;
             if(temp_state == hpx::iter_state::invalid)
             {
                 return self_type(temp_curr_bfg_pair,
-                                                      (temp_local_index - n),
-                                                      temp_state );
+                                 (temp_local_index - n),
+                                 temp_state );
             }
             else
             {
@@ -417,11 +401,11 @@ namespace hpx
                     same_chunk = false;
                     n = n - size;
                     --temp_curr_bfg_pair;
-                    size = hpx::stubs::chunk_vector::size_async(
-                                            (temp_curr_bfg_pair->second).get()
-                                                                ).get();
+                    size = chunk_vector_stubs::size_async(
+                                    (temp_curr_bfg_pair->second).get()
+                                                          ).get();
                 }//end of while
-            }//end of
+            }//end of else
 
             if(same_chunk)
             {
@@ -433,8 +417,8 @@ namespace hpx
             }
 
             return self_type(temp_curr_bfg_pair,
-                                              temp_local_index,
-                                               temp_state);
+                             temp_local_index,
+                             temp_state);
         }//end of a - n
 
 //        //TODO this returning int64_t which has half range with size_t
@@ -525,7 +509,7 @@ namespace hpx
                     return true;
                 else if (this->state_ == other.state_
                          &&
-                          this->local_index_ > other.local_index_)
+                         this->local_index_ > other.local_index_)
                     return true;
             }
                 return false;
@@ -574,7 +558,7 @@ namespace hpx
          *
          *  @return Returns the reference to the incremented object
          */
-        self_type & operator +=(std::size_t n)
+        self_type & operator +=(size_type n)
         {
             *this = *this + n;
            //return self_type to make (a = (b += n)) work
@@ -585,7 +569,7 @@ namespace hpx
          *
          *  @return Returns the reference to the decremented object
          */
-        self_type & operator -=(std::size_t n)
+        self_type & operator -=(size_type n)
         {
             *this = *this - n;
             //return self_type to make (a = (b -= n)) work
@@ -599,7 +583,7 @@ namespace hpx
          *  @return Value in the element which is at n position ahead of the
          *           current iterator
          */
-        VALUE_TYPE operator[](std::size_t n) const
+        VALUE_TYPE operator[](size_type n) const
         {
             self_type temp = *this;
             temp = temp + n;
@@ -629,7 +613,7 @@ namespace hpx
         {
             return std::make_pair(
                     chunk_bfg_pair->second,
-                    hpx::stubs::chunk_vector::size_async(
+                    chunk_vector_stubs::size_async(
                                     (chunk_bfg_pair->second).get()
                                                          ).get()
                                  );
@@ -640,9 +624,27 @@ namespace hpx
         //
         /** @brief Default destructor for hpx::segmented_vector_iterator.*/
         ~const_segmented_vector_iterator()
-            {
-                //DEFAULT destructor
-            }
+        {
+            //DEFAULT destructor
+        }
+
+    protected:
+
+        //  PROGRAMMER DOCUMENTATION:
+        //  This is the iterator pointing the the vector which stores the
+        //   (base_index, gid) pair. (For base_index and gid refer to
+        //   hpx::vector class in hpx/components/vector/vector.hpp). This
+        //   actually represent to which gid pair our current iterator
+        //   position is pointing.
+        vector_type::const_iterator         curr_bfg_pair_;
+
+        // This represent the local position in the current base_gid pair
+        //  pointed by the curr_bfg_pair_ (defined above) iterator.
+        size_type                           local_index_;
+
+        //This represent the state of the iterator
+        hpx::iter_state                     state_;
+
     };//end of const_segmented_vector_iterator
 
     class segmented_vector_iterator : public const_segmented_vector_iterator
@@ -653,11 +655,11 @@ namespace hpx
         segmented_vector_iterator(base_type const& other): base_type(other){}
     public:
         typedef base_type::vector_type                  vector_type;
-
+        typedef base_type::size_type                    size_type;
 
         segmented_vector_iterator():base_type() {}
         segmented_vector_iterator(vector_type::const_iterator curr_bfg_pair,
-                                  std::size_t local_index,
+                                  size_type local_index,
                                   iter_state state)
                         :base_type(curr_bfg_pair,
                                    local_index,
@@ -675,13 +677,13 @@ namespace hpx
             return *this;
         }
 
-        self_type operator + (std::size_t n) const
+        self_type operator + (size_type n) const
         {
             base_type temp = *this;
             return self_type(temp + n);
         }
 
-        self_type operator - (std::size_t n) const
+        self_type operator - (size_type n) const
         {
             base_type temp = *this;
             return self_type(temp - n);
@@ -719,14 +721,14 @@ namespace hpx
             return return_temp;
         }
 
-        self_type & operator +=(std::size_t n)
+        self_type & operator +=(size_type n)
         {
             *this = *this + n;
            //return self_type to make (a = (b += n)) work
             return *this;
         }//End of +=
 
-        self_type & operator -=(std::size_t n)
+        self_type & operator -=(size_type n)
         {
             *this = *this - n;
             //return self_type to make (a = (b -= n)) work
