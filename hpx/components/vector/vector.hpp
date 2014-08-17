@@ -61,11 +61,16 @@ namespace hpx{
         typedef hpx::segmented_vector_iterator          iterator;
         typedef hpx::const_segmented_vector_iterator    const_iterator;
         typedef std::size_t                             size_type;
-        typedef hpx::lcos::future<size_type>          size_future;
+        typedef hpx::lcos::future<size_type>            size_future;
+        typedef hpx::lcos::future<void>                 void_future;
+        typedef hpx::lcos::future<bool>                 bool_future;
 
     private:
         //Short name for chunk_vector class in hpx::server namespace.
-        typedef hpx::server::chunk_vector   chunk_vector_type;
+        typedef hpx::server::chunk_vector           chunk_vector_server;
+        typedef hpx::stubs::chunk_vector            chunk_vector_stubs;
+        typedef hpx::naming::id_type                hpx_id;
+        typedef hpx::lcos::shared_future<hpx_id>    hpx_id_shared_future;
 
 
         //PROGRAMMER DOCUMENTATION:
@@ -75,10 +80,7 @@ namespace hpx{
         //   chunk_vector. Taken as future of hpx_id's as it delay the .get() as
         //   far as possible. The shared_future is necessary as .get() function
         //   can be called more than once.
-        typedef std::pair<
-                        size_type,
-                         hpx::lcos::shared_future<hpx::naming::id_type>
-                         > bfg_pair;
+        typedef std::pair<size_type, hpx_id_shared_future> bfg_pair;
 
         // The standard vector of the bfg_pair defined above.
         typedef std::vector< bfg_pair > vector_type;
@@ -119,26 +121,25 @@ namespace hpx{
         //
         //   LAST also helps in preventing the crash of the system due to invalid
         //   state of the iterator (segmented_iterator) defined for hpx::vector.
-        void create(size_type num_chunks,
-                    size_type chunk_size,
-                     VALUE_TYPE val)
+        void create(size_type num_chunks, size_type chunk_size, VALUE_TYPE val)
         {
             for (std::size_t chunk_index = 0;
-                    chunk_index < num_chunks;
-                     ++chunk_index)
+                 chunk_index < num_chunks;
+                 ++chunk_index)
             {
                 base_sf_of_gid_pair_.push_back(
                             std::make_pair(
                                 chunk_index * chunk_size,
-                                hpx::components::new_<chunk_vector_type>(
+                                hpx::components::new_<chunk_vector_server>(
                                                         hpx::find_here(),
                                                         chunk_size, val
                                                                     )
                                           )
                                               );
             }
+
             // Pushing LAST at the back
-            hpx::naming::id_type invalid_id;
+            hpx_id invalid_id;
             base_sf_of_gid_pair_.push_back(
                 std::make_pair(std::numeric_limits<size_type>::max(),
                                 hpx::make_ready_future(invalid_id)
@@ -156,18 +157,19 @@ namespace hpx{
         //  of the size_type
         vector_type::const_iterator get_base_gid_pair(size_type pos) const
         {
-            hpx::lcos::shared_future<hpx::naming::id_type> sf;
-            hpx::naming::id_type invalid_id;
+            hpx_id_shared_future sf;
+            hpx_id invalid_id;
 
-            // Return the iterator to the first element which does not comparable
-            // less than value (i.e equal or greater)
+            // Return the iterator to the first element which does not
+            // comparable less than value (i.e equal or greater)
             vector_type::const_iterator it =
                     std::lower_bound(
                         base_sf_of_gid_pair_.begin(),
-                            // As we don't need to compare with LAST, if not matches
-                            // LowerBound return the last iterator so the return
-                            // should be LAST not the .end() hence --it
-                            // (below condition) make sense or else it doesn't
+                            // As we don't need to compare with LAST, if not
+                            // matches. LowerBound return the last iterator so
+                            // the return should be LAST not the .end() hence
+                            // --it (below condition) make sense or else it
+                            // doesn't
                         base_sf_of_gid_pair_.end() - 1,
                         std::make_pair(pos, sf),
                         [](bfg_pair const& middle, bfg_pair const& val)-> bool
@@ -175,8 +177,9 @@ namespace hpx{
                             return middle.first < val.first;
                         }
                                     );
-            //  Second condition avoid the boundry case where the get_value can be
-            //  called on invalid gid. This occurs when pos = -1 (maximum value)
+            //  Second condition avoid the boundry case where the get_value can
+            //  be called on invalid gid. This occurs when pos = -1
+            //  (maximum value)
             if(it->first == pos && (it->second).get() != invalid_id)
             {
                 return it;
@@ -188,24 +191,24 @@ namespace hpx{
         }//End of get_gid
 
 //        //Note num_chunks == represent then chunk vector index
-//        hpx::lcos::future<std::size_t>
+//        size_future
 //            size_helper(size_type num_chunks) const
 //        {
 //            if(num_chunks < 1)
 //            {
 //                HPX_ASSERT(num_chunks >= 0);
-//                return hpx::stubs::chunk_vector::size_async(
-//                            ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
-//                                                            );
+//                return chunk_vector_stubs::size_async(
+//                          ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
+//                                                      );
 //            }
 //            else
 //                return hpx::lcos::local::dataflow(
-//                    [](hpx::lcos::future<std::size_t> s1,
-//                        hpx::lcos::future<std::size_t> s2) -> size_type
+//                    [](size_future s1,
+//                       size_future s2) -> size_type
 //                        {
 //                            return s1.get() + s2.get();
 //                        },
-//                    hpx::stubs::chunk_vector::size_async(
+//                    chunk_vector_stubs::size_async(
 //                        ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
 //                                                         ),
 //                    size_helper(num_chunks - 1)
@@ -231,14 +234,12 @@ namespace hpx{
                                 vector_type::const_iterator it_end) const
         {
             if((it_end - it_begin) == 1 )
-                return hpx::stubs::chunk_vector::size_async(
-                                                (it_begin->second).get()
-                                                            );
+                return chunk_vector_stubs::size_async((it_begin->second).get());
             else
             {
                 int mid = (it_end - it_begin)/2;
                 size_future left_tree_size = size_helper(it_begin,
-                                                          it_begin + mid);
+                                                         it_begin + mid);
                 size_future right_tree_size = hpx::async(
                                                     launch::async,
                                                     hpx::util::bind(
@@ -260,24 +261,24 @@ namespace hpx{
             }
         }//end of size_helper
 
-//        hpx::lcos::future<std::size_t>
+//        size_future
 //            max_size_helper(size_type num_chunks) const
 //        {
 //            if(num_chunks < 1)
 //            {
 //                HPX_ASSERT(num_chunks >= 0);
-//                return hpx::stubs::chunk_vector::max_size_async(
+//                return chunk_vector_stubs::max_size_async(
 //                        ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
 //                                                                );
 //            }
 //            else
 //                return hpx::lcos::local::dataflow(
-//                    [](hpx::lcos::future<std::size_t> s1,
-//                       hpx::lcos::future<std::size_t> s2) -> size_type
+//                    [](size_future s1,
+//                       size_future s2) -> size_type
 //                    {
 //                        return s1.get() + s2.get();
 //                    },
-//                    hpx::stubs::chunk_vector::max_size_async(
+//                    chunk_vector_stubs::max_size_async(
 //                        ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
 //                                                             ),
 //                    max_size_helper(num_chunks - 1)
@@ -302,7 +303,7 @@ namespace hpx{
                                     vector_type::const_iterator it_end) const
         {
             if((it_end - it_begin) == 1 )
-                return hpx::stubs::chunk_vector::max_size_async(
+                return chunk_vector_stubs::max_size_async(
                                                     (it_begin->second).get()
                                                                 );
             else
@@ -332,26 +333,26 @@ namespace hpx{
         }//end of max_size_helper
 
 
-//        hpx::lcos::future<std::size_t>
+//        size_future
 //            capacity_helper(size_type num_chunks) const
 //        {
 //            if(num_chunks < 1)
 //            {
 //                HPX_ASSERT(num_chunks >= 0);
-//                return hpx::stubs::chunk_vector::capacity_async(
-//                            ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
-//                                                                );
+//                return chunk_vector_stubs::capacity_async(
+//                          ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
+//                                                         );
 //            }
 //            else
 //                return hpx::lcos::local::dataflow(
-//                    [](hpx::lcos::future<std::size_t> s1,
-//                        hpx::lcos::future<std::size_t> s2) -> size_type
+//                    [](size_future s1,
+//                       size_future s2) -> size_type
 //                    {
 //                        return s1.get() + s2.get();
 //                    },
-//                    hpx::stubs::chunk_vector::capacity_async(
+//                    chunk_vector_stubs::capacity_async(
 //                        ((base_sf_of_gid_pair_.at(num_chunks)).second).get()
-//                                                            ),
+//                                                       ),
 //                    capacity_helper(num_chunks - 1)
 //                                                );
 //            }//end of capacity_helper
@@ -360,11 +361,11 @@ namespace hpx{
 
         // PROGRAMMER DOCUMENTATION:
         //  This helper function return the number of element in the hpx::vector.
-        //  Here we are dividing the sequence of bfg_pairs into half and computing
-        //  the capacity of the individual chunk_vector and then adding them. Note
-        //  this create the binary tree of height Equal to log (num_bfg_pairs in
-        //  base_sf_of_gid_pair_). Hence it might be efficient than previous
-        //  implementation
+        //  Here we are dividing the sequence of bfg_pairs into half and
+        //  computing the capacity of the individual chunk_vector and then adding
+        //  them. Note this create the binary tree of height Equal to log
+        //  (num_bfg_pairs in base_sf_of_gid_pair_). Hence it might be efficient
+        //  than previous implementation.
         //
         // NOTE: This implementation does not need all the chunk_vector of same
         //       size.
@@ -373,9 +374,9 @@ namespace hpx{
                                     vector_type::const_iterator it_end) const
         {
             if((it_end - it_begin) == 1 )
-                return hpx::stubs::chunk_vector::capacity_async(
+                return chunk_vector_stubs::capacity_async(
                                                     (it_begin->second).get()
-                                                                );
+                                                          );
             else
             {
                 int mid = (it_end - it_begin)/2;
@@ -511,10 +512,10 @@ namespace hpx{
         VALUE_TYPE operator [](size_type pos) const
         {
             vector_type::const_iterator it = get_base_gid_pair(pos);
-            return hpx::stubs::chunk_vector::get_value_noexpt_async(
-                                                            (it->second).get(),
-                                                            (pos - (it->first))
-                                                                   ).get();
+            return chunk_vector_stubs::get_value_noexpt_async(
+                                                        (it->second).get(),
+                                                        (pos - (it->first))
+                                                             ).get();
         }
 
         /** @brief Copy assignment operator.
@@ -544,7 +545,7 @@ namespace hpx{
             HPX_ASSERT(base_sf_of_gid_pair_.size() > 1);
             //Here end -1 is because we have the LAST in the vector
             return size_helper(base_sf_of_gid_pair_.begin(),
-                                base_sf_of_gid_pair_.end() - 1
+                               base_sf_of_gid_pair_.end() - 1
                               ).get();
         }
 
@@ -556,8 +557,8 @@ namespace hpx{
         {
             HPX_ASSERT(base_sf_of_gid_pair_.size() > 1);
             //Here end -1 is because we have the LAST in the vector
-                return size_helper(base_sf_of_gid_pair_.begin(),
-                                   base_sf_of_gid_pair_.end() - 1);
+            return size_helper(base_sf_of_gid_pair_.begin(),
+                               base_sf_of_gid_pair_.end() - 1);
         }
 
         //MAX_SIZE
@@ -591,21 +592,23 @@ namespace hpx{
 //            void resize(size_type n)
 //            {
 //                if(n == 0)
-//                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error, "resize", "Invalid Vector: new_chunk_size should be greater than zero");
+//                    HPX_THROW_EXCEPTION(hpx::invalid_vector_error,
+//                                        "resize",
+//                                        "Invalid Vector: new_chunk_size should be greater than zero");
 //
-//                std::vector<hpx::lcos::future<void>> resize_lazy_sync;
+//                std::vector<void_future> resize_lazy_sync;
 //                //Resizing the vector chunks
 //                //AS we have to iterate until we hit LAST
 //                BOOST_FOREACH(bfg_pair const& p, std::make_pair(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1) )
 //                {
-//                    resize_lazy_sync.push_back(hpx::stubs::chunk_vector::resize_async((p.second).get(), n));
+//                    resize_lazy_sync.push_back(chunk_vector_stubs::resize_async((p.second).get(), n));
 //                }
 //                HPX_ASSERT(base_sf_of_gid_pair_.size() > 1); //As this function changes the size we should have LAST always.
 //                //waiting for the resizing
 //                hpx::wait_all(resize_lazy_sync);
 //                adjust_base_index(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1, n);
 //            }
-//            hpx::lcos::future<void> resize_async(size_type n)
+//            void_future resize_async(size_type n)
 //            {
 //                //static_cast to resolve ambiguity of the overloaded function
 //                return hpx::async(launch::async, hpx::util::bind(static_cast<void(vector::*)(std::size_t)>(&vector::resize), this, n));
@@ -637,14 +640,14 @@ namespace hpx{
                     "Invalid Vector: new_chunk_size should be greater than zero"
                                     );
 
-            std::vector<hpx::lcos::future<void>> resize_lazy_sync;
+            std::vector<void_future> resize_lazy_sync;
             BOOST_FOREACH(bfg_pair const& p,
                           std::make_pair(base_sf_of_gid_pair_.begin(),
-                          base_sf_of_gid_pair_.end() - 1)
+                                         base_sf_of_gid_pair_.end() - 1)
                          )
             {
                 resize_lazy_sync.push_back(
-                                hpx::stubs::chunk_vector::resize_async(
+                                chunk_vector_stubs::resize_async(
                                                         (p.second).get(),
                                                          n,
                                                          val)
@@ -671,8 +674,8 @@ namespace hpx{
          *  @exception hpx::invalid_vector_error If the n is equal to zero then
          *              it throw invlid_vector_error.
          */
-        hpx::lcos::future<void> resize_async(size_type n,
-                                             VALUE_TYPE const& val = VALUE_TYPE())
+        void_future resize_async(size_type n,
+                                 VALUE_TYPE const& val = VALUE_TYPE())
         {
             //static_cast to resolve ambiguity of the overloaded function
             return hpx::async(launch::async,
@@ -730,7 +733,7 @@ namespace hpx{
          *
          *  @return The hpx future of return value empty()
          */
-        hpx::lcos::future<bool> empty_async() const
+        bool_future empty_async() const
         {
             return hpx::async(launch::async,
                               hpx::util::bind(&vector::empty, this));
@@ -755,15 +758,14 @@ namespace hpx{
          */
         void reserve(size_type n)
         {
-            std::vector<hpx::lcos::future<void>> reserve_lazy_sync;
+            std::vector<void_future> reserve_lazy_sync;
             BOOST_FOREACH(bfg_pair const& p,
                           std::make_pair(base_sf_of_gid_pair_.begin(),
                                          base_sf_of_gid_pair_.end() - 1)
                           )
             {
                 reserve_lazy_sync.push_back(
-                        hpx::stubs::chunk_vector::reserve_async((p.second).get(),
-                                                                 n)
+                        chunk_vector_stubs::reserve_async((p.second).get(), n)
                                             );
             }
             hpx::wait_all(reserve_lazy_sync);
@@ -781,7 +783,7 @@ namespace hpx{
          *              least one chunk_vector then function throw
          *              hpx::length_error exception.
          */
-        hpx::lcos::future<void> reserve_async(size_type n)
+        void_future reserve_async(size_type n)
         {
             return hpx::async(launch::async,
                               hpx::util::bind(&vector::reserve, this, n));
@@ -810,11 +812,12 @@ namespace hpx{
         {
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
-                return hpx::stubs::chunk_vector::get_value_async((it->second).get(),
-                                                                 (pos - (it->first))
-                                                                 ).get();
+                return chunk_vector_stubs::get_value_async(
+                                                           (it->second).get(),
+                                                           (pos - (it->first))
+                                                          ).get();
             }
-            catch(hpx::exception const& e){
+            catch(hpx::exception const& /*e*/){
                 HPX_THROW_EXCEPTION(hpx::out_of_range,
                                     "get_value",
                                     "Value of 'pos' is out of range");
@@ -837,16 +840,16 @@ namespace hpx{
          */
         hpx::future< VALUE_TYPE > get_value_async(size_type pos) const
         {
-            // Here you can call the get_val_sync API but you have already an API
-            // to do that which reduce one function call
+            // Here you can call the get_val_sync API but you have already an
+            // API to do that which reduce one function call
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
-                return hpx::stubs::chunk_vector::get_value_async(
+                return chunk_vector_stubs::get_value_async(
                                                         (it->second).get(),
                                                         (pos - (it->first))
-                                                                );
+                                                          );
             }
-            catch(hpx::exception const& e){
+            catch(hpx::exception const& /*e*/){
                 HPX_THROW_EXCEPTION(
                     hpx::out_of_range,
                     "get_value_async",
@@ -863,9 +866,9 @@ namespace hpx{
          */
         VALUE_TYPE front() const
         {
-            return hpx::stubs::chunk_vector::front_async(
+            return chunk_vector_stubs::front_async(
                                     (base_sf_of_gid_pair_.front().second).get()
-                                                         ).get();
+                                                  ).get();
         }//end of front_value
 
         /** @brief Asynchronous API for front().
@@ -876,9 +879,9 @@ namespace hpx{
          */
         hpx::future< VALUE_TYPE > front_async() const
         {
-            return hpx::stubs::chunk_vector::front_async(
+            return chunk_vector_stubs::front_async(
                                     (base_sf_of_gid_pair_.front().second).get()
-                                                         );
+                                                  );
         }//end of front_async
 
         //BACK (never throws exception)
@@ -890,11 +893,11 @@ namespace hpx{
          */
         VALUE_TYPE back() const
         {
-            // As the LAST pair is there and then decrement operator to that LAST is undefined
-            // hence used the end() function rather than back()
-            return hpx::stubs::chunk_vector::back_async(
-                                    ((base_sf_of_gid_pair_.end() - 2)->second).get()
-                                                        ).get();
+            // As the LAST pair is there and then decrement operator to that
+            // LAST is undefined hence used the end() function rather than back()
+            return chunk_vector_stubs::back_async(
+                            ((base_sf_of_gid_pair_.end() - 2)->second).get()
+                                                 ).get();
         }//end of back_value
 
         /** @brief Asynchronous API for back().
@@ -906,9 +909,9 @@ namespace hpx{
         hpx::future< VALUE_TYPE > back_async() const
         {
             //As the LAST pair is there
-            return hpx::stubs::chunk_vector::back_async(
-                                    ((base_sf_of_gid_pair_.end() - 2)->second).get()
-                                                         );
+            return chunk_vector_stubs::back_async(
+                            ((base_sf_of_gid_pair_.end() - 2)->second).get()
+                                                 );
         }//end of back_async
 
 
@@ -937,16 +940,20 @@ namespace hpx{
                     "Invalid Vector: new_chunk_size should be greater than zero"
                                     );
 
-            std::vector<hpx::lcos::future<void>> assign_lazy_sync;
+            std::vector<void_future> assign_lazy_sync;
             BOOST_FOREACH(bfg_pair const& p,
                           std::make_pair(base_sf_of_gid_pair_.begin(),
                                          base_sf_of_gid_pair_.end() - 1)
                           )
             {
-                assign_lazy_sync.push_back(hpx::stubs::chunk_vector::assign_async((p.second).get(), n, val));
+                assign_lazy_sync.push_back(
+                    chunk_vector_stubs::assign_async((p.second).get(), n, val)
+                                          );
             }
             hpx::wait_all(assign_lazy_sync);
-            adjust_base_index(base_sf_of_gid_pair_.begin(), base_sf_of_gid_pair_.end() - 1, n);
+            adjust_base_index(base_sf_of_gid_pair_.begin(),
+                              base_sf_of_gid_pair_.end() - 1,
+                              n);
         }//End of assign
 
         /** @brief Asynchronous API for assign().
@@ -961,8 +968,7 @@ namespace hpx{
          *           type can help to check whether the action is completed or
          *           not]
          */
-        hpx::lcos::future<void> assign_async(size_type n,
-                                             VALUE_TYPE const& val)
+        void_future assign_async(size_type n, VALUE_TYPE const& val)
         {
             return hpx::async(launch::async,
                               hpx::util::bind(&vector::assign,
@@ -982,9 +988,10 @@ namespace hpx{
          */
         void push_back(VALUE_TYPE const& val)
         {
-            hpx::stubs::chunk_vector::push_back_async(
+            chunk_vector_stubs::push_back_async(
                             ((base_sf_of_gid_pair_.end() - 2 )->second).get(),
-                                                val).get();
+                                                val
+                                                ).get();
         }
 
         /** @brief Asynchronous API for push_back().
@@ -995,11 +1002,12 @@ namespace hpx{
          *           type can help to check whether the action is completed or
          *           not]
          */
-        hpx::lcos::future<void> push_back_async(VALUE_TYPE const& val)
+        void_future push_back_async(VALUE_TYPE const& val)
         {
-            return hpx::stubs::chunk_vector::push_back_async(
-                                ((base_sf_of_gid_pair_.end() - 2)->second).get(),
-                                                        val);
+            return chunk_vector_stubs::push_back_async(
+                            ((base_sf_of_gid_pair_.end() - 2)->second).get(),
+                                                        val
+                                                        );
         }
 
         //PUSH_BACK (With rval)
@@ -1010,31 +1018,32 @@ namespace hpx{
          */
         void push_back(VALUE_TYPE const&& val)
         {
-            hpx::stubs::chunk_vector::push_back_rval_async(
-                                ((base_sf_of_gid_pair_.end() - 2)->second).get(),
-                                                           std::move(val)
-                                                           ).get();
+            chunk_vector_stubs::push_back_rval_async(
+                            ((base_sf_of_gid_pair_.end() - 2)->second).get(),
+                                                    std::move(val)
+                                                     ).get();
         }
 
         /** @brief Asynchronous API for push_back(VALUE_TYPE const&& val).
          *
          *  @param val Value to be moved to new element
          */
-        hpx::lcos::future<void> push_back_async(VALUE_TYPE const&& val)
+        void_future push_back_async(VALUE_TYPE const&& val)
         {
-            return hpx::stubs::chunk_vector::push_back_rval_async(
-                                ((base_sf_of_gid_pair_.end() - 2)->second).get(),
-                                                            std::move(val));
+            return chunk_vector_stubs::push_back_rval_async(
+                            ((base_sf_of_gid_pair_.end() - 2)->second).get(),
+                                                    std::move(val)
+                                                            );
         }
 
         //POP_BACK (Never throw exception)
 //            void pop_back()
 //            {
-//                hpx::stubs::chunk_vector::pop_back_async(( (base_sf_of_gid_pair_.end() - 2)->second).get()).get();
+//                chunk_vector_stubs::pop_back_async(( (base_sf_of_gid_pair_.end() - 2)->second).get()).get();
 //                //TODO if following change the affect back() and further pop_back function
 //                //checking if last element from the particular gid is popped up then delete that..
 //                // (-2)I am retaining one gid in vector as otherwise it goes to invalid state and it makes a compulsion that we need to keep at least one element that is not good
-//                if(hpx::stubs::chunk_vector::empty_async(( (base_sf_of_gid_pair_.end() - 2)->second).get()).get() && base_sf_of_gid_pair_.size() > 2)
+//                if(chunk_vector_stubs::empty_async(( (base_sf_of_gid_pair_.end() - 2)->second).get()).get() && base_sf_of_gid_pair_.size() > 2)
 //                    base_sf_of_gid_pair_.pop_back();
 //                HPX_ASSERT(base_sf_of_gid_pair_.size() > 1); //As this function changes the size we should have LAST always.
 //            }
@@ -1050,19 +1059,20 @@ namespace hpx{
          *  @param val   The value to be copied
          *
          *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound exception.
+         *              out of bound then it throws the hpx::out_of_bound
+         *              exception.
          */
         void set_value(size_type pos, VALUE_TYPE const& val)
         {
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
-                return hpx::stubs::chunk_vector::set_value_async(
+                return chunk_vector_stubs::set_value_async(
                                                 (it->second).get(),
                                                 (pos - (it->first)),
                                                 val
-                                                                ).get();
+                                                           ).get();
             }
-            catch(hpx::exception const& e){
+            catch(hpx::exception const& /*e*/){
                 HPX_THROW_EXCEPTION(hpx::out_of_range,
                                     "set_value",
                                     "Value of 'pos' is out of range"
@@ -1078,22 +1088,22 @@ namespace hpx{
          *  @param val   The value to be copied
          *
          *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound exception.
+         *              out of bound then it throws the hpx::out_of_bound
+         *              exception.
          */
-        hpx::lcos::future<void> set_value_async(size_type pos,
-                                                VALUE_TYPE const& val)
+        void_future set_value_async(size_type pos, VALUE_TYPE const& val)
         {
             try{
                 // This reduce one function call as we are directly calling
                 // chunk vector API
                 vector_type::const_iterator it = get_base_gid_pair(pos);
-                return hpx::stubs::chunk_vector::set_value_async(
+                return chunk_vector_stubs::set_value_async(
                                                 (it->second).get(),
                                                 (pos - (it->first)),
                                                 val
                                                                 );
             }
-            catch(hpx::exception const& e){
+            catch(hpx::exception const& /*e*/){
                 HPX_THROW_EXCEPTION(hpx::out_of_range,
                                     "set_value_async",
                                     "Value of 'pos' is out of range");
@@ -1109,26 +1119,28 @@ namespace hpx{
          *  @param val   The value to be moved
          *
          *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound exception.
+         *              out of bound then it throws the hpx::out_of_bound
+         *              exception.
          */
         void set_value(size_type pos, VALUE_TYPE const&& val)
         {
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
-                return hpx::stubs::chunk_vector::set_value_rval_async(
+                return chunk_vector_stubs::set_value_rval_async(
                                                     (it->second).get(),
                                                     (pos - (it->first)),
                                                     std::move(val)
-                                                                    ).get();
+                                                                ).get();
             }
-            catch(hpx::exception const& e){
+            catch(hpx::exception const& /*e*/){
                 HPX_THROW_EXCEPTION(hpx::out_of_range,
                                     "set_value",
                                     "Value of 'pos' is out of range");
             }
         }//end of set_value
 
-        /** @brief Asynchronous API for set_value(std::size_t pos, VALUE_TYPE const&& val).
+        /** @brief Asynchronous API for
+         *          set_value(std::size_t pos, VALUE_TYPE const&& val).
          *          It throws the hpx::out_of_bound exception.
          *
          *  @param pos   Position of the element in the chunk_vector [Note the
@@ -1139,18 +1151,17 @@ namespace hpx{
          *              out of bound then it throws the hpx::out_of_bound
          *              exception.
          */
-        hpx::lcos::future<void> set_value_async(size_type pos,
-                                                VALUE_TYPE const&& val)
+        void_future set_value_async(size_type pos, VALUE_TYPE const&& val)
         {
             try{
                 vector_type::const_iterator it = get_base_gid_pair(pos);
-                return hpx::stubs::chunk_vector::set_value_rval_async(
+                return chunk_vector_stubs::set_value_rval_async(
                                                     (it->second).get(),
                                                     (pos - (it->first)),
                                                         std::move(val)
-                                                                      );
+                                                                );
             }
-            catch(hpx::exception const& e){
+            catch(hpx::exception const& /*e*/){
                 HPX_THROW_EXCEPTION(hpx::out_of_range,
                                     "set_value_async",
                                     "Value of 'pos' is out of range");
@@ -1166,7 +1177,7 @@ namespace hpx{
 //                //It is keeping one gid hence iterator does not go in an invalid state
 //                base_sf_of_gid_pair_.erase(base_sf_of_gid_pair_.begin() + 1,
 //                                           base_sf_of_gid_pair_.end()-1);
-//                hpx::stubs::chunk_vector::clear_async((base_sf_of_gid_pair_[0].second).get()).get();
+//                chunk_vector_stubs::clear_async((base_sf_of_gid_pair_[0].second).get()).get();
 //                HPX_ASSERT(base_sf_of_gid_pair_.size() > 1); //As this function changes the size we should have LAST always.
 //            }
 
@@ -1201,7 +1212,7 @@ namespace hpx{
             return iterator(base_sf_of_gid_pair_.begin(), 0, valid);
         }//end of begin
 
-        /**  @brief Return the const_iterator at the beginning of the vector. */
+        /**  @brief Return the const_iterator at the beginning of the vector.*/
         const_iterator begin() const
         {
             return const_iterator(base_sf_of_gid_pair_.begin(), 0, valid);
@@ -1216,9 +1227,9 @@ namespace hpx{
         iterator end()
         {
             return iterator((base_sf_of_gid_pair_.end() - 2),
-                            hpx::stubs::chunk_vector::size_async(
-                                        ((base_sf_of_gid_pair_.end() - 2)->second).get()
-                                                                ).get(),
+                            chunk_vector_stubs::size_async(
+                                ((base_sf_of_gid_pair_.end() - 2)->second).get()
+                                                           ).get(),
                             valid);
         }//end of end
 
@@ -1226,9 +1237,9 @@ namespace hpx{
         const_iterator end() const
         {
             return const_iterator((base_sf_of_gid_pair_.end() - 2),
-                            hpx::stubs::chunk_vector::size_async(
-                                        ((base_sf_of_gid_pair_.end() - 2)->second).get()
-                                                                ).get(),
+                            chunk_vector_stubs::size_async(
+                                ((base_sf_of_gid_pair_.end() - 2)->second).get()
+                                                           ).get(),
                             valid);
         }//end of end
 
@@ -1251,9 +1262,9 @@ namespace hpx{
         const_iterator cend() const
         {
             return const_iterator((base_sf_of_gid_pair_.end() - 2),
-                            hpx::stubs::chunk_vector::size_async(
-                                        ((base_sf_of_gid_pair_.end() - 2)->second).get()
-                                                                ).get(),
+                            chunk_vector_stubs::size_async(
+                                ((base_sf_of_gid_pair_.end() - 2)->second).get()
+                                                           ).get(),
                             valid);
         }//end of cend
 
