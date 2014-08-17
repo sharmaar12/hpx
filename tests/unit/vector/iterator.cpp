@@ -9,19 +9,23 @@
 
 #define VAL_TYPE double
 #define INITIAL_VALUE 124
+#define INITIAL_NUM_CHUNKS 100
+#define INITIAL_CHUNK_SIZE 10005
 
-typedef hpx::vector::iterator iter;
+typedef hpx::vector::iterator   iter;
+typedef std::size_t             size_type;
 
 void test_dereference_and_offset_dereference()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
     iter it_begin = v.begin();
     iter it_end = v.end();
 
-    std::size_t count = 0;
+    size_type count = 0;
 
     //Checking default value through dereference
     for(iter it = it_begin; it != it_end; ++it)
@@ -34,7 +38,7 @@ void test_dereference_and_offset_dereference()
     count = 0;
     //Checking default value through offset dereference
     iter it_offset_deref = it_begin;
-    for(std::size_t i = 0; i < v.size(); i++)
+    for(size_type i = 0; i < v.size(); i++)
     {
         HPX_TEST_EQ(it_offset_deref[i], (VAL_TYPE) INITIAL_VALUE);
         ++count;
@@ -43,7 +47,7 @@ void test_dereference_and_offset_dereference()
 
     count = 0;
     //Setting the different values for each elements
-    for(std::size_t i = 0; i < v.size(); ++i)
+    for(size_type i = 0; i < v.size(); ++i)
     {
         v.set_value(i, (VAL_TYPE)i);
         ++count;
@@ -52,7 +56,7 @@ void test_dereference_and_offset_dereference()
     HPX_TEST_EQ(count, v.size());
 
     count = 0;
-    std::size_t j = 0;
+    size_type j = 0;
     //Checking the values using the dereference operator
     for(iter it = it_begin; it != it_end; ++it, ++j)
     {
@@ -64,7 +68,7 @@ void test_dereference_and_offset_dereference()
 
     count = 0;
     //Checking default value through offset dereference
-    for(std::size_t i = 0; i < v.size(); i++)
+    for(size_type i = 0; i < v.size(); i++)
     {
         HPX_TEST_EQ(it_offset_deref[i], (VAL_TYPE) i);
         ++count;
@@ -105,14 +109,15 @@ void test_dereference_and_offset_dereference()
 
 void test_copy_constructor_and_assignment_operator()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size);
 
     iter it_begin = v.begin();
 
     //Setting the different values for each elements
-    for(std::size_t i = 0; i < v.size(); ++i)
+    for(size_type i = 0; i < v.size(); ++i)
     {
         v.set_value(i, (VAL_TYPE)i);
     }
@@ -133,15 +138,16 @@ void test_copy_constructor_and_assignment_operator()
 
 void test_remaining_operator()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size);
 
     iter it_begin = v.begin();
     iter it_end = v.end();
 
     //Setting the different values for each elements
-    for(std::size_t i = 0; i < v.size(); ++i)
+    for(size_type i = 0; i < v.size(); ++i)
     {
         v.set_value(i, (VAL_TYPE)i);
     }

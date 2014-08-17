@@ -9,20 +9,26 @@
 
 #define VAL_TYPE double
 #define INITIAL_VALUE 124
+#define INITIAL_NUM_CHUNKS 100
+#define INITIAL_CHUNK_SIZE 10005
+
+typedef std::size_t		size_type;
 
 void test_front_and_front_async()
 {
     {
-        //Vector created with 100 chunks and each chunk is having 10005 elements
-        std::size_t num_chunks = 100, chunk_size = 10005;
+        //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+        //  INITIAL_CHUNK_SIZE elements
+        size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
         hpx::vector v(num_chunks, chunk_size);
 
         HPX_TEST_EQ(v.front(), (VAL_TYPE) 0 );
         HPX_TEST_EQ(v.front_async().get(), (VAL_TYPE) 0 );
     }
     {
-        //Vector created with 100 chunks and each chunk is having 10005 elements
-        std::size_t num_chunks = 100, chunk_size = 10005;
+        //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+        //  INITIAL_CHUNK_SIZE elements
+        size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
         hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
         HPX_TEST_EQ(v.front(), (VAL_TYPE) INITIAL_VALUE );
@@ -38,16 +44,18 @@ void test_front_and_front_async()
 void test_back_and_back_async()
 {
     {
-        //Vector created with 100 chunks and each chunk is having 10005 elements
-        std::size_t num_chunks = 100, chunk_size = 10005;
+        //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+        //  INITIAL_CHUNK_SIZE elements
+        size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
         hpx::vector v(num_chunks, chunk_size);
 
         HPX_TEST_EQ(v.back(), (VAL_TYPE) 0 );
         HPX_TEST_EQ(v.back_async().get(), (VAL_TYPE) 0 );
     }
     {
-        //Vector created with 100 chunks and each chunk is having 10005 elements
-        std::size_t num_chunks = 100, chunk_size = 10005;
+        //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+        //  INITIAL_CHUNK_SIZE elements
+        size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
         hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
         HPX_TEST_EQ(v.back(), (VAL_TYPE) INITIAL_VALUE );

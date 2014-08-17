@@ -10,19 +10,23 @@
 
 #define VAL_TYPE double
 #define INITIAL_VALUE 124
+#define INITIAL_NUM_CHUNKS 100
+#define INITIAL_CHUNK_SIZE 10005
 
-void test_assign(std::size_t initial_chunk_size,
-                 std::size_t new_chunk_size,
+typedef std::size_t     size_type;
+
+void test_assign(size_type initial_chunk_size,
+                 size_type new_chunk_size,
                  VAL_TYPE val)
 {
-    std::size_t num_chunks = 100;
-    std::size_t initial_vector_size = num_chunks * initial_chunk_size;
-    std::size_t new_vector_size = num_chunks * new_chunk_size;
+    size_type num_chunks = INITIAL_NUM_CHUNKS;
+    size_type initial_vector_size = num_chunks * initial_chunk_size;
+    size_type new_vector_size = num_chunks * new_chunk_size;
     hpx::vector v(num_chunks, initial_chunk_size, INITIAL_VALUE);
 
     v.assign(new_chunk_size, val);
 
-    std::size_t count = 0;
+    size_type count = 0;
     std::for_each(v.begin(), v.end(),
                   [&count] (VAL_TYPE val)
                   {
@@ -43,18 +47,18 @@ void test_assign(std::size_t initial_chunk_size,
         HPX_TEST(initial_vector_size == v.size());
 }//end of test_assign()
 
-void test_assign_async(std::size_t initial_chunk_size,
-                       std::size_t new_chunk_size,
+void test_assign_async(size_type initial_chunk_size,
+                       size_type new_chunk_size,
                        VAL_TYPE val)
 {
-    std::size_t num_chunks = 100;
-    std::size_t initial_vector_size = num_chunks * initial_chunk_size;
-    std::size_t new_vector_size = num_chunks * new_chunk_size;
+    size_type num_chunks = INITIAL_NUM_CHUNKS;
+    size_type initial_vector_size = num_chunks * initial_chunk_size;
+    size_type new_vector_size = num_chunks * new_chunk_size;
     hpx::vector v(num_chunks, initial_chunk_size, INITIAL_VALUE);
 
     v.assign_async(new_chunk_size, val).get();
 
-    std::size_t count = 0;
+    size_type count = 0;
     std::for_each(v.begin(), v.end(),
                   [&count] (VAL_TYPE val)
                   {
@@ -77,8 +81,9 @@ void test_assign_async(std::size_t initial_chunk_size,
 
 void test_assign_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
     bool caught_exception = false;
@@ -100,8 +105,9 @@ void test_assign_exception()
 
 void test_assign_async_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
     bool caught_exception = false;
@@ -123,23 +129,23 @@ void test_assign_async_exception()
 
 void test_push_back_and_push_back_async()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t initial_vector_size;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type initial_vector_size;
     initial_vector_size = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size);
 
     v.push_back((VAL_TYPE)1241991);
 
     HPX_TEST_EQ(v.back(), 1241991);
-    std::size_t size_after_one_push_back = v.size();
+    size_type size_after_one_push_back = v.size();
     HPX_TEST(size_after_one_push_back > initial_vector_size);
 
     v.push_back_async((VAL_TYPE)124).get();
     HPX_TEST_EQ(v.back(), 124);
     HPX_TEST(v.size() > initial_vector_size);
     HPX_TEST(v.size() > size_after_one_push_back);
-
 }//end of test_push_back_and_push_back_async()
 
 int main()
@@ -161,7 +167,7 @@ int main()
         // Test the Exceptions
         test_assign_exception();
         test_assign_async_exception();
-        
+
         test_push_back_and_push_back_async();
     }
     catch(...)
@@ -172,3 +178,4 @@ int main()
 
     return hpx::util::report_errors();
 }
+

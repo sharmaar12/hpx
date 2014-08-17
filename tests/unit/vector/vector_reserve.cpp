@@ -8,12 +8,19 @@
 #include <hpx/components/vector/vector.hpp>
 #include <hpx/util/lightweight_test.hpp>
 
+#define INITIAL_NUM_CHUNKS 100
+#define INITIAL_CHUNK_SIZE 10005
+
+typedef std::size_t		size_type;
+
 void test_reserve_increase()
 {
-    //Vector created with 100 chunks and each chunk is having 1000 elements
-    std::size_t num_chunks = 100, chunk_size = 1000, n = 100;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type n = 100;
     hpx::vector v(num_chunks, chunk_size);
-    std::size_t initial_capacity = v.capacity();
+    size_type initial_capacity = v.capacity();
 
     v.reserve(v.capacity() + n);
     HPX_TEST(initial_capacity < v.capacity());
@@ -22,10 +29,12 @@ void test_reserve_increase()
 
 void test_reserve_async_increase()
 {
-    //Vector created with 100 chunks and each chunk is having 1000 elements
-    std::size_t num_chunks = 100, chunk_size = 1000, n = 100;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type n = 100;
     hpx::vector v(num_chunks, chunk_size);
-    std::size_t initial_capacity = v.capacity();
+    size_type initial_capacity = v.capacity();
 
     v.reserve_async(v.capacity() + n).get();
     HPX_TEST(initial_capacity < v.capacity());
@@ -34,10 +43,11 @@ void test_reserve_async_increase()
 
 void test_reserve_decrease()
 {
-    //Vector created with 100 chunks and each chunk is having 1000 elements
-    std::size_t num_chunks = 100, chunk_size = 1000;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size);
-    std::size_t initial_capacity = v.capacity();
+    size_type initial_capacity = v.capacity();
 
     v.reserve(100);
     HPX_TEST(initial_capacity == v.capacity());
@@ -46,10 +56,11 @@ void test_reserve_decrease()
 
 void test_reserve_async_decrease()
 {
-    //Vector created with 100 chunks and each chunk is having 1000 elements
-    std::size_t num_chunks = 100, chunk_size = 1000;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size);
-    std::size_t initial_capacity = v.capacity();
+    size_type initial_capacity = v.capacity();
 
     v.reserve_async(100).get();
     HPX_TEST(initial_capacity == v.capacity());

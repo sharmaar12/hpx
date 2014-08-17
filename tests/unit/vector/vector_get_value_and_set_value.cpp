@@ -10,19 +10,24 @@
 
 #define VAL_TYPE double
 #define INITIAL_VALUE 124
+#define INITIAL_NUM_CHUNKS 100
+#define INITIAL_CHUNK_SIZE 10005
+
+typedef std::size_t		size_type;
 
 void test_get_value_and_set_value()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size);
 
-    std::size_t count = 0;
+    size_type count = 0;
 
     //Assigning value from 0,1,...,vec.size() - 1
-    for(std::size_t i = 0; i < v.size(); ++i)
+    for(size_type i = 0; i < v.size(); ++i)
     {
         try{
             v.set_value(i, (VAL_TYPE)i);
@@ -39,7 +44,7 @@ void test_get_value_and_set_value()
 
     count = 0;
     //checking the values are correctly inserted and accessed by [] operator
-    for(std::size_t i = 0; i < v.size(); ++i)
+    for(size_type i = 0; i < v.size(); ++i)
     {
         try{
             //Test the array subscript correctly assigning the value in correct order
@@ -60,16 +65,17 @@ void test_get_value_and_set_value()
 
 void test_get_value_async_and_set_value_async()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size);
 
-    std::size_t count = 0;
+    size_type count = 0;
 
     //Assigning value from 0,1,...,vec.size() - 1
-    for(std::size_t i = 0; i < v.size(); ++i)
+    for(size_type i = 0; i < v.size(); ++i)
     {
         try{
             v.set_value_async(i, (VAL_TYPE)i).get();
@@ -86,7 +92,7 @@ void test_get_value_async_and_set_value_async()
 
     count = 0;
     //checking the values are correctly inserted and accessed by [] operator
-    for(std::size_t i = 0; i < v.size(); ++i)
+    for(size_type i = 0; i < v.size(); ++i)
     {
         try{
             //Test the array subscript correctly assigning the value in correct order
@@ -107,9 +113,10 @@ void test_get_value_async_and_set_value_async()
 
 void test_get_value_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
@@ -204,9 +211,10 @@ void test_get_value_exception()
 
 void test_get_value_async_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
@@ -301,9 +309,10 @@ void test_get_value_async_exception()
 
 void test_set_value_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 
@@ -402,9 +411,10 @@ void test_set_value_exception()
 
 void test_set_value_async_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size, INITIAL_VALUE);
 

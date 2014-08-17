@@ -10,12 +10,17 @@
 
 #define VAL_TYPE double
 #define INITIAL_VALUE 124
+#define INITIAL_NUM_CHUNKS 100
+#define INITIAL_CHUNK_SIZE 10005
+
+typedef std::size_t         size_type;
 
 void test_size_and_size_async()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size);
 
@@ -28,9 +33,10 @@ void test_size_and_size_async()
 
 void test_max_size_and_max_size_async()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size);
 
@@ -39,12 +45,12 @@ void test_max_size_and_max_size_async()
 }//End of test_max_size_and_max_size_async()
 
 //  This is when the new size is greater than
-void test_resize_helper_increase(std::size_t num_chunks,
-                                 std::size_t initial_chunk_size,
-                                 std::size_t new_chunk_size,
+void test_resize_helper_increase(size_type num_chunks,
+                                 size_type initial_chunk_size,
+                                 size_type new_chunk_size,
                                  VAL_TYPE val = (double)0)
 {
-    std::size_t initial_size = num_chunks * initial_chunk_size;
+    size_type initial_size = num_chunks * initial_chunk_size;
     hpx::vector v(num_chunks, initial_chunk_size, INITIAL_VALUE);
 
     if(val == (VAL_TYPE)0)
@@ -55,18 +61,18 @@ void test_resize_helper_increase(std::size_t num_chunks,
     else
         v.resize(new_chunk_size, val);
 
-    std::size_t new_size = num_chunks * new_chunk_size;
-    std::size_t count_old_ele = 0, count_new_ele = 0;
+    size_type new_size = num_chunks * new_chunk_size;
+    size_type count_old_ele = 0, count_new_ele = 0;
 
-    for(std::size_t chunks = 0; chunks < num_chunks; ++chunks)
+    for(size_type chunks = 0; chunks < num_chunks; ++chunks)
     {
-        for(std::size_t i = 0; i < initial_chunk_size; ++i)
+        for(size_type i = 0; i < initial_chunk_size; ++i)
         {
             HPX_TEST_EQ(v[ (chunks * new_chunk_size) + i],
                         (VAL_TYPE) INITIAL_VALUE);
             ++count_old_ele;
         }
-        for(std::size_t i = initial_chunk_size;
+        for(size_type i = initial_chunk_size;
                 i < new_chunk_size;
                 ++i)
         {
@@ -85,12 +91,12 @@ void test_resize_helper_increase(std::size_t num_chunks,
 }//End of test_resize_helper_increase()
 
 //  This is when the new size is less than or equal
-void test_resize_helper_decrease_equal(std::size_t num_chunks,
-                                       std::size_t initial_chunk_size,
-                                       std::size_t new_chunk_size,
+void test_resize_helper_decrease_equal(size_type num_chunks,
+                                       size_type initial_chunk_size,
+                                       size_type new_chunk_size,
                                        VAL_TYPE val = (double)0)
 {
-    std::size_t initial_size = num_chunks * initial_chunk_size;
+    size_type initial_size = num_chunks * initial_chunk_size;
     hpx::vector v(num_chunks, initial_chunk_size, INITIAL_VALUE);
 
     if(val == (VAL_TYPE)0)
@@ -105,12 +111,12 @@ void test_resize_helper_decrease_equal(std::size_t num_chunks,
         v.resize(new_chunk_size, val);
     }
 
-    std::size_t new_size = num_chunks * new_chunk_size;
-    std::size_t count_old_ele = 0;
+    size_type new_size = num_chunks * new_chunk_size;
+    size_type count_old_ele = 0;
 
-    for(std::size_t chunks = 0; chunks < num_chunks; ++chunks)
+    for(size_type chunks = 0; chunks < num_chunks; ++chunks)
     {
-        for(std::size_t i = 0; i < new_chunk_size; ++i)
+        for(size_type i = 0; i < new_chunk_size; ++i)
         {
             HPX_TEST_EQ(v[ (chunks * new_chunk_size) + i],
                         (VAL_TYPE) INITIAL_VALUE);
@@ -146,8 +152,9 @@ void test_resize()
 
 void test_resize_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size);
 
     bool caught_exception = false;
@@ -189,12 +196,12 @@ void test_resize_exception()
 }// End of test_resize_exception()
 
 //  This is when the new size is greater than
-void test_resize_async_helper_increase(std::size_t num_chunks,
-                                       std::size_t initial_chunk_size,
-                                       std::size_t new_chunk_size,
+void test_resize_async_helper_increase(size_type num_chunks,
+                                       size_type initial_chunk_size,
+                                       size_type new_chunk_size,
                                        VAL_TYPE val = (double)0)
 {
-    std::size_t initial_size = num_chunks * initial_chunk_size;
+    size_type initial_size = num_chunks * initial_chunk_size;
     hpx::vector v(num_chunks, initial_chunk_size, INITIAL_VALUE);
 
     if(val == (VAL_TYPE)0)
@@ -205,18 +212,18 @@ void test_resize_async_helper_increase(std::size_t num_chunks,
     else
         v.resize_async(new_chunk_size, val).get();
 
-    std::size_t new_size = num_chunks * new_chunk_size;
-    std::size_t count_old_ele = 0, count_new_ele = 0;
+    size_type new_size = num_chunks * new_chunk_size;
+    size_type count_old_ele = 0, count_new_ele = 0;
 
-    for(std::size_t chunks = 0; chunks < num_chunks; ++chunks)
+    for(size_type chunks = 0; chunks < num_chunks; ++chunks)
     {
-        for(std::size_t i = 0; i < initial_chunk_size; ++i)
+        for(size_type i = 0; i < initial_chunk_size; ++i)
         {
             HPX_TEST_EQ(v[ (chunks * new_chunk_size) + i],
                         (VAL_TYPE) INITIAL_VALUE);
             ++count_old_ele;
         }
-        for(std::size_t i = initial_chunk_size;
+        for(size_type i = initial_chunk_size;
                 i < new_chunk_size;
                 ++i)
         {
@@ -235,12 +242,12 @@ void test_resize_async_helper_increase(std::size_t num_chunks,
 }//End of test_resize_async_helper_increase()
 
 //  This is when the new size is less than or equal
-void test_resize_async_helper_decrease_equal(std::size_t num_chunks,
-                                             std::size_t initial_chunk_size,
-                                             std::size_t new_chunk_size,
+void test_resize_async_helper_decrease_equal(size_type num_chunks,
+                                             size_type initial_chunk_size,
+                                             size_type new_chunk_size,
                                              VAL_TYPE val = (double)0)
 {
-    std::size_t initial_size = num_chunks * initial_chunk_size;
+    size_type initial_size = num_chunks * initial_chunk_size;
     hpx::vector v(num_chunks, initial_chunk_size, INITIAL_VALUE);
 
     if(val == (VAL_TYPE)0)
@@ -255,12 +262,12 @@ void test_resize_async_helper_decrease_equal(std::size_t num_chunks,
         v.resize_async(new_chunk_size, val).get();
     }
 
-    std::size_t new_size = num_chunks * new_chunk_size;
-    std::size_t count_old_ele = 0;
+    size_type new_size = num_chunks * new_chunk_size;
+    size_type count_old_ele = 0;
 
-    for(std::size_t chunks = 0; chunks < num_chunks; ++chunks)
+    for(size_type chunks = 0; chunks < num_chunks; ++chunks)
     {
-        for(std::size_t i = 0; i < new_chunk_size; ++i)
+        for(size_type i = 0; i < new_chunk_size; ++i)
         {
             HPX_TEST_EQ(v[ (chunks * new_chunk_size) + i],
                         (VAL_TYPE) INITIAL_VALUE);
@@ -296,8 +303,9 @@ void test_resize_async()
 
 void test_resize_async_exception()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size);
 
     bool caught_exception = false;
@@ -341,9 +349,10 @@ void test_resize_async_exception()
 
 void test_capacity_and_capacity_async()
 {
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //  Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having
+    //  INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v(num_chunks, chunk_size);
 
@@ -358,8 +367,8 @@ void test_empty_and_empty_async()
     HPX_TEST(v_empty.empty());
     HPX_TEST(v_empty.empty_async().get());
 
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
+    //Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
     hpx::vector v(num_chunks, chunk_size);
     HPX_TEST_EQ(false, v.empty());
     HPX_TEST_EQ(false, v.empty_async().get());

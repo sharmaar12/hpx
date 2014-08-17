@@ -9,19 +9,24 @@
 
 #define VAL_TYPE double
 #define INITIAL_VALUE 124
+#define INITIAL_NUM_CHUNKS 100
+#define INITIAL_CHUNK_SIZE 10005
+
+typedef std::size_t	size_type;
 
 void test_constructor()
 {
     //Vector created with default constructor
     hpx::vector v;
-    HPX_TEST_EQ(v.size(), (std::size_t) 0);
+    HPX_TEST_EQ(v.size(), (size_type) 0);
     //Tests iterator API are behaving correctly
     HPX_TEST(v.begin() == v.end());
     HPX_TEST(v.cbegin() == v.cend());
 
-    //Vector created with 100 chunks and each chunk is having 10005 elements
-    std::size_t num_chunks = 100, chunk_size = 10005;
-    std::size_t expected_total_elements;
+    //	Vector created with INITIAL_NUM_CHUNKS chunks and each chunk is having 
+    //	INITIAL_CHUNK_SIZE elements
+    size_type num_chunks = INITIAL_NUM_CHUNKS, chunk_size = INITIAL_CHUNK_SIZE;
+    size_type expected_total_elements;
     expected_total_elements = num_chunks * chunk_size;
     hpx::vector v_with_size(num_chunks, chunk_size);
 
@@ -29,7 +34,7 @@ void test_constructor()
     HPX_TEST(v_with_size.begin() != v_with_size.end());
     HPX_TEST(v_with_size.cbegin() != v_with_size.cend());
 
-    std::size_t count = 0;
+    size_type count = 0;
 
     //Segmented iterator work for std:for_each as lamda is taking value not
     // reference and all other iterator API is implemented.
@@ -43,7 +48,7 @@ void test_constructor()
     HPX_TEST_EQ(v_with_size.size(), count);
     HPX_TEST_EQ(v_with_size.size(), expected_total_elements );
 
-    //Vector Created with 100 chunks and each chunk is having 10005 elements
+    //Vector Created with INITIAL_NUM_CHUNKS chunks and each chunk is having INITIAL_CHUNK_SIZE elements
     //All elements of vector are initialized to INITIAL_VALUE
     hpx::vector v_with_val(num_chunks, chunk_size, INITIAL_VALUE);
 
