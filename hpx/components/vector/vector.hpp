@@ -11,9 +11,9 @@
  *  @brief The hpx::vector and its API's are defined here.
  *
  *  The hpx::vector is segmented data structure which is collection of one or
- *   more chunk_vector. The hpx::vector stores the global ID's of each
- *   chunk_vector and the index (with respect to whole vector) of the first
- *   element in that chunk_vector. These two are stored in std::pair. Note that
+ *   more hpx::chunk_vector. The hpx::vector stores the global ID's of each
+ *   hpx::chunk_vector and the index (with respect to whole vector) of the first
+ *   element in that hpx::chunk_vector. These two are stored in std::pair. Note that
  *   the hpx::vector must contain at least one chunk_vector at any time during
  *   its life cycle. The hpx::vector is considered INVALID if it is created with
  *   zero chunk_vector or n (n>0) chunk_vector with chunk_size 0.
@@ -35,7 +35,9 @@
 
 //TODO Remove all unnecessary comments from file
 
-/** @brief Defines the type of value stored by the chunk_vector.*/
+/** @brief Defines the type of value stored by elements in the
+ *          hpx::chunk_vector.
+ */
 #define VALUE_TYPE double
 
 /**
@@ -50,7 +52,7 @@ namespace hpx{
 
     /** @brief This is the vector class which define hpx::vector functionality.
     *
-    *   This contain the implementation of the hpx::vector. This Class defined
+    *   This contain the implementation of the hpx::vector. This class defined
     *    the synchronous and asynchronous API's for each functionality.
     */
     class vector
@@ -83,22 +85,10 @@ namespace hpx{
         typedef std::pair<size_type, hpx_id_shared_future> bfg_pair;
 
         // The standard vector of the bfg_pair defined above.
-        typedef std::vector< bfg_pair > vector_type;
+        typedef std::vector< bfg_pair >                    vector_type;
 
         // This typedef helps to call object of same class.
-        typedef hpx::vector self_type;
-
-            //PROGRAMMER DOCUMENTATION:
-            // This is the vector representing the base_index and corresponding
-            //  global ID's of chunk_vector. Taken as future of hpx_id's as it
-            //  delay the .get() as far as possible. Shared future is mandatory
-            //  as .get() can be called any number of time. The base_index value
-            //  for each bfg_pair must be unique.
-
-            /** @brief This is the vector representing the base_index and
-             *          corresponding global ID's of chunk_vector.
-             */
-            vector_type base_sf_of_gid_pair_;
+        typedef hpx::vector                                self_type;
 
     protected:
         // PROGRAMMER DOCUMENTATION:
@@ -177,7 +167,7 @@ namespace hpx{
                             return middle.first < val.first;
                         }
                                     );
-            //  Second condition avoid the boundry case where the get_value can
+            //  Second condition avoid the boundary case where the get_value can
             //  be called on invalid gid. This occurs when pos = -1
             //  (maximum value)
             if(it->first == pos && (it->second).get() != invalid_id)
@@ -426,9 +416,8 @@ namespace hpx{
         //
         // Constructors
         //
-        /** @brief Default Constructor which create vector with num_chunk = 1
-         *          and chunk_size = 0. Hence overall size of the vector is 0.
-         *          All the elements are initialized to 0.
+        /** @brief Default Constructor which create hpx::vector with \a num_chunk = 1
+         *          and \a chunk_size = 0. Hence overall size of the vector is 0.
          */
         explicit vector()
         {
@@ -444,8 +433,8 @@ namespace hpx{
 //            create(num_chunks, 0, VALUE_TYPE());
 //        }
 
-        /** @brief Constructor which create and initialize vector with all
-         *          elements as 0.
+        /** @brief Constructor which create hpx::vector with size \a chunk_size.
+         *          This use default constructor to initialized object.
          *
          *  @param num_chunks   The number of chunks to be created
          *  @param chunk_size   The size of each chunk
@@ -467,7 +456,7 @@ namespace hpx{
         }
 
         /** @brief Constructor which create and initialize vector with all
-         *          elements with val.
+         *          elements with \a val.
          *
          *  @param num_chunks   The number of chunks to be created
          *  @param chunk_size   The size of each chunk
@@ -503,10 +492,10 @@ namespace hpx{
         /** @brief Array subscript operator. This does not throw any exception.
          *
          *  @param pos Position of the element in the vector [Note the first
-         *              position in the chunk_vector is 0]
+         *              position in the chunk is 0]
          *
          *  @return Return the value of the element at position represented by
-         *           pos [Note that this is not the reference to the element]
+         *           \a pos [Note that this is not the reference to the element]
          *
          */
         VALUE_TYPE operator [](size_type pos) const
@@ -538,7 +527,7 @@ namespace hpx{
         //SIZE
         /** @brief Compute the size as the number of elements it contains.
          *
-         *  @return Return the number of element in the vector
+         *  @return Return the number of elements in the vector
          */
         size_type size() const
         {
@@ -551,7 +540,7 @@ namespace hpx{
 
         /** @brief Asynchronous API for size().
          *
-         * @return This return the hpx future of return value of size()
+         * @return This return the hpx::future of return value of size()
          */
         size_future size_async() const
         {
@@ -562,9 +551,9 @@ namespace hpx{
         }
 
         //MAX_SIZE
-        /**  @brief Compute the max_size of vector.
-         *
-         *  @return Return maximum number of element the vector can hold
+        /**  @brief Compute the maximum size of hpx::vector in terms of
+         *           number of elements.
+         *  @return Return maximum number of elements the vector can hold
          */
         size_type max_size() const
         {
@@ -577,7 +566,7 @@ namespace hpx{
 
         /**  @brief Asynchronous API for max_size().
          *
-         *  @return Return the hpx future of return value of max_size()
+         *  @return Return the hpx::future of return value of max_size()
          */
         size_future max_size_async() const
         {
@@ -617,19 +606,20 @@ namespace hpx{
         // RESIZE (with value)
         // SEMANTIC DIFFERENCE:
         //    It is resize with respective chunk not whole vector
-        /** @brief Resize each chunk_vector so that it contain n elements.
+        /** @brief Resize each chunk so that it contain n elements. If
+         *          the \a val is not it use default constructor instead.
          *
-         *  This function resize the each chunk_vector so that it contains n
-         *   element. [Note that the n does not represent the total size of
-         *   vector it is the size of each chunk. This mean if n is 10 and
+         *  This function resize the each chunk so that it contains \a n
+         *   elements. [Note that the \a n does not represent the total size of
+         *   vector it is the size of each chunk. This mean if \a n is 10 and
          *   num_chunk is 5 then total size of vector after resize is 10*5 = 50]
          *
-         *  @param n    new size of the each chunk_vector
-         *  @param val  value to be copied if n is greater than the current size
-         *               [Default is 0]
+         *  @param n    New size of the each chunk
+         *  @param val  Value to be copied if \a n is greater than the current
+         *               size [Default is 0]
          *
-         *  @exception hpx::invalid_vector_error If the n is equal to zero then
-         *              it throw invalid_vector_error.
+         *  @exception hpx::invalid_vector_error If the \a n is equal to zero
+         *              then it throw \a hpx::invalid_vector_error exception.
          */
         void resize(size_type n, VALUE_TYPE const& val = VALUE_TYPE())
         {
@@ -663,16 +653,16 @@ namespace hpx{
 
         /** @brief Asynchronous API for resize().
          *
-         *  @param n    new size of the each chunk_vector
-         *  @param val  value to be copied if n is greater than the current size
+         *  @param n    New size of the each chunk
+         *  @param val  Value to be copied if \a n is greater than the current size
          *               [Default is 0]
          *
          *  @return This return the hpx::future of type void [The void return
          *           type can help to check whether the action is completed or
          *           not]
          *
-         *  @exception hpx::invalid_vector_error If the n is equal to zero then
-         *              it throw invlid_vector_error.
+         *  @exception hpx::invalid_vector_error If the \a n is equal to zero
+         *              then it throw \a hpx::invalid_vector_error exception.
          */
         void_future resize_async(size_type n,
                                  VALUE_TYPE const& val = VALUE_TYPE())
@@ -709,7 +699,7 @@ namespace hpx{
 
         /** @brief Asynchronous API for capacity().
          *
-         *  @return Returns the hpx future of return value of capacity()
+         *  @return Returns the hpx::future of return value of capacity()
          */
         size_future capacity_async() const
         {
@@ -731,7 +721,7 @@ namespace hpx{
 
         /** @brief Asynchronous API for empty().
          *
-         *  @return The hpx future of return value empty()
+         *  @return The hpx::future of return value empty()
          */
         bool_future empty_async() const
         {
@@ -740,21 +730,22 @@ namespace hpx{
         }
 
         //RESERVE
-        /** @brief Request the change in each chunk_vector capacity so that it
-         *          can hold n elements. Throws the hpx::length_error exception.
+        /** @brief Request the change in each chunk capacity so that it
+         *          can hold \a n elements. Throws the
+         *          \a hpx::length_error exception.
          *
-         *  This function request for each chunk_vector capacity should be at
-         *   least enough to contain n elements. For all chunk_vector in vector
-         *   if its capacity is less than n then their reallocation happens to
-         *   increase their capacity to n (or greater). In other cases the
-         *   chunk_vector capacity does not got affected. It does not change the
-         *   chunk_vector size. Hence the size of the vector does not affected.
+         *  This function request for each chunk capacity should be at
+         *   least enough to contain \a n elements. For all chunk in vector
+         *   if its capacity is less than \a n then their reallocation happens
+         *   to increase their capacity to \a n (or greater). In other cases
+         *   the chunk capacity does not got affected. It does not change the
+         *   chunk size. Hence the size of the vector does not affected.
          *
-         * @param n minimum capacity of chunk_vector
+         * @param n Minimum capacity of chunk
          *
-         * @exception hpx::length_error If n is greater than max_size for at
-         *             least one chunk_vector then function throw
-         *             hpx::length_error exception.
+         * @exception hpx::length_error If \a n is greater than maximum size for
+         *             at least one chunk then function throw
+         *             \a hpx::length_error exception.
          */
         void reserve(size_type n)
         {
@@ -773,15 +764,15 @@ namespace hpx{
 
         /** @brief Asynchronous API for reserve().
          *
-         *  @param n minimum capacity of chunk_vector
+         *  @param n Minimum capacity of chunk
          *
          *  @return This return the hpx::future of type void [The void return
          *           type can help to check whether the action is completed or
          *           not]
          *
-         *  @exception hpx::length_error If n is greater than max_size for at
-         *              least one chunk_vector then function throw
-         *              hpx::length_error exception.
+         *  @exception hpx::length_error If \a n is greater than maximum size
+         *              for at least one chunk then function throw
+         *              \a hpx::length_error exception.
          */
         void_future reserve_async(size_type n)
         {
@@ -795,18 +786,18 @@ namespace hpx{
         //
 
         //GET_VALUE
-        /** @brief Returns the element at position pos in the vector container.
-         *          It throws the hpx::out_of_bound exception.
+        /** @brief Returns the element at position \a pos in the vector
+         *          container. It throws the \a hpx::out_of_range exception.
          *
          *  @param pos Position of the element in the vector [Note the first
-         *          position in the chunk_vector is 0]
+         *          position in the chunk is 0]
          *
          *  @return Return the value of the element at position represented by
-         *           pos [Note that this is not the reference to the element]
+         *           \a pos [Note that this is not the reference to the element]
          *
-         *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound
-         *              exception.
+         *  @exception hpx::out_of_range The \a pos is bound checked and if
+         *              \a pos is out of bound then it throws the
+         *              \a hpx::out_of_range exception.
          */
         VALUE_TYPE get_value(size_type pos) const
         {
@@ -825,18 +816,18 @@ namespace hpx{
         }//end of get_value
 
         /** @brief Asynchronous API for get_value(). It throws the
-         *          hpx::out_of_bound exception.
+         *          \a hpx::out_of_range exception.
          *
          *  @param pos Position of the element in the vector [Note the first
-         *          position in the chunk_vector is 0]
+         *          position in the chunk is 0]
          *
-         *  @return Return the hpx future to value of the element at position
-         *           represented by pos [Note that this is not the reference to
-         *           the element]
+         *  @return Return the hpx::future to value of the element at position
+         *           represented by \a pos [Note that this is not the reference
+         *           to the element]
          *
-         *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound
-         *              exception.
+         *  @exception hpx::out_of_range The \a pos is bound checked and if
+         *              \a pos is out of bound then it throws the
+         *              \a hpx::out_of_range exception.
          */
         hpx::future< VALUE_TYPE > get_value_async(size_type pos) const
         {
@@ -875,7 +866,7 @@ namespace hpx{
          *
          *  Calling the function on empty container cause undefined behavior.
          *
-         * @return Return the future to return value of front()
+         * @return Return the hpx::future to return value of front()
          */
         hpx::future< VALUE_TYPE > front_async() const
         {
@@ -904,7 +895,7 @@ namespace hpx{
          *
          *  Calling the function on empty container cause undefined behavior.
          *
-         * @return Return future to the return value of back()
+         * @return Return hpx::future to the return value of back()
          */
         hpx::future< VALUE_TYPE > back_async() const
         {
@@ -921,15 +912,15 @@ namespace hpx{
         //
 
         //ASSIGN
-        /** @brief Assigns new contents to each chunk_vector, replacing its
-         *          current contents, and modifying each chunk_vector size
+        /** @brief Assigns new contents to each chunk, replacing its
+         *          current contents and modifying each chunk size
          *          accordingly.
          *
-         *  @param n     new size of each chunk_vector
-         *  @param val   Value to fill the chunk_vector with
+         *  @param n     New size of each chunk
+         *  @param val   Value to fill the chunk with
          *
-         *  @exception hpx::invalid_vector_error If the n is equal to zero then
-         *              it throw invalid_vector_error.
+         *  @exception hpx::invalid_vector_error If the \a n is equal to zero
+         *              then it throw \a hpx::invalid_vector_error exception.
          */
         void assign(size_type n, VALUE_TYPE const& val)
         {
@@ -958,11 +949,11 @@ namespace hpx{
 
         /** @brief Asynchronous API for assign().
          *
-         *  @param n     new size of each chunk_vector
-         *  @param val   Value to fill the chunk_vector with
+         *  @param n     New size of each chunk
+         *  @param val   Value to fill the chunk with
          *
-         *  @exception hpx::invalid_vector_error If the n is equal to zero then
-         *              it throw invalid_vector_error.
+         *  @exception hpx::invalid_vector_error If the \a n is equal to zero
+         *              then it throw \a hpx::invalid_vector_error exception.
          *
          *  @return This return the hpx::future of type void [The void return
          *           type can help to check whether the action is completed or
@@ -980,9 +971,9 @@ namespace hpx{
 
         //PUSH_BACK
         /** @brief Add new element at the end of vector. The added element
-         *          contain the val as value.
+         *          contain the \a val as value.
          *
-         *  The value is added to the back to the last chunk_vector.
+         *  The value is added to the back to the last chunk.
          *
          *  @param val Value to be copied to new element
          */
@@ -1012,7 +1003,9 @@ namespace hpx{
 
         //PUSH_BACK (With rval)
         /** @brief Add new element at the end of vector. The added element
-         *          contain the val as value.
+         *          contain the \a val as value.
+         *
+         *  The value is added to the back to the last chunk.
          *
          *  @param val Value to be moved to new element
          */
@@ -1051,16 +1044,17 @@ namespace hpx{
         //
         //  set_value API's in vector class
         //
-        /** @brief Copy the value of val in the element at position pos in the
-         *          vector container. It throws the hpx::out_of_bound exception.
+        /** @brief Copy the value of \a val in the element at position \a pos in
+         *          the vector container. It throws the \a hpx::out_of_range
+         *          exception.
          *
          *  @param pos   Position of the element in the vector [Note the first
          *                position in the vector is 0]
          *  @param val   The value to be copied
          *
-         *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound
-         *              exception.
+         *  @exception hpx::out_of_range The \a pos is bound checked and if
+         *              \a pos is out of bound then it throws the
+         *              \a hpx::out_of_range exception.
          */
         void set_value(size_type pos, VALUE_TYPE const& val)
         {
@@ -1081,15 +1075,15 @@ namespace hpx{
         }//end of set_value
 
         /** @brief Asynchronous API for set_value(). It throws the
-         *          hpx::out_of_bound exception.
+         *          \a hpx::out_of_range exception.
          *
          *  @param pos   Position of the element in the vector [Note the first
          *                position in the vector is 0]
          *  @param val   The value to be copied
          *
-         *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound
-         *              exception.
+         *  @exception hpx::out_of_range The \a pos is bound checked and if
+         *              \a pos is out of bound then it throws the
+         *              \a hpx::out_of_range exception.
          */
         void_future set_value_async(size_type pos, VALUE_TYPE const& val)
         {
@@ -1111,16 +1105,16 @@ namespace hpx{
         }//end of set_value_async
 
         //SET_VALUE (with rval)
-        /** @brief Move the val in the element at position pos in the vector
-         *          container. It throws the hpx::out_of_bound exception.
+        /** @brief Move the val in the element at position \a pos in the vector
+         *          container. It throws the \a hpx::out_of_range exception.
          *
-         *  @param pos   Position of the element in the chunk_vector [Note the
+         *  @param pos   Position of the element in the vector [Note the
          *                first position in the vector is 0]
          *  @param val   The value to be moved
          *
-         *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound
-         *              exception.
+         *  @exception hpx::out_of_range The \a pos is bound checked and if
+         *              \a pos is out of bound then it throws the
+         *              \a hpx::out_of_range exception.
          */
         void set_value(size_type pos, VALUE_TYPE const&& val)
         {
@@ -1141,15 +1135,15 @@ namespace hpx{
 
         /** @brief Asynchronous API for
          *          set_value(std::size_t pos, VALUE_TYPE const&& val).
-         *          It throws the hpx::out_of_bound exception.
+         *          It throws the \a hpx::out_of_range exception.
          *
-         *  @param pos   Position of the element in the chunk_vector [Note the
+         *  @param pos   Position of the element in the vector [Note the
          *                first position in the vector is 0]
          *  @param val   The value to be moved
          *
-         *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound
-         *              exception.
+         *  @exception hpx::out_of_range The \a pos is bound checked and if
+         *              \a pos is out of bound then it throws the
+         *              \a hpx::out_of_range exception.
          */
         void_future set_value_async(size_type pos, VALUE_TYPE const&& val)
         {
@@ -1199,7 +1193,7 @@ namespace hpx{
 //            }//end of create chunk
 
             //
-            // Iteratro API's in vector class
+            // Iterator API's in vector class
             //
 
         // PROGRAMMER DOCUMENTATION:
@@ -1223,7 +1217,7 @@ namespace hpx{
         //   (std::vector's last iterator position) of the chunk_vector in
         //   bfg_pair which immediately precedes the LAST (for LAST Refer
         //   the Create PROGRAMMER DOCUMENTATION).
-        /**  @brief Return the iterator at the beginning of the vector. */
+        /**  @brief Return the iterator at the end of the vector. */
         iterator end()
         {
             return iterator((base_sf_of_gid_pair_.end() - 2),
@@ -1233,7 +1227,7 @@ namespace hpx{
                             valid);
         }//end of end
 
-        /**  @brief Return the iterator at the beginning of the vector. */
+        /**  @brief Return the const_iterator at the end of the vector. */
         const_iterator end() const
         {
             return const_iterator((base_sf_of_gid_pair_.end() - 2),
@@ -1247,7 +1241,7 @@ namespace hpx{
         //  The beginning id represented by the 0'th position of the first
         //   chunk_vector.
         //
-        /**  @brief Return the iterator at the beginning of the vector. */
+        /**  @brief Return the const_iterator at the beginning of the vector. */
         const_iterator cbegin() const
         {
             return const_iterator(base_sf_of_gid_pair_.begin(), 0, valid);
@@ -1258,7 +1252,7 @@ namespace hpx{
         //   (std::vector's last iterator position) of the chunk_vector in
         //   bfg_pair which immediately precedes the LAST (for LAST Refer
         //   the Create PROGRAMMER DOCUMENTATION).
-        /**  @brief Return the iterator at the beginning of the vector. */
+        /**  @brief Return the const_iterator at the end of the vector. */
         const_iterator cend() const
         {
             return const_iterator((base_sf_of_gid_pair_.end() - 2),
@@ -1276,6 +1270,20 @@ namespace hpx{
         {
             //DEFAULT destructor
         }
+
+
+    private:
+        //PROGRAMMER DOCUMENTATION:
+        // This is the vector representing the base_index and corresponding
+        //  global ID's of chunk_vector. Taken as future of hpx_id's as it
+        //  delay the .get() as far as possible. Shared future is mandatory
+        //  as .get() can be called any number of time. The base_index value
+        //  for each bfg_pair must be unique.
+
+        /** @brief This is the vector representing the base_index and
+         *          corresponding global ID's of chunk.
+         */
+        vector_type base_sf_of_gid_pair_;
 
     };//end of class vector
 
