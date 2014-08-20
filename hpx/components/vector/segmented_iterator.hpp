@@ -297,7 +297,7 @@ namespace hpx
 
         //ARITHMATIC OPERATOR
         /** @brief Return the const_segmented_vector_iterator pointing to the
-         *  position which is n units ahead of the current position.
+         *  position which is \a n units ahead of the current position.
          */
         self_type operator + (size_type n) const
         {
@@ -366,7 +366,7 @@ namespace hpx
         }//End of a + n
 
         /** @brief Return the const_segmented_vector_iterator pointing to the
-         *          position which is n units behind the current position.
+         *          position which is \a n units behind the current position.
          */
         self_type operator - (size_type n) const
         {
@@ -549,7 +549,7 @@ namespace hpx
         }// End of >=
 
         //COMPOUND ASSIGNMENT
-        /** @brief Increment the const_segmented_vector_iterator by n.
+        /** @brief Increment the const_segmented_vector_iterator by \a n.
          *
          *  @return Returns the reference to the incremented object
          */
@@ -560,7 +560,7 @@ namespace hpx
             return *this;
         }//End of +=
 
-        /** @brief Decrement the const_segmented_vector_iterator by n.
+        /** @brief Decrement the const_segmented_vector_iterator by \a n.
          *
          *  @return Returns the reference to the decremented object
          */
@@ -572,7 +572,7 @@ namespace hpx
         }//End of +=
 
         //OFFSET DEREFERENCE
-        /** @brief Dereferences the iterator which is at n position ahead of the
+        /** @brief Dereferences the iterator which is at \a n position ahead of the
          *          current iterator position and returns the value of the element.
          *
          *  @return Value in the element which is at n position ahead of the
@@ -585,12 +585,28 @@ namespace hpx
             return *temp;
         }
 
+        //
         // API related to Segmented Iterators
+        //
+
+        //  PROGRAMMER DOCUMENTATION:
+        //      Conceptually this function is suppose to denote which segment,
+        //  the iterator is currently pointing to (i.e. just global iterator).
+        //      As we are having the gid and base index in a pair and we have a
+        //  std::vector which store these pairs. So we are returning the
+        //  const_iterator so that we can have access to both gid and and
+        //  base_index and the iterator is also comparable against == and !=
+        //  operator
         static vector_type::const_iterator segment(self_type const& seg_iter)
         {
             return seg_iter.curr_bfg_pair_;
         }
 
+        //  PROGRAMMER DOCUMENTATION:
+        //      This function should specify which is the current segment and
+        //  in that exact position to which local iterator is pointing.
+        //      Now we are returning the pair of the gid and local index to
+        //  represent the position.
         static local_return_type local(self_type const& seg_iter)
         {
             return std::make_pair(
@@ -599,11 +615,23 @@ namespace hpx
                                  );
         }
 
+        //  PROGRAMMER DOCUMENTATION:
+        //      This function should specify the local iterator which is at the
+        //  beginning of the chunk.
+        //      We are returning the pair of the gid and local index as 0. Though
+        //  we can get the local iterator at the beginning if we are having the
+        //  gid but we are returning this to have same API for each algorithm.
         static local_return_type begin(vector_type::const_iterator chunk_bfg_pair)
         {
             return std::make_pair(chunk_bfg_pair->second, 0);
         }
 
+        //  PROGRAMMER DOCUMENTATION:
+        //      This function should specify the local iterator which is at the
+        //  end of the chunk.
+        //      We are returning the pair of the gid and local index as size.
+        //  Though we can get the local iterator at the end if we are having the
+        //  gid but we are returning this to have same API for each algorithm.
         static local_return_type end(vector_type::const_iterator chunk_bfg_pair)
         {
             return std::make_pair(
@@ -687,7 +715,7 @@ namespace hpx
         }
 
         /** @brief Return the segmented_vector_iterator pointing to the
-         *  position which is n units ahead of the current position.
+         *  position which is \a n units ahead of the current position.
          */
         self_type operator + (size_type n) const
         {
@@ -696,7 +724,7 @@ namespace hpx
         }
 
         /** @brief Return the segmented_vector_iterator pointing to the
-         *          position which is n units behind the current position.
+         *          position which is \a n units behind the current position.
          */
         self_type operator - (size_type n) const
         {
@@ -756,7 +784,7 @@ namespace hpx
             return return_temp;
         }
 
-        /** @brief Increment the segmented_vector_iterator by n.
+        /** @brief Increment the segmented_vector_iterator by \a n.
          *
          *  @return Returns the reference to the incremented object
          */
@@ -767,7 +795,7 @@ namespace hpx
             return *this;
         }//End of +=
 
-        /** @brief Decrement the segmented_vector_iterator by n.
+        /** @brief Decrement the segmented_vector_iterator by \a n.
          *
          *  @return Returns the reference to the decremented object
          */
