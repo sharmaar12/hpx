@@ -39,14 +39,13 @@ namespace hpx
 
     /**  @brief This enum define the iterator state. */
     enum iter_state{
-        invalid = 0, /**< This represent the iterator goes into invalid state */
+        invalid = 0, /**< This represent the iterator is in invalid state */
         valid = 1      /**< This represent the iterator is in valid state */
         };
 
 
 
-    /** @brief This is the const_segmented_vector_iterator class which implement
-    *           iterator functionality for hpx::vector.
+    /** @brief This class implement const iterator functionality for hpx::vector.
     *
     *   This contain the implementation of the all random access iterator API
     *    need. This Class also contain some additional API which is needed to
@@ -55,7 +54,7 @@ namespace hpx
     class const_segmented_vector_iterator
     {
     public:
-        typedef std::size_t                                 size_type;
+        typedef std::size_t             size_type;
 
     private:
         // This typedef helps to call object of same class.
@@ -105,10 +104,10 @@ namespace hpx
          state_(state) {}
 
 
-        /** @brief Copy Constructor for const_segmented_vector_iterator.
+        /** @brief Copy Constructor
          *
-         *  @param other    This the hpx::const_segmented_vector_iterator object which
-         *                   is to be copied
+         *  @param other   The const_segmented_vector_iterator object which
+         *                  is to be copied
          */
         const_segmented_vector_iterator(self_type const& other)
         {
@@ -119,11 +118,11 @@ namespace hpx
 
         //COPY ASSIGNMENT
         //  PROGRAMMER DOCUMENTATION:
-        //  Return allow a=b=c;
-        /** @brief Copy one iterator into other.
+        //  Return self_type& allow a=b=c;
+        /** @brief Copy one const_segmented_vector_iterator into other.
          *
-         *  @param other    This the hpx::const_segmented_vector_iterator objects which
-         *                   is to be copied
+         *  @param other The const_segmented_vector_iterator objects which
+         *                is to be copied
          *
          *  @return This return the reference to the newly created
          *           const_segmented_vector_iterator
@@ -137,10 +136,9 @@ namespace hpx
         }
 
         //COMPARISON API
-        /** @brief Compare the two segmented_vector_iterator for equality.
+        /** @brief Compare the two iterators for equality.
          *
-         *  @param other    This the hpx::const_segmented_vector_iterator objects
-         *                   which is to be compared
+         *  @param other The iterator objects which is to be compared
          *
          *  @return Return true if both are equal, false otherwise
          */
@@ -153,10 +151,9 @@ namespace hpx
                     this->local_index_ == other.local_index_);
         }
 
-        /** @brief Compare the two hpx::segmented_vector_iterator for inequality.
+        /** @brief Compare the two iterators for inequality.
          *
-         *  @param other    This the hpx::segmented_vector_iterator objects
-         *                   which is to be compared
+         *  @param other The iterator objects which is to be compared
          *
          *  @return Return false if both are equal, false otherwise
          */
@@ -166,14 +163,15 @@ namespace hpx
         }
 
         //DEREFERENCE
-        /** @brief Dereferences the iterator and returns the value of the element.
+        /** @brief Dereferences the iterator and returns the value of the
+         *          element.
+         *
+         *   If iterator is out of range of container then it cause undefined
+         *      behavior.
          *
          *  @return Value in the element pointed by the iterator [Note like
-         *           standard iterator it does not return reference just value]
-         *
-         *  @exception hpx::out_of_range The pos is bound checked and if pos is
-         *              out of bound then it throws the hpx::out_of_bound
-         *              exception.
+         *           standard iterator it does not return reference, it just
+         *           returns value]
          */
         VALUE_TYPE operator * () const
         {
@@ -195,9 +193,10 @@ namespace hpx
         //      3. The step 2 is repeated until you hit last valid gid in the list
         //         for the last valid gid you just increment local_index
         //
-        /** @brief Increment the iterator position by one unit.
+        /** @brief Increment the const_segmented_vector_iterator position by one
+         *          unit.
          *
-         *  @return Return the incremented hpx::segmented_vector_iterator object
+         *  @return Return the incremented const_segmented_vector_iterator object
          */
         self_type operator ++ ()  //prefix behavior
         {
@@ -229,9 +228,10 @@ namespace hpx
             return *this;
         }
 
-        /** @brief Increment the iterator position by one unit.
+        /** @brief Increment the const_segmented_vector_iterator position by one
+         *          unit.
          *
-         *  @return Return the original hpx::segmented_vector_iterator object
+         *  @return Return the original const_segmented_vector_iterator object
          */
         self_type operator ++ (int) //postfix behavior
         {
@@ -250,9 +250,10 @@ namespace hpx
         //       gid.
         //    2. Else just decrement the local_index.
         //
-        /** @brief Decrement the iterator position by one unit.
+        /** @brief Decrement the const_segmented_vector_iterator position by one
+         *          unit.
          *
-         *  @return Return the decremented hpx::segmented_vector_iterator object
+         *  @return Return the decremented const_segmented_vector_iterator object
          */
         self_type operator -- () //prefix behavior
         {
@@ -281,9 +282,10 @@ namespace hpx
             return *this;
         }
 
-        /** @brief Decrement the iterator position by one unit.
+        /** @brief Decrement the const_segmented_vector_iterator position by one
+         *          unit.
          *
-         *  @return Return the original hpx::segmented_vector_iterator object
+         *  @return Return the original const_segmented_vector_iterator object
          */
         self_type operator -- (int) //postfix behavior
         {
@@ -294,9 +296,9 @@ namespace hpx
         }
 
         //ARITHMATIC OPERATOR
-        /** @brief Return the iterator pointing to the position which is n units
-        *           ahead of the current position.
-        */
+        /** @brief Return the const_segmented_vector_iterator pointing to the
+         *  position which is n units ahead of the current position.
+         */
         self_type operator + (size_type n) const
         {
             //copying the current states of the iterator
@@ -363,9 +365,9 @@ namespace hpx
                              temp_state);
         }//End of a + n
 
-        /** @brief Return the iterator pointing to the position which is n units
-        *           behind the current position.
-        */
+        /** @brief Return the const_segmented_vector_iterator pointing to the
+         *          position which is n units behind the current position.
+         */
         self_type operator - (size_type n) const
         {
             //copying the current states of the iterator
@@ -457,11 +459,9 @@ namespace hpx
 //        }//end of a - b
 
         //RELATIONAL OPERATOR
-        /** @brief Compare the two hpx::segmented_vector_iterator for less than
-         *          relation.
+        /** @brief Compare the two iterator for less than relation.
          *
-         *  @param other    This the hpx::segmented_vector_iterator objects
-         *                   which is to be compared
+         *  @param other This the iterator objects which is to be compared
          *
          *  @return Return true if object with which it called is less than
          *           other, false otherwise
@@ -488,11 +488,9 @@ namespace hpx
                 return false;
         }// End of <
 
-        /** @brief Compare the two hpx::segmented_vector_iterator for greater
-         *          than relation.
+        /** @brief Compare the two iterator for greater than relation.
          *
-         *  @param other    This the hpx::segmented_vector_iterator objects
-         *                   which is to be compared
+         *  @param other This the iterator objects which is to be compared
          *
          *  @return Return true if object with which it called is greater than
          *           other, false otherwise
@@ -515,11 +513,9 @@ namespace hpx
                 return false;
         }// End of >
 
-        /** @brief Compare the two hpx::segmented_vector_iterator for less than
-         *          or equal to relation.
+        /** @brief Compare the two iterator for less than or equal to relation.
          *
-         *  @param other    This the hpx::segmented_vector_iterator objects
-         *                   which is to be compared
+         *  @param other This the iterator objects which is to be compared
          *
          *  @return Return true if object with which it called is less than or
          *           equal to the other, false otherwise
@@ -534,11 +530,10 @@ namespace hpx
                 return false;
         }// End of <=
 
-        /** @brief Compare the two hpx::segmented_vector_iterator for greater
-         *          than or equal to relation.
+        /** @brief Compare the two iterator for greater than or equal to
+         *          relation.
          *
-         *  @param other    This the hpx::segmented_vector_iterator objects
-         *                   which is to be compared
+         *  @param other This the iterator objects which is to be compared
          *
          *  @return Return true if object with which it called is greater than
          *           or equal to the other, false otherwise
@@ -554,7 +549,7 @@ namespace hpx
         }// End of >=
 
         //COMPOUND ASSIGNMENT
-        /** @brief Increment the hpx::segmented_vector_iterator by n.
+        /** @brief Increment the const_segmented_vector_iterator by n.
          *
          *  @return Returns the reference to the incremented object
          */
@@ -565,7 +560,7 @@ namespace hpx
             return *this;
         }//End of +=
 
-        /** @brief Decrement the hpx::segmented_vector_iterator by n.
+        /** @brief Decrement the const_segmented_vector_iterator by n.
          *
          *  @return Returns the reference to the decremented object
          */
@@ -622,7 +617,7 @@ namespace hpx
         //
         // Destructor
         //
-        /** @brief Default destructor for hpx::segmented_vector_iterator.*/
+        /** @brief Default destructor for const_segmented_vector_iterator.*/
         ~const_segmented_vector_iterator()
         {
             //DEFAULT destructor
@@ -664,11 +659,25 @@ namespace hpx
                         :base_type(curr_bfg_pair,
                                    local_index,
                                    state) {}
+
+        /** @brief Copy Constructor
+         *
+         *  @param other   The segmented_vector_iterator object which
+         *                  is to be copied
+         */
         segmented_vector_iterator(self_type const& other)
                         : base_type(other.curr_bfg_pair_,
                                     other.local_index_,
                                     other.state_) {}
 
+        /** @brief Copy one segmented_vector_iterator into other.
+         *
+         *  @param other The segmented_vector_iterator objects which
+         *                is to be copied
+         *
+         *  @return This return the reference to the newly created
+         *           segmented_vector_iterator
+         */
         self_type & operator = (self_type const& other)
         {
             this->curr_bfg_pair_ = other.curr_bfg_pair_;
@@ -677,18 +686,29 @@ namespace hpx
             return *this;
         }
 
+        /** @brief Return the segmented_vector_iterator pointing to the
+         *  position which is n units ahead of the current position.
+         */
         self_type operator + (size_type n) const
         {
             base_type temp = *this;
             return self_type(temp + n);
         }
 
+        /** @brief Return the segmented_vector_iterator pointing to the
+         *          position which is n units behind the current position.
+         */
         self_type operator - (size_type n) const
         {
             base_type temp = *this;
             return self_type(temp - n);
         }
 
+        /** @brief Increment the segmented_vector_iterator position by one
+         *          unit.
+         *
+         *  @return Return the incremented segmented_vector_iterator object
+         */
         self_type operator ++ ()  //prefix behavior
         {
             base_type temp = *(this);
@@ -696,6 +716,11 @@ namespace hpx
             return *this;
         }
 
+        /** @brief Increment the segmented_vector_iterator position by one
+         *          unit.
+         *
+         *  @return Return the original segmented_vector_iterator object
+         */
         self_type operator ++ (int) //postfix behavior
         {
             //return_temp object should be return to simulate the postfix behavior
@@ -705,6 +730,11 @@ namespace hpx
             return return_temp;
         }
 
+        /** @brief Decrement the segmented_vector_iterator position by one
+         *          unit.
+         *
+         *  @return Return the decremented segmented_vector_iterator object
+         */
         self_type operator -- () //prefix behavior
         {
             base_type temp = *(this);
@@ -712,6 +742,11 @@ namespace hpx
             return *this;
         }
 
+        /** @brief Decrement the segmented_vector_iterator position by one
+         *          unit.
+         *
+         *  @return Return the original segmented_vector_iterator object
+         */
         self_type operator -- (int) //postfix behavior
         {
             //return_temp object should be return to simulate the postfix behavior
@@ -721,6 +756,10 @@ namespace hpx
             return return_temp;
         }
 
+        /** @brief Increment the segmented_vector_iterator by n.
+         *
+         *  @return Returns the reference to the incremented object
+         */
         self_type & operator +=(size_type n)
         {
             *this = *this + n;
@@ -728,6 +767,10 @@ namespace hpx
             return *this;
         }//End of +=
 
+        /** @brief Decrement the segmented_vector_iterator by n.
+         *
+         *  @return Returns the reference to the decremented object
+         */
         self_type & operator -=(size_type n)
         {
             *this = *this - n;
