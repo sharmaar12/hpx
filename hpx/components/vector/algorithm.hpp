@@ -54,7 +54,7 @@ namespace hpx
 
     //TODO modify the comment if you are unable to add the template support in backend
 
-    /** @brief Apply the function fn to each element in the
+    /** @brief Apply the function \a fn to each element in the
      *         range [first, last).
      *
      *  @tparam input_iterator  Segmented iterator to the sequence
@@ -126,7 +126,7 @@ namespace hpx
     }//end of for_each
 
 
-    /** @brief Apply the function fn to each element in the
+    /** @brief Apply the function \a fn to each element in the
      *         range [first, last).
      *
      *  @tparam const_input_iterator  Constant Segmented iterator to the sequence
@@ -141,7 +141,7 @@ namespace hpx
      *                  in the range[first, last)]
      *  @param fn       Unary function (either function pointer or move
      *                  constructible function object) that accept an
-     *                  element in the range as argument.
+     *                  const element in the range as argument.
      */
     template<class const_input_iterator, class fun>
     void for_each(  const_input_iterator first,
@@ -206,7 +206,7 @@ namespace hpx
 
 
 
-    /** @brief Apply the function fn to each element in the
+    /** @brief Apply the function \a fn to each element in the
      *         range [first, last).
      *
      *  @tparam input_iterator  Segmented iterator to the sequence
@@ -244,7 +244,7 @@ namespace hpx
                           );
     }//end of for_each_async
 
-    /** @brief Apply the function fn to each element in the range
+    /** @brief Apply the function \a fn to each element in the range
      *          [first, first + n).
      *
      *  @tparam input_iterator  Segmented iterator to the sequence
@@ -267,7 +267,7 @@ namespace hpx
         hpx::for_each(first, first + n, fn);
     }//end of for_each_n
 
-    /** @brief Apply the function fn to each element in the range
+    /** @brief Apply the function \a fn to each element in the range
      *          [first, first + n).
      *
      *  @tparam input_iterator  Segmented iterator to the sequence
