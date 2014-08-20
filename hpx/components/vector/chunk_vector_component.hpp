@@ -222,6 +222,7 @@ namespace hpx
                         hpx::out_of_range,
                         "get_value",
                         "Value of 'pos' is out of range");
+		    return VALUE_TYPE();
                 }
             }
 
