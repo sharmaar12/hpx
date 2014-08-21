@@ -52,8 +52,6 @@ namespace hpx
         typedef true_type is_const_segmented_iterator;
     };
 
-    //TODO modify the comment if you are unable to add the template support in backend
-
     /** @brief Apply the function \a fn to each element in the
      *         range [first, last).
      *
@@ -72,7 +70,7 @@ namespace hpx
      *                  element in the range as argument.
      */
     template<class input_iterator, class fun>
-    void for_each(  input_iterator first,
+    void for_eachT(  input_iterator first,
                     input_iterator last,
                     fun fn,
                     false_type)
@@ -144,7 +142,7 @@ namespace hpx
      *                  const element in the range as argument.
      */
     template<class const_input_iterator, class fun>
-    void for_each(  const_input_iterator first,
+    void for_eachT(  const_input_iterator first,
                     const_input_iterator last,
                     fun fn,
                     true_type)
@@ -201,7 +199,7 @@ namespace hpx
     inline void for_each(iter first, iter last, fun fn)
     {
         typedef segmented_iterator_traits<iter> traits;
-        for_each(first, last, fn, typename traits::is_const_segmented_iterator());
+        for_eachT(first, last, fn, typename traits::is_const_segmented_iterator());
     }
 
 
@@ -238,8 +236,7 @@ namespace hpx
                           hpx::util::bind((&hpx::for_each<input_iterator, fun>),
                                            first,
                                            last,
-                                           fn,
-                                           iter_type()
+                                           fn
                                           )
                           );
     }//end of for_each_async
@@ -298,8 +295,7 @@ namespace hpx
                           hpx::util::bind((&hpx::for_each<input_iterator, fun>),
                                            first,
                                            first + n,
-                                           fn,
-                                           iter_type()
+                                           fn
                                           )
                           );
     }//end of for_each_n_async
